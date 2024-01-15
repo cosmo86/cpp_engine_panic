@@ -1,0 +1,15 @@
+# ninja log v5
+0	1887	7269479522425933	CMakeFiles/MyLibrary.dir/src/Porter.cpp.obj	f07a81dec8f55963
+5	1945	7269479522990007	CMakeFiles/MyLibrary.dir/include/log_handle.cpp.obj	c4dbc042995e0967
+5	980	7269464295466696	CMakeFiles/MyLibrary.dir/src/dispatcher.cpp.obj	7d49ed9b471641a6
+1945	2606	7269479522990007	bin/MyLibrary.dll	dd0cd4695ac5665
+3	1877	7269479522344850	CMakeFiles/MyLibrary.dir/src/engine.cpp.obj	2e74fc58cc7bbf
+0	9	0	clean	9992afb1f91dc381
+1945	2606	7269479522990007	lib/MyLibrary.lib	dd0cd4695ac5665
+0	9	0	clean	9992afb1f91dc381
+5	519	7269479827713076	CMakeFiles/MyLibrary.dir/src/dispatcher.cpp.obj	7d49ed9b471641a6
+1	1500	7269479837508486	CMakeFiles/MyLibrary.dir/src/Porter.cpp.obj	f07a81dec8f55963
+3	1501	7269479837508486	CMakeFiles/MyLibrary.dir/src/engine.cpp.obj	2e74fc58cc7bbf
+6	1546	7269479837946629	CMakeFiles/MyLibrary.dir/include/log_handle.cpp.obj	c4dbc042995e0967
+1546	1969	7269479839268019	bin/MyLibrary.dll	dd0cd4695ac5665
+1546	1969	7269479839268019	lib/MyLibrary.lib	dd0cd4695ac5665
