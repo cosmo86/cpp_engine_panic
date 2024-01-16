@@ -4,7 +4,7 @@
 # compile CXX with /opt/rh/devtoolset-7/root/usr/bin/c++
 CXX_DEFINES = -DMyLibrary_EXPORTS
 
-CXX_INCLUDES = -I/root/user/dev/cpp_engine_1/cpp_engine/include -I/root/user/dev/cpp_engine_1/cpp_engine/Strategy -I/root/user/dev/cpp_engine_1/cpp_engine/model -I/root/user/dev/cpp_engine_1/cpp_engine/spdlog -I/root/user/dev/cpp_engine_1/cpp_engine/src
+CXX_INCLUDES = -I/root/usr_1/cpp_engine_panic/include -I/root/usr_1/cpp_engine_panic/Strategy -I/root/usr_1/cpp_engine_panic/model -I/root/usr_1/cpp_engine_panic/spdlog -I/root/usr_1/cpp_engine_panic/src
 
 CXX_FLAGS = -O3 -DNDEBUG -std=gnu++1z -fPIC
 

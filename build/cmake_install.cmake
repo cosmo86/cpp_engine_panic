@@ -1,4 +1,4 @@
-# Install script for directory: /root/user/dev/cpp_engine_1/cpp_engine
+# Install script for directory: /root/usr_1/cpp_engine_panic
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/root/user/dev/cpp_engine_1/cpp_engine/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/root/usr_1/cpp_engine_panic/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
