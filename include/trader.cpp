@@ -13,62 +13,98 @@
 *				2.当库文件和源文件不在同一目录时，请注意相应路径的不同
 				3.运行时若找不到动态库，可export $LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
 ***********************************************************************/
+#pragma once
 #include "TORATstpTraderApi.h"
 #include <stdio.h>
 #include <string.h>
+#include <string>
+#include <map>
 
+#include "concurrentqueue.h"
+#include "spdlog/spdlog.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
+#include "spdlog/sinks/basic_file_sink.h"
+#include "spdlog/async.h"
+#include "SEObject.hpp"
+#include "Event.h"
 
-#ifdef WINDOWS
-#pragma comment(lib,"fasttraderapi.lib")
-#endif
+using LoggerPtr = std::shared_ptr<spdlog::async_logger>;
 
 using namespace TORASTOCKAPI;
+/*
+1.CTORATstpTraderApi::CreateTstpTraderApi("./flow", false);
+2.RegisterSpi(&trade_spi);
+3.RegisterFront((char*)TD_TCP_FrontAddress);
+4.// 订阅公有流和私有流
+	demo_trade_api->SubscribePrivateTopic(TORA_TERT_QUICK);
+	demo_trade_api->SubscribePublicTopic(TORA_TERT_QUICK);
+5. demo_trade_api->Init();
+	
+*/
 
-//投资者账户 
-const char* InvestorID = "00030557";
-/*该默认账号为共用连通测试使用，自有测试账号请到n-sight.com.cn注册并从个人中心获取交易编码，不是网站登录密码，不是手机号
-实盘交易时，取客户号，请注意不是资金账号
-或咨询金科顾问*/
-
-//操作员账户
-const char* UserID = "00030557";	   //同客户号保持一致即可
-
-//资金账户 
-const char* AccountID = "00030557";		//以Req(TradingAccount)查询的为准
-
-//上海交易所股东账号
-const char* SH_ShareHolderID = "A00030557";	//以Req(ShareholderAccount)查询的为准
-
-//登陆密码
-const char* Password = "17522830";		//N视界注册模拟账号的交易密码，不是登录密码
-
-const char* DepartmentID = "0003";		//默认客户号的前4位
-
-
-class DemoTradeSpi : public CTORATstpTraderSpi
+class TradeSpi : public CTORATstpTraderSpi
 {
+private:
+	CTORATstpTraderApi* m_api;
+	int m_req_id;
+	int m_front_id;
+	int m_session_id;
+
+	char m_userid[21];
+	char m_password[41];
+	char m_address[64];
+	char m_mode[21];
+
+	moodycamel::ConcurrentQueue<SEEvent>* m_Event_Q_ptr = nullptr;
+	LoggerPtr m_logger=nullptr;
+
+	std::unordered_map<std::string, double> limup_table;
+	std::unordered_map<TTORATstpExchangeIDType, std::string> shareHolder_table;
+
 public:
-	DemoTradeSpi(CTORATstpTraderApi* api)
+	TradeSpi()
 	{
-		m_api = api;
+		m_api = CTORATstpTraderApi::CreateTstpTraderApi("./flow", false);
 		m_req_id = 1;
+		std::cout<<"[TradeSpi] TraderApi created"<< std::endl;
 	}
 
-	~DemoTradeSpi()
-	{
+	~TradeSpi()
+	{}
 
+public:
+	void init_queue(moodycamel::ConcurrentQueue<SEEvent>* m_Event_Q_ptr)
+	{
+		std::cout<< "[TradeSpi] pointer before init :"<<m_Event_Q_ptr<<std::endl;
+		this->m_Event_Q_ptr = m_Event_Q_ptr;
+		std::cout<< "[TradeSpi] pointer to queue inited, address is "<< m_Event_Q_ptr<<std::endl;
+	}
+	// connect to L2 server
+	virtual void connect(const char* const userid, const char* const password, const char* const address, const char* const mode)
+	{
+		strcpy(m_userid, userid);
+		strcpy(m_password, password);
+		strcpy(m_address, address);
+		strcpy(m_mode, mode);
+
+		m_api->RegisterSpi(this);
+		m_api->RegisterFront(m_address);
+		std::cout<<"[TradeSpi] RegisterFront"<< std::endl;
+		std::cout<<"[TradeSpi] RegisterSpi"<< std::endl;
+		m_api->Init();
+		std::cout<<"[TradeSpi] Init"<< std::endl;
 	}
 
 private:
 	virtual void OnFrontConnected()
 	{
-		printf("TradeApi OnFrontConnected\n");
+		std::cout<<"[TradeSpi]  OnFrontConnected"<< std::endl;
 
 		// 获取终端信息
 		int ret = m_api->ReqGetConnectionInfo(m_req_id++);
 		if (ret != 0)
 		{
-			printf("ReqGetConnectionInfo fail, ret[%d]\n", ret);
+			printf("[TradeSpi] ReqGetConnectionInfo fail, ret[%d]\n", ret);
 		}
 	}
 
@@ -81,11 +117,11 @@ private:
 	{
 		if (pRspInfo->ErrorID == 0)
 		{
-			printf("inner_ip_address[%s]\n"
-				"inner_port[%d]\n"
-				"outer_ip_address[%s]\n"
-				"outer_port[%d]\n"
-				"mac_address[%s]\n",
+			printf("[TradeSpi]  inner_ip_address[%s]\n"
+				"[TradeSpi]  inner_port[%d]\n"
+				"[TradeSpi]  outer_ip_address[%s]\n"
+				"[TradeSpi] outer_port[%d]\n"
+				"[TradeSpi] mac_address[%s]\n",
 				pConnectionInfoField->InnerIPAddress,
 				pConnectionInfoField->InnerPort,
 				pConnectionInfoField->OuterIPAddress,
@@ -98,8 +134,9 @@ private:
 
 			// 支持以用户代码、资金账号和股东账号方式登录
 			// （1）以用户代码方式登录
-			strcpy(field.LogInAccount, UserID);
+			strcpy(field.LogInAccount, m_userid);
 			field.LogInAccountType = TORA_TSTP_LACT_UserID;
+			strcpy(field.Password, m_password);
 			// （2）以资金账号方式登录
 			//strcpy(field.DepartmentID, DepartmentID);
 			//strcpy(field.LogInAccount, AccountID);
@@ -115,7 +152,6 @@ private:
 			// （1）密码认证
 			// 密码认证时AuthMode可不填
 			//field.AuthMode = TORA_TSTP_AM_Password;
-			strcpy(field.Password, Password);
 			// （2）指纹认证
 			// 非密码认证时AuthMode必填
 			//field.AuthMode = TORA_TSTP_AM_FingerPrint;
@@ -124,9 +160,9 @@ private:
 
 			// 终端信息采集
 			// UserProductInfo填写终端名称
-			strcpy(field.UserProductInfo, "notthisone");
+			strcpy(field.UserProductInfo, "HX5ZJ0C1PV");
 			// 按照监管要求填写终端信息
-			strcpy(field.TerminalInfo, "PC;IIP=123.112.154.118;IPORT=50361;LIP=192.168.118.107;MAC=54EE750B1713FCF8AE5CBD58;HD=TF655AY91GHRVL;@notthisone");
+			strcpy(field.TerminalInfo, "PC;IIP=NA;IPORT=NA;LIP=NA;MAC=123ABC456DEF;HD=00b6f88d0890cb7c2b505cb50cb00506;@HX5ZJ0C1PV");
 			// 以下内外网IP地址若不填则柜台系统自动采集，若填写则以终端填值为准报送
 			//strcpy(field.MacAddress, pConnectionInfoField->MacAddress);
 			//strcpy(field.InnerIPAddress, pConnectionInfoField->InnerIPAddress);
@@ -136,12 +172,12 @@ private:
 			int ret = m_api->ReqUserLogin(&field, m_req_id++);
 			if (ret != 0)
 			{
-				printf("TradeApi ReqUserLogin fail, ret[%d]\n", ret);
+				printf("[TradeSpi] TradeApi ReqUserLogin fail, ret[%d]\n", ret);
 			}
 		}
 		else
 		{
-			printf("get connection info fail! error_id[%d] error_msg[%s]\n", pRspInfo->ErrorID, pRspInfo->ErrorMsg);
+			printf("[TradeSpi] get connection info fail! error_id[%d] error_msg[%s]\n", pRspInfo->ErrorID, pRspInfo->ErrorMsg);
 		}
 	}
 
@@ -149,48 +185,25 @@ private:
 	{
 		if (pRspInfo->ErrorID == 0)
 		{
-			printf("TradeApi OnRspUserLogin: OK! [%d]\n", nRequestID);
+			printf("[TradeSpi] TradeApi OnRspUserLogin: OK! [%d]\n", nRequestID);
 
 			m_front_id = pRspUserLoginField->FrontID;
 			m_session_id = pRspUserLoginField->SessionID;
 
-#if 0
-			// 修改密码  模拟环境不支持修改密码
-			CTORATstpUserPasswordUpdateField field;
-			memset(&field, 0, sizeof(field));
-
-			strcpy(field.UserID, UserID);
-			strcpy(field.OldPassword, Password);
-			strcpy(field.NewPassword, "123456");
-
-			int ret = m_api->ReqUserPasswordUpdate(&field, m_req_id++);
-			if (ret != 0)
-			{
-				printf("ReqUserPasswordUpdate fail, ret[%d]\n", ret);
-			}
-			return;
-#endif
-
-
-#if 0
 			// 查询合约
 			CTORATstpQrySecurityField field;
 			memset(&field, 0, sizeof(field));
 
 			// 以下字段不填表示不设过滤条件，即查询全部合约
-			field.ExchangeID = TORA_TSTP_EXD_SSE;
-			strcpy(field.SecurityID, "600000");
-
+			  //field.ExchangeID = TORA_TSTP_EXD_SSE;
+			  //strcpy(field.SecurityID, "600000");
 			int ret = m_api->ReqQrySecurity(&field, m_req_id++);
 			if (ret != 0)
 			{
-				printf("ReqQrySecurity fail, ret[%d]\n", ret);
+				printf("[TradeSpi] ReqQrySecurity fail, ret[%d]\n", ret);
 			}
-			return;
-#endif
 
 
-#if 0
 			// 查询投资者信息
 			CTORATstpQryInvestorField field;
 			memset(&field, 0, sizeof(field));//不初始化内存将有可能脏数据请求，然后查不到结果
@@ -201,12 +214,9 @@ private:
 			int ret = m_api->ReqQryInvestor(&field, m_req_id++);
 			if (ret != 0)
 			{
-				printf("ReqQryInvestor fail, ret[%d]\n", ret);
+				printf("[TradeSpi]  ReqQryInvestor fail, ret[%d]\n", ret);
 			}
-#endif
 
-
-#if 1
 			// 查询股东账户
 			CTORATstpQryShareholderAccountField field_sa;
 			memset(&field_sa, 0, sizeof(field_sa));
@@ -217,111 +227,37 @@ private:
 			int ret_sa = m_api->ReqQryShareholderAccount(&field_sa, m_req_id++);
 			if (ret_sa != 0)
 			{
-				printf("ReqQryShareholderAccount fail, ret[%d]\n", ret_sa);
+				printf("[TradeSpi]  ReqQryShareholderAccount fail, ret[%d]\n", ret_sa);
 			}
-
-#endif
-
-
-#if 0
-			// 查询资金账户
-			CTORATstpQryTradingAccountField field_ta;
-			memset(&field_ta, 0, sizeof(field_ta));
-
-			//以下字段不填表示不设过滤条件，即查询所有资金账号
-			//strcpy(field_ta.InvestorID, InvestorID);
-			//strcpy(field_ta.DepartmentID, DepartmentID);
-			//strcpy(field_ta.AccountID, AccountID);
-			//CurrencyID
-			//AccountType
-
-			int ret_ta = m_api->ReqQryTradingAccount(&field_ta, m_req_id++);
-			if (ret_ta != 0)
-			{
-				printf("ReqQryTradingAccount fail, ret[%d]\n", ret_ta);
-			}
-#endif
-
-#if 0
-			// 查询报单
-			CTORATstpQryOrderField field;
-			memset(&field, 0, sizeof(field));
-
-			// 以下字段不填表示不设过滤条件，即查询所有报单
-			//strcpy(field.SecurityID, "600000");
-			//strcpy(field.InsertTimeStart, "09:35:00");
-			//strcpy(field.InsertTimeEnd, "10:30:00");
-
-			// IsCancel字段填1表示只查询可撤报单
-			//field.IsCancel = 1;
-
-			int ret = m_api->ReqQryOrder(&field, m_req_id++);
-			if (ret != 0)
-			{
-				printf("ReqQryOrder fail, ret[%d]\n", ret);
-			}
-#endif
+		}
+	}
 
 
-#if 1
-			// 查询持仓
-			CTORATstpQryPositionField field;
-			memset(&field, 0, sizeof(CTORATstpQryPositionField));
+	void Send_Order_LimitPrice( const char exchange_id, const int volume, const double price, TTORATstpSecurityIDType stock_id )
+	{
+		
+		// 请求报单
+		CTORATstpInputOrderField input_order_field;
+		memset(&input_order_field, 0, sizeof(input_order_field));
+		input_order_field.ExchangeID = exchange_id;
+		strcpy(input_order_field.ShareholderID ,shareHolder_table[exchange_id].c_str());
+		strcpy(input_order_field.SecurityID, stock_id);
+		input_order_field.Direction = TORA_TSTP_D_Buy;
+		input_order_field.VolumeTotalOriginal = volume;
+		input_order_field.LimitPrice = price;
+		input_order_field.OrderPriceType = TORA_TSTP_OPT_LimitPrice;
+		input_order_field.TimeCondition = TORA_TSTP_TC_GFD;
+		input_order_field.VolumeCondition = TORA_TSTP_VC_AV;
 
-			// 以下字段不填表示不设过滤条件，即查询所有持仓
-			//strcpy(field.SecurityID, "600000");
+		int ret_oi = m_api->ReqOrderInsert(&input_order_field, m_req_id++);
+		if (ret_oi != 0)
+		{
+			printf("ReqOrderInsert fail, ret[%d]\n", ret_oi);
+		}
+	}
 
-			int ret = m_api->ReqQryPosition(&field, m_req_id++);
-			if (ret != 0)
-			{
-				printf("ReqQryPosition fail, ret[%d]\n", ret);
-			}
-#endif
-
-#if 0
-			// 请求报单
-			CTORATstpInputOrderField field_oi;
-			memset(&field_oi, 0, sizeof(CTORATstpInputOrderField));
-
-			field_oi.ExchangeID = TORA_TSTP_EXD_SSE;
-			strcpy(field_oi.ShareholderID, SH_ShareHolderID);
-			strcpy(field_oi.SecurityID, "600000");
-			field_oi.Direction = TORA_TSTP_D_Buy;
-			field_oi.VolumeTotalOriginal = 200;
-
-			// 上交所支持限价指令和最优五档剩撤、最优五档剩转限两种市价指令，对于科创板额外支持本方最优和对手方最优两种市价指令和盘后固定价格申报指令
-			// 深交所支持限价指令和立即成交剩余撤销、全额成交或撤销、本方最优、对手方最优和最优五档剩撤五种市价指令
-			// 限价指令和上交所科创板盘后固定价格申报指令需填写报单价格，其它市价指令无需填写报单价格
-			// 以下以上交所限价指令为例，其它指令参考开发指南相关说明填写OrderPriceType、TimeCondition和VolumeCondition三个字段:
-			field_oi.LimitPrice = 7.00;
-			field_oi.OrderPriceType = TORA_TSTP_OPT_LimitPrice;
-			field_oi.TimeCondition = TORA_TSTP_TC_GFD;
-			field_oi.VolumeCondition = TORA_TSTP_VC_AV;
-
-
-			// OrderRef为报单引用，类型为整型，该字段报单时为选填
-			// 若不填写，则系统会为每笔报单自动分配一个报单引用
-			// 若填写，则需保证同一个TCP会话下报单引用严格单调递增，不要求连续递增，至少需从1开始编号
-			field_oi.OrderRef = 1;
-
-
-			//InvestorID为选填，若填写则需保证填写正确
-			//Operway为委托方式，根据券商要求填写，无特殊说明置空即可
-
-			// 终端自定义字段，终端可根据需要填写如下字段的值，该字段值不会被柜台系统修改，在报单回报和查询报单时返回给终端
-			//strcpy(field.SInfo, "sinfo");
-			//field.IInfo = 678;
-
-			//其它字段置空
-
-			int ret_oi = m_api->ReqOrderInsert(&field_oi, m_req_id++);
-			if (ret_oi != 0)
-			{
-				printf("ReqOrderInsert fail, ret[%d]\n", ret_oi);
-			}
-#endif
-
-#if 0
+	void Send_Cancle_Order(CTORATstpInputOrderActionField* CancleOrderRequest)
+	{
 			// 请求撤单
 			CTORATstpInputOrderActionField field;
 			memset(&field, 0, sizeof(CTORATstpInputOrderActionField));
@@ -353,7 +289,7 @@ private:
 			{
 				printf("ReqOrderAction fail, ret[%d]\n", ret);
 			}
-#endif
+	}
 
 #if 0
 			// 查询集中交易资金
@@ -435,17 +371,7 @@ private:
 		}
 	}
 
-	virtual void OnRspUserPasswordUpdate(CTORATstpUserPasswordUpdateField* pUserPasswordUpdateField, CTORATstpRspInfoField* pRspInfo, int nRequestID)
-	{
-		if (pRspInfo->ErrorID == 0)
-		{
-			printf("OnRspUserPasswordUpdate: OK! [%d]\n", nRequestID);
-		}
-		else
-		{
-			printf("OnRspUserPasswordUpdate: Error! [%d] [%d] [%s]\n", nRequestID, pRspInfo->ErrorID, pRspInfo->ErrorMsg);
-		}
-	}
+
 
 	virtual void OnRspOrderInsert(CTORATstpInputOrderField* pInputOrderField, CTORATstpRspInfoField* pRspInfo, int nRequestID)
 	{
@@ -471,37 +397,6 @@ private:
 		}
 	}
 
-	virtual void OnRspInquiryJZFund(CTORATstpRspInquiryJZFundField* pRspInquiryJZFundField, CTORATstpRspInfoField* pRspInfo, int nRequestID)
-	{
-		if (pRspInfo->ErrorID == 0)
-		{
-			printf("OnRspInquiryJZFund: OK! [%d] [%.2f] [%.2f]\n", nRequestID, pRspInquiryJZFundField->UsefulMoney, pRspInquiryJZFundField->FetchLimit);
-		}
-		else
-		{
-			printf("OnRspInquiryJZFund: Error! [%d] [%d] [%s]\n", nRequestID, pRspInfo->ErrorID, pRspInfo->ErrorMsg);
-		}
-	}
-
-	virtual void OnRspTransferFund(CTORATstpInputTransferFundField* pInputTransferFundField, CTORATstpRspInfoField* pRspInfo, int nRequestID)
-	{
-		if (pRspInfo->ErrorID == 0)
-		{
-			printf("OnRspTransferFund: OK! [%d] [%d]", nRequestID, pInputTransferFundField->ApplySerial);
-		}
-		else
-		{
-			printf("OnRspTransferFund: Error! [%d] [%d] [%s]\n", nRequestID, pRspInfo->ErrorID, pRspInfo->ErrorMsg);
-		}
-	}
-
-	virtual void OnRtnTransferFund(CTORATstpTransferFundField* pTransferFund)
-	{
-		printf("OnRtnTransferFund: FundSerial[%d] ApplySerial[%d] FrontID[%d] SessionID[%u] DepartmentID[%s] AccountID[%s] CurrencyID[%c] TransferDirection[%c] Amount[%.2f] TransferStatus[%c] OperateTime[%s]",
-			pTransferFund->FundSerial, pTransferFund->ApplySerial, pTransferFund->FrontID, pTransferFund->SessionID,
-			pTransferFund->DepartmentID, pTransferFund->AccountID, pTransferFund->CurrencyID, pTransferFund->TransferDirection,
-			pTransferFund->Amount, pTransferFund->TransferStatus, pTransferFund->OperateTime);
-	}
 
 	virtual void OnRtnOrder(CTORATstpOrderField* pOrder)
 	{
@@ -581,13 +476,11 @@ private:
 	{
 		if (pSecurity)
 		{
-			printf("OnRspQrySecurity[%d]: SecurityID[%s] SecurityName[%s] MarketID[%c] OrderUnit[%c] OpenDate[%s] UpperLimitPrice[%.2f] LowerLimitPrice[%.2f]\n",
-				nRequestID, pSecurity->SecurityID, pSecurity->SecurityName, pSecurity->MarketID, pSecurity->OrderUnit,
-				pSecurity->OpenDate, pSecurity->UpperLimitPrice, pSecurity->LowerLimitPrice);
+			limup_table.emplace(std::string(pSecurity->SecurityID), pSecurity->UpperLimitPrice);
 		}
 		if (bIsLast)
 		{
-			printf("查询合约结束[%d] ErrorID[%d] ErrorMsg[%s]\n", nRequestID, pRspInfo->ErrorID, pRspInfo->ErrorMsg);
+			std::cout<<"[TraderSpi] 600519 limupPrice is "<<limup_table["600519"]<<std::endl;
 		}
 	}
 
@@ -608,6 +501,7 @@ private:
 	{
 		if (pShareholderAccount)
 		{
+			shareHolder_table.emplace(pShareholderAccount->ExchangeID,std::string(pShareholderAccount->ShareholderID));
 			printf("OnRspQryShareholderAccount[%d]: InvestorID[%s] ExchangeID[%c] ShareholderID[%s]\n",
 				nRequestID,
 				pShareholderAccount->InvestorID,
@@ -665,12 +559,11 @@ private:
 			printf("查询持仓结束[%d] ErrorID[%d] ErrorMsg[%s]\n", nRequestID, pRspInfo->ErrorID, pRspInfo->ErrorMsg);
 		}
 	}
-private:
-	CTORATstpTraderApi* m_api;
-	int m_req_id;
-	int m_front_id;
-	int m_session_id;
+
+
 };
+
+
 
 int main(int argc, char* argv[])
 {
