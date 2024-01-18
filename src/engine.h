@@ -11,7 +11,7 @@
 #include "log_handle.h"
 #include "dispatcher.h"
 #include "Strategy.hpp"
-
+#include "trader.cpp"
 
 class Engine
 {
@@ -37,7 +37,7 @@ public:
 private:
     std::map<std::string, Lev2MdSpi*> m_L2_quoter_list;
     Lev2MdSpi m_L2_quoter;
-    //DemoTradeSpi* trader_ptr;
+    TradeSpi m_trader;
     LoggerPtr m_logger;
     Dispatcher dispatcher;
 };

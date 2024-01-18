@@ -128,7 +128,7 @@ private:
 		printf("TradeApi OnFrontDisconnected: [%d]\n", nReason);
 	}
 
-	virtual void OnRspGetConnectionInfo(CTORATstpConnectionInfoField* pConnectionInfoField, CTORATstpRspInfoField* pRspInfo, int nRequestID)
+	virtual void OnRspGetConnectionInfo(CTORATstpConnectionInfoField* pConnectionInfoField, TORASTOCKAPI::CTORATstpRspInfoField* pRspInfo, int nRequestID)
 	{
 		if (pRspInfo->ErrorID == 0)
 		{
@@ -144,13 +144,13 @@ private:
 				pConnectionInfoField->MacAddress);
 
 
-			CTORATstpReqUserLoginField field;
-			memset(&field, 0, sizeof(CTORATstpReqUserLoginField));
+			TORASTOCKAPI::CTORATstpReqUserLoginField field;
+			memset(&field, 0, sizeof(TORASTOCKAPI::CTORATstpReqUserLoginField));
 
 			// 支持以用户代码、资金账号和股东账号方式登录
 			// （1）以用户代码方式登录
 			strcpy(field.LogInAccount, m_userid);
-			field.LogInAccountType = TORA_TSTP_LACT_UserID;
+			field.LogInAccountType = TORASTOCKAPI::TORA_TSTP_LACT_UserID;
 			strcpy(field.Password, m_password);
 			// （2）以资金账号方式登录
 			//strcpy(field.DepartmentID, DepartmentID);
@@ -196,7 +196,7 @@ private:
 		}
 	}
 
-	void OnRspUserLogin(CTORATstpRspUserLoginField* pRspUserLoginField, CTORATstpRspInfoField* pRspInfo, int nRequestID)
+	void OnRspUserLogin(TORASTOCKAPI::CTORATstpRspUserLoginField* pRspUserLoginField, TORASTOCKAPI::CTORATstpRspInfoField* pRspInfo, int nRequestID)
 	{
 		if (pRspInfo->ErrorID == 0)
 		{
@@ -288,7 +288,7 @@ private:
 		}
 	}
 
-	virtual void OnRspOrderInsert(CTORATstpInputOrderField* pInputOrderField, CTORATstpRspInfoField* pRspInfo, int nRequestID)
+	virtual void OnRspOrderInsert(CTORATstpInputOrderField* pInputOrderField, TORASTOCKAPI::CTORATstpRspInfoField* pRspInfo, int nRequestID)
 	{
 		if (pRspInfo->ErrorID == 0)
 		{
@@ -300,7 +300,7 @@ private:
 		}
 	}
 
-	virtual void OnRspOrderAction(CTORATstpInputOrderActionField* pInputOrderActionField, CTORATstpRspInfoField* pRspInfo, int nRequestID)
+	virtual void OnRspOrderAction(CTORATstpInputOrderActionField* pInputOrderActionField, TORASTOCKAPI::CTORATstpRspInfoField* pRspInfo, int nRequestID)
 	{
 		if(pInputOrderActionField->SInfo[0] == '\0'){
 			std::cout<<"[Trader:OnRtnOrder] SInfo is empty, please check order source "<< std::endl;
@@ -424,7 +424,7 @@ private:
 		printf("OnRtnMarketStatus: MarketID[%c] MarketStatus[%c]\n", pMarketStatus->MarketID, pMarketStatus->MarketStatus);
 	}
 
-	virtual void OnRspQrySecurity(CTORATstpSecurityField* pSecurity, CTORATstpRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
+	virtual void OnRspQrySecurity(CTORATstpSecurityField* pSecurity, TORASTOCKAPI::CTORATstpRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
 	{
 		if (pSecurity)
 		{
@@ -436,7 +436,7 @@ private:
 		}
 	}
 
-	virtual void OnRspQryInvestor(CTORATstpInvestorField* pInvestor, CTORATstpRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
+	virtual void OnRspQryInvestor(CTORATstpInvestorField* pInvestor, TORASTOCKAPI::CTORATstpRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
 	{
 		if (pInvestor)
 		{
@@ -450,7 +450,7 @@ private:
 		}
 	}
 
-	virtual void OnRspQryShareholderAccount(CTORATstpShareholderAccountField* pShareholderAccount, CTORATstpRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
+	virtual void OnRspQryShareholderAccount(CTORATstpShareholderAccountField* pShareholderAccount, TORASTOCKAPI::CTORATstpRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
 	{
 		if (pShareholderAccount)
 		{
@@ -468,7 +468,7 @@ private:
 		}
 	}
 
-	virtual void OnRspQryTradingAccount(CTORATstpTradingAccountField* pTradingAccount, CTORATstpRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
+	virtual void OnRspQryTradingAccount(CTORATstpTradingAccountField* pTradingAccount, TORASTOCKAPI::CTORATstpRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
 	{
 		if (pTradingAccount)
 		{
@@ -483,7 +483,7 @@ private:
 		}
 	}
 
-	virtual void OnRspQryOrder(CTORATstpOrderField* pOrder, CTORATstpRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
+	virtual void OnRspQryOrder(CTORATstpOrderField* pOrder, TORASTOCKAPI::CTORATstpRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
 	{
 		if (pOrder)
 		{
@@ -500,7 +500,7 @@ private:
 		}
 	}
 
-	virtual void OnRspQryPosition(CTORATstpPositionField* pPosition, CTORATstpRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
+	virtual void OnRspQryPosition(CTORATstpPositionField* pPosition, TORASTOCKAPI::CTORATstpRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
 	{
 		if (pPosition)
 		{
