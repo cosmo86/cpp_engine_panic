@@ -13,6 +13,7 @@ void Engine::Start()
     std::cout<<"[Engine] dispatcher started"<< std::endl;
     m_logger->info("[Engine] dispatcher started");
     char LEV2MD_TCP_FrontAddress[64];
+    const char* TD_TCP_FrontAddress = "tcp://210.14.72.21:4400";
     char UserID[21];
     char Password[41];
     char mode[21];
@@ -24,7 +25,11 @@ void Engine::Start()
     strcpy(mode,"test");
     std::cout<<"[Engine] user ,passwork copied"<< std::endl;
     m_L2_quoter.init_queue(&dispatcher._event_q);
-    m_L2_quoter.connect( UserID, Password,LEV2MD_TCP_FrontAddress,mode);
+    //m_L2_quoter.connect( UserID, Password,LEV2MD_TCP_FrontAddress,mode);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+    m_trader.init_queue(&dispatcher._event_q);
+    m_trader.connect( UserID, Password,TD_TCP_FrontAddress,mode);
     m_logger->info("Engine started");
 }
 

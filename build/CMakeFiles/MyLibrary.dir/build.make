@@ -141,6 +141,7 @@ lib/libMyLibrary.so: CMakeFiles/MyLibrary.dir/src/dispatcher.cpp.o
 lib/libMyLibrary.so: CMakeFiles/MyLibrary.dir/include/log_handle.cpp.o
 lib/libMyLibrary.so: CMakeFiles/MyLibrary.dir/build.make
 lib/libMyLibrary.so: /root/usr_1/cpp_engine_panic/include/liblev2mdapi.so
+lib/libMyLibrary.so: /root/usr_1/cpp_engine_panic/include/libtraderapi.so
 lib/libMyLibrary.so: /root/usr_1/cpp_engine_panic/include/libjemalloc.so.2
 lib/libMyLibrary.so: CMakeFiles/MyLibrary.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/root/usr_1/cpp_engine_panic/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX shared library lib/libMyLibrary.so"

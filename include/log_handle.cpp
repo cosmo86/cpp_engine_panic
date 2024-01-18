@@ -34,6 +34,7 @@ LoggerPtr GetLogger()
 
         std::vector<spdlog::sink_ptr> sinks{ console_sink, file_sink };
         logger = std::make_shared<spdlog::async_logger>("async_logger", sinks.begin(), sinks.end(), spdlog::thread_pool(), spdlog::async_overflow_policy::block);
+        logger->flush_on(spdlog::level::info);
     }
     return logger;
 }

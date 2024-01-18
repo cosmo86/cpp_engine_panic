@@ -1,11 +1,13 @@
 #pragma once
 #include <iostream>
+#include <string>
 #include <thread>
 #include <map>
 #include <vector>
 #include <list>
 #include <queue>
 #include <mutex>
+#include <shared_mutex>
 #include "Event.h"
 #include "SEObject.hpp"
 #include "StrategyBase.h"
@@ -50,7 +52,7 @@ private:
 	bool _is_running;
 	std::thread _dispatcher_th;
 
-	std::mutex _strategy_mutex;
+	std::shared_mutex _strategy_mutex;
     std::mutex _event_mutex;
     std::mutex _task_mutex;
     std::mutex _pool_mutex;

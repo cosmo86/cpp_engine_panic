@@ -21,7 +21,7 @@ struct SE_InputOrderActionField : public SEObject
 		TTORATstpSessionIDType	SessionID;
 	
 		///被撤报单引用
-		TTORATstpOrderRefType	OrderRef;
+		TORASTOCKAPI::TTORATstpOrderRefType	OrderRef;
 	
 		///被撤报单系统编号
 		TTORATstpOrderSysIDType	OrderSysID;
@@ -30,7 +30,7 @@ struct SE_InputOrderActionField : public SEObject
 		TTORATstpActionFlagType	ActionFlag;
 	
 		///报单操作引用
-		TTORATstpOrderRefType	OrderActionRef;
+		TORASTOCKAPI::TTORATstpOrderRefType	OrderActionRef;
 	
 		///系统撤单编号
 		TTORATstpOrderSysIDType	CancelOrderSysID;
@@ -97,7 +97,7 @@ struct SE_TradeField : public SEObject
 		TTORATstpPbuIDType	PbuID;
 	
 		///报单引用
-		TTORATstpOrderRefType	OrderRef;
+		TORASTOCKAPI::TTORATstpOrderRefType	OrderRef;
 	
 		///资金账户代码
 		TTORATstpAccountIDType	AccountID;
@@ -169,7 +169,7 @@ struct SE_OrderField: public SEObject
 		TTORATstpSessionIDType	SessionID;
 	
 		///报单引用
-		TTORATstpOrderRefType	OrderRef;
+		TORASTOCKAPI::TTORATstpOrderRefType	OrderRef;
 	
 		///本地报单编号
 		TTORATstpOrderLocalIDType	OrderLocalID;

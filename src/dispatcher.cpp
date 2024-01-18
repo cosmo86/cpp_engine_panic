@@ -1,5 +1,5 @@
 #include "dispatcher.h"
- 
+#include <shared_mutex>
 
 void Dispatcher::init() 
 {
@@ -8,7 +8,7 @@ void Dispatcher::init()
 	this->bind_Callback(Eventtype::L2TICK, &StrategyBase::on_tick);
 	this->bind_Callback(Eventtype::ORDER_DETIAL, &StrategyBase::on_orderDetial);
 	this->bind_Callback(Eventtype::TRANSACTION, &StrategyBase::on_transac);
-	std::cout<<"[Dispatcher] init, functions binded"<< std::endl;
+	
 	//this->bind_Callback(Eventtype::, &TaskBase::on_cus_event);
 	std::shared_ptr<Strategy> temp_strategy = std::make_shared<Strategy>(1);
 	_strategy_map[1] = temp_strategy;
@@ -76,9 +76,26 @@ void Dispatcher::dispatch()
 				std::cout << "No callback found for this event type, Your etype is : " << temp_event.e_type << std::endl;
 				return;
 			}
+
+			if (temp_event.e_type == Eventtype::CANCEL_ERROR ||
+			   temp_event.e_type == Eventtype::CANCEL_SUCCESS ||
+			   temp_event.e_type == Eventtype::ORDER_SUCCESS ||
+			   temp_event.e_type == Eventtype::ORDER_ERROR ||
+			   temp_event.e_type == Eventtype::TRADE )
+			   {
+					if (temp_event.S_id == '\0')
+					{
+						std::cout<<"Sinfo is empty "<<temp_event.e_type<<temp_event.event<<std::endl;
+						return;
+					}
+					auto temp_strategy_iter = _strategy_map.find(std::stoi(temp_event.S_id));
+					if (temp_strategy_iter == _strategy_map.end()) {std::cout<<}
+					SETask task( temp_event.event, func_to_call->second,  temp_strategy_iter->second );
+					_task_q.enqueue(std::move(task));
+			   }
 			// lock the task_q
 			{
-				std::lock_guard<std::mutex> lock(_strategy_mutex);
+				std::shared_lock<std::shared_mutex> lock(_strategy_mutex);
 				for (const auto& pair : _strategy_map) 
 				{
 					SETask task( temp_event.event, func_to_call->second,  pair.second );
@@ -122,15 +139,14 @@ void Dispatcher::worker_main()
 
 void Dispatcher::add_strategy(int s_id, std::shared_ptr<Strategy> s)
 {
-	std::lock_guard<std::mutex> lock(_strategy_mutex);
+	std::unique_lock<std::shared_mutex> lock(_strategy_mutex);
 	_strategy_map.emplace(s_id , s);
 }
 
 void Dispatcher::remove_strategy(int s_id)
 {
-	std::lock_guard<std::mutex> lock(_strategy_mutex);
+	std::unique_lock<std::shared_mutex> lock(_strategy_mutex);
 	auto S_toRemove = _strategy_map.find(s_id);
-
 	if (S_toRemove != _strategy_map.end()) {
 		_strategy_map.erase(s_id);
 	}

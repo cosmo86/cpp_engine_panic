@@ -304,4 +304,10 @@ CMakeFiles/MyLibrary.dir/src/Porter.cpp.o: \
  /opt/rh/devtoolset-7/root/usr/include/c++/7/deque \
  /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/stl_deque.h \
  /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/deque.tcc \
- /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/stl_queue.h
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/stl_queue.h \
+ /root/usr_1/cpp_engine_panic/include/trader.cpp \
+ /root/usr_1/cpp_engine_panic/include/TORATstpTraderApi.h \
+ /root/usr_1/cpp_engine_panic/include/TORATstpUserApiStruct.h \
+ /root/usr_1/cpp_engine_panic/include/TORATstpUserApiDataType.h \
+ /root/usr_1/cpp_engine_panic/model/OrderModels.hpp \
+ /root/usr_1/cpp_engine_panic/include/TORATstpUserApiDataType.h

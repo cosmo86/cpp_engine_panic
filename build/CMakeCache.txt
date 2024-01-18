@@ -231,7 +231,7 @@ CMAKE_TAPI:FILEPATH=CMAKE_TAPI-NOTFOUND
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
 
 //Dependencies for the target
-MyLibrary_LIB_DEPENDS:STATIC=general;/root/usr_1/cpp_engine_panic/include/liblev2mdapi.so;general;/root/usr_1/cpp_engine_panic/include/libjemalloc.so.2;
+MyLibrary_LIB_DEPENDS:STATIC=general;/root/usr_1/cpp_engine_panic/include/liblev2mdapi.so;general;/root/usr_1/cpp_engine_panic/include/libtraderapi.so;general;/root/usr_1/cpp_engine_panic/include/libjemalloc.so.2;
 
 //Value Computed by CMake
 cpp_engine_BINARY_DIR:STATIC=/root/usr_1/cpp_engine_panic/build
