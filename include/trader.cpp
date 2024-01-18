@@ -256,39 +256,21 @@ private:
 		}
 	}
 
-	void Send_Cancle_Order(CTORATstpInputOrderActionField* CancleOrderRequest)
+	void Send_Cancle_Order( const char exchange_id, TTORATstpOrderSysIDType order_sys_id )
 	{
-			// 请求撤单
-			CTORATstpInputOrderActionField field;
-			memset(&field, 0, sizeof(CTORATstpInputOrderActionField));
-
-			field.ExchangeID = TORA_TSTP_EXD_SSE;
-			field.ActionFlag = TORA_TSTP_AF_Delete;
-
-
-			// 撤单支持以下两种方式定位原始报单：
-			// （1）报单引用方式
-			//field.OrderRef = 1;
-			//field.FrontID = m_front_id;
-			//field.SessionID = m_session_id;
-			// （2）系统报单编号方式
-			strcpy(field.OrderSysID, "110019400000006");
+		// 请求撤单
+		CTORATstpInputOrderActionField input_order_action_field;
+		memset(&input_order_action_field, 0, sizeof(input_order_action_field));
+		input_order_action_field.ExchangeID = exchange_id;
+		input_order_action_field.ActionFlag = TORA_TSTP_AF_Delete;
+		strcpy(input_order_action_field.OrderSysID, order_sys_id);
 
 
-			// OrderActionRef报单操作引用，用法同报单引用，可根据需要选填
-
-			// 终端自定义字段，终端可根据需要填写如下字段的值，该字段值不会被柜台系统修改，在查询撤单时返回给终端
-			//strcpy(field.SInfo, "sinfo");
-			//field.IInfo = 678;
-
-			// 委托方式字段根据券商要求填写，无特殊说明置空即可
-			//Operway
-
-			int ret = m_api->ReqOrderAction(&field, m_req_id++);
-			if (ret != 0)
-			{
-				printf("ReqOrderAction fail, ret[%d]\n", ret);
-			}
+		int ret = m_api->ReqOrderAction(&input_order_action_field, m_req_id++);
+		if (ret != 0)
+		{
+			printf("ReqOrderAction fail, ret[%d]\n", ret);
+		}
 	}
 
 #if 0
