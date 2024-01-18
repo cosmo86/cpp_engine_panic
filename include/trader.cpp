@@ -27,6 +27,7 @@
 #include "spdlog/async.h"
 #include "SEObject.hpp"
 #include "Event.h"
+#include "OrderModels.hpp"
 
 using LoggerPtr = std::shared_ptr<spdlog::async_logger>;
 
@@ -45,7 +46,7 @@ using namespace TORASTOCKAPI;
 class TradeSpi : public CTORATstpTraderSpi
 {
 private:
-	CTORATstpTraderApi* m_api;
+	CTORATstpTraderApi* m_api = nullptr;
 	int m_req_id;
 	int m_front_id;
 	int m_session_id;
@@ -55,11 +56,14 @@ private:
 	char m_address[64];
 	char m_mode[21];
 
+	char m_InvestorID[16];
+	
 	moodycamel::ConcurrentQueue<SEEvent>* m_Event_Q_ptr = nullptr;
 	LoggerPtr m_logger=nullptr;
 
-	std::unordered_map<std::string, double> limup_table;
-	std::unordered_map<TTORATstpExchangeIDType, std::string> shareHolder_table;
+	std::unordered_map<std::string, double> limup_table; //<securityid , limup_price>
+	std::unordered_map<TTORATstpExchangeIDType, std::string> shareHolder_table; // <exchangeid , shareholderid>
+	std::unordered_map<std::string, char[33]> OrderSysid_Sinfo_map; //<OrderSysid , Sinfo>
 
 public:
 	TradeSpi()
@@ -73,6 +77,17 @@ public:
 	{}
 
 public:
+
+	void Release()
+	{
+		if(m_api){
+			m_api->Release();
+		}
+		else{
+			std::cout<<"trade_api not created."<<std::endl;
+		}
+	}
+
 	void init_queue(moodycamel::ConcurrentQueue<SEEvent>* m_Event_Q_ptr)
 	{
 		std::cout<< "[TradeSpi] pointer before init :"<<m_Event_Q_ptr<<std::endl;
@@ -191,13 +206,13 @@ private:
 			m_session_id = pRspUserLoginField->SessionID;
 
 			// 查询合约
-			CTORATstpQrySecurityField field;
-			memset(&field, 0, sizeof(field));
+			CTORATstpQrySecurityField field_Security;
+			memset(&field_Security, 0, sizeof(field_Security));
 
 			// 以下字段不填表示不设过滤条件，即查询全部合约
 			  //field.ExchangeID = TORA_TSTP_EXD_SSE;
 			  //strcpy(field.SecurityID, "600000");
-			int ret = m_api->ReqQrySecurity(&field, m_req_id++);
+			int ret = m_api->ReqQrySecurity(&field_Security, m_req_id++);
 			if (ret != 0)
 			{
 				printf("[TradeSpi] ReqQrySecurity fail, ret[%d]\n", ret);
@@ -205,13 +220,13 @@ private:
 
 
 			// 查询投资者信息
-			CTORATstpQryInvestorField field;
-			memset(&field, 0, sizeof(field));//不初始化内存将有可能脏数据请求，然后查不到结果
+			CTORATstpQryInvestorField field_Incestor;
+			memset(&field_Incestor, 0, sizeof(field_Incestor));//不初始化内存将有可能脏数据请求，然后查不到结果
 
 			// 以下字段不填表示不设过滤条件
 			//strcpy_s(field.InvestorID, InvestorID);
 
-			int ret = m_api->ReqQryInvestor(&field, m_req_id++);
+			int ret = m_api->ReqQryInvestor(&field_Incestor, m_req_id++);
 			if (ret != 0)
 			{
 				printf("[TradeSpi]  ReqQryInvestor fail, ret[%d]\n", ret);
@@ -273,88 +288,6 @@ private:
 		}
 	}
 
-#if 0
-			// 查询集中交易资金
-			CTORATstpReqInquiryJZFundField field;
-
-			memset(&field, 0, sizeof(field));
-			strcpy(field.DepartmentID, DepartmentID);
-			strcpy(field.AccountID, AccountID);
-			field.CurrencyID = TORA_TSTP_CID_CNY;
-
-			int ret = m_api->ReqInquiryJZFund(&field, m_req_id++);
-			if (ret != 0)
-			{
-				printf("ReqInquiryJZFund fail, ret[%d]\n", ret);
-			}
-
-#endif
-
-#if 0
-			// 资金转移(包括资金调拨和银证转账)
-			CTORATstpInputTransferFundField field;
-
-			memset(&field, 0, sizeof(field));
-			strcpy(field.DepartmentID, DepartmentID);
-			strcpy(field.AccountID, AccountID);
-			field.CurrencyID = TORA_TSTP_CID_CNY;
-
-			field.Amount = 100000.0;
-
-			// 转移方向：
-			// TORA_TSTP_TRNSD_MoveIn表示资金从集中交易柜台调拨至快速交易柜台
-			// TORA_TSTP_TRNSD_MoveOut表示资金从快速交易柜台调拨至集中交易柜台
-			// TORA_TSTP_TRNSD_StockToBank表示证券快速交易系统资金转入银行，即出金
-			// TORA_TSTP_TRNSD_BankToStock表示银行资金转入证券快速交易系统，即入金
-			// 以下说明各场景下字段填值：
-			// （1）资金从集中交易柜台调拨至快速交易柜台
-			field.TransferDirection = TORA_TSTP_TRNSD_MoveIn;
-			// （2）资金从快速交易柜台调拨至集中交易柜台
-			//field.TransferDirection = TORA_TSTP_TRNSD_MoveOut;
-			// （3）证券快速交易系统资金转入银行，需填写银行代码和资金密码
-			//field.TransferDirection = TORA_TSTP_TRNSD_StockToBank;
-			//field.BankID = TORA_TSTP_BKID_CCB;
-			//strcpy(field.AccountPassword, "123456");
-			// （4）银行资金转入证券快速交易系统，需填写银行代码和银行卡密码
-			//field.TransferDirection = TORA_TSTP_TRNSD_BankToStock;
-			//field.BankID = TORA_TSTP_BKID_CCB;
-			//strcpy(field.BankPassword, "123456");
-
-			// 申请流水号ApplySerial字段为选填字段
-			// 若不填写则柜台系统会自动生成一个申请流水号
-			// 若填写则需保证同一个TCP会话下申请流水号不重复
-			//field.ApplySerial = 1;
-
-			int ret = m_api->ReqTransferFund(&field, m_req_id++);
-			if (ret != 0)
-			{
-				printf("ReqTransferFund fail, ret[%d]\n", ret);
-			}
-#endif
-
-#if 0
-			// 登出,目前登出成功连接会立即被柜台系统断开，终端不会收到OnRspUserLogout应答
-			// 连接断开后接口内部会触发重新连接，为不使连接成功后又触发重新登录，需终端做好逻辑控制
-			// 一般情况下若希望登出，直接调用Release接口即可，释放成功连接将被终端强制关闭，Release接口调用注意事项见下文说明
-			CTORATstpUserLogoutField field;
-			memset(&field, 0, sizeof(field));
-
-			int ret = m_api->ReqUserLogout(&field, ++m_req_id);
-			if (ret != 0)
-			{
-				printf("ReqUserLogout fail, ret[%d]\n", ret);
-			}
-#endif
-			return;
-		}
-		else
-		{
-			printf("TradeApi OnRspUserLogin: Error! [%d] [%d] [%s]\n", nRequestID, pRspInfo->ErrorID, pRspInfo->ErrorMsg);
-		}
-	}
-
-
-
 	virtual void OnRspOrderInsert(CTORATstpInputOrderField* pInputOrderField, CTORATstpRspInfoField* pRspInfo, int nRequestID)
 	{
 		if (pRspInfo->ErrorID == 0)
@@ -369,20 +302,39 @@ private:
 
 	virtual void OnRspOrderAction(CTORATstpInputOrderActionField* pInputOrderActionField, CTORATstpRspInfoField* pRspInfo, int nRequestID)
 	{
+		if(pInputOrderActionField->SInfo[0] == '\0'){
+			std::cout<<"[Trader:OnRtnOrder] SInfo is empty, please check order source "<< std::endl;
+			printf("[%d] [%d] [%s] \n", nRequestID, pInputOrderActionField->OrderActionRef, pInputOrderActionField->CancelOrderSysID);
+			return;
+		}
+		SEEvent temp_event;
+		std::shared_ptr<SE_InputOrderActionField> InputOrderActionField = SEObject::Create<SE_InputOrderActionField>();
+		memcpy(InputOrderActionField.get(),pInputOrderActionField,sizeof(SE_InputOrderActionField));
+
 		if (pRspInfo->ErrorID == 0)
 		{
 			printf("OnRspOrderAction: OK! [%d] [%d] [%s] \n", nRequestID, pInputOrderActionField->OrderActionRef, pInputOrderActionField->CancelOrderSysID);
+			temp_event.e_type = Eventtype::CANCEL_SUCCESS;
+			temp_event.event = InputOrderActionField;
+			strcpy(temp_event.S_id, pInputOrderActionField->SInfo);
+			m_Event_Q_ptr->enqueue(std::move(temp_event));
 		}
 		else
 		{
 			printf("OnRspOrderAction: Error! [%d] [%d] [%s]\n", nRequestID, pRspInfo->ErrorID, pRspInfo->ErrorMsg);
+			temp_event.e_type = Eventtype::CANCEL_ERROR;
+			temp_event.event = InputOrderActionField;
+			strcpy(temp_event.S_id, pInputOrderActionField->SInfo);
+			m_Event_Q_ptr->enqueue(std::move(temp_event));
 		}
 	}
 
 
 	virtual void OnRtnOrder(CTORATstpOrderField* pOrder)
 	{
-		printf(
+		if(pOrder->SInfo[0] == '\0'){
+			std::cout<<"[Trader:OnRtnOrder] SInfo is empty, please check order source "<< std::endl;
+			printf(
 			"OnRtnOrder:::\n"
 			"---RequestID[%d] SecurityID[%s] OrderRef[%d] OrderLocalID[%s] OrderSysID[%s]\n"
 			"---OrderType[%c] LimitPrice[%.2f]\n"
@@ -399,52 +351,70 @@ private:
 			, pOrder->InsertUser, pOrder->InsertDate, pOrder->InsertTime, pOrder->AcceptTime
 			, pOrder->CancelUser, pOrder->CancelTime
 			, pOrder->PbuID
-		);
+		    );
+			return;
+		}
 
-		//撤单测试
-#if 1
-	// 请求撤单  交易所已接收
-		if (TORA_TSTP_OST_Accepted == pOrder->OrderStatus && TORA_TSTP_OSS_InsertSubmitted == pOrder->OrderSubmitStatus)
+		// order succedd status=2 and not withdraw submitstatud = 1
+		if (pOrder->OrderStatus == '2' &&  pOrder->OrderSubmitStatus == '1')
 		{
+			SEEvent temp_event;
+			std::shared_ptr<SE_OrderField> orderField = SEObject::Create<SE_OrderField>();
+			memcpy(orderField.get(),pOrder,sizeof(SE_OrderField));
 
-			CTORATstpInputOrderActionField field;
-			memset(&field, 0, sizeof(CTORATstpInputOrderActionField));
+			temp_event.e_type = Eventtype::ORDER_SUCCESS;
+			temp_event.event = orderField;
+			strcpy(temp_event.S_id, pOrder->SInfo);
 
-			field.ExchangeID = pOrder->ExchangeID;
-			field.ActionFlag = TORA_TSTP_AF_Delete;
+			//std::shared_ptr<SE_Lev2MarketDataField> temp = std::static_pointer_cast<SE_Lev2MarketDataField>(temp_event.event);
+			//std::cout<<temp->SecurityID<<" "<<temp->ClosePrice<<std::endl;
+			m_Event_Q_ptr->enqueue(std::move(temp_event));
 
-
-			// 撤单支持以下两种方式定位原始报单：
-			// （1）报单引用方式
-			//field.OrderRef = 1;
-			//field.FrontID = m_front_id;
-			//field.SessionID = m_session_id;
-			// （2）系统报单编号方式
-			strcpy(field.OrderSysID, pOrder->OrderSysID);
-
-
-			// OrderActionRef报单操作引用，用法同报单引用，可根据需要选填
-
-			// 终端自定义字段，终端可根据需要填写如下字段的值，该字段值不会被柜台系统修改，在查询撤单时返回给终端
-			//strcpy(field.SInfo, "sinfo");
-			//field.IInfo = 678;
-
-			// 委托方式字段根据券商要求填写，无特殊说明置空即可
-			//Operway
-
-			int ret = m_api->ReqOrderAction(&field, m_req_id++);
-			if (ret != 0)
-			{
-				printf("ReqOrderAction fail, ret[%d]\n", ret);
-			}
-		} //end if
-#endif
-
-
+			printf(
+				"OnRtnOrder:::\n"
+				"---RequestID[%d] SecurityID[%s] OrderRef[%d] OrderLocalID[%s] OrderSysID[%s]\n"
+				"---OrderType[%c] LimitPrice[%.2f]\n"
+				"---OrderStatus[%c] StatusMsg[%s] OrderSubmitStatus[%c]\n"
+				"---VolumeTotalOriginal[%d] VolumeTraded[%d] VolumeCanceled[%d]\n"
+				"---InsertUser[%s] InsertDate[%s] InsertTime[%s] AcceptTime[%s]\n"
+				"---CancelUser[%s] CancelTime[%s]"
+				"---PbuID[%s]"
+				"\n"
+				, pOrder->RequestID, pOrder->SecurityID, pOrder->OrderRef, pOrder->OrderLocalID, pOrder->OrderSysID
+				, pOrder->OrderType, pOrder->LimitPrice
+				, pOrder->OrderStatus, pOrder->StatusMsg, pOrder->OrderSubmitStatus
+				, pOrder->VolumeTotalOriginal, pOrder->VolumeTraded, pOrder->VolumeCanceled
+				, pOrder->InsertUser, pOrder->InsertDate, pOrder->InsertTime, pOrder->AcceptTime
+				, pOrder->CancelUser, pOrder->CancelTime
+				, pOrder->PbuID
+				);
+		}
 	}
 
 	virtual void OnRtnTrade(CTORATstpTradeField* pTrade)
 	{
+		
+		auto temp_map_ptr = OrderSysid_Sinfo_map.find(std::string(pTrade->OrderSysID));
+		// If ordersysid not in the map, then the order to this trade was not sent by this program, probably done other platform manuelly
+		if(temp_map_ptr== OrderSysid_Sinfo_map.end() ){
+			std::cout<<"[Trader:OnRtnOrder] SInfo is empty, please check order source "<< std::endl;
+			printf("OnRtnTrade: TradeID[%s] InvestorID[%s] SecurityID[%s] OrderRef[%d] OrderLocalID[%s] Price[%.2f] Volume[%d]\n",
+			pTrade->TradeID, pTrade->InvestorID, pTrade->SecurityID, pTrade->OrderRef, pTrade->OrderLocalID, pTrade->Price, pTrade->Volume);
+			return;
+		}
+
+		SEEvent temp_event;
+		std::shared_ptr<SE_TradeField> TradeField = SEObject::Create<SE_TradeField>();
+		memcpy(TradeField.get(),pTrade,sizeof(SE_TradeField));
+
+		temp_event.e_type = Eventtype::TRADE;
+		temp_event.event = TradeField;
+		strcpy(temp_event.S_id, temp_map_ptr->second);
+
+		//std::shared_ptr<SE_Lev2MarketDataField> temp = std::static_pointer_cast<SE_Lev2MarketDataField>(temp_event.event);
+		//std::cout<<temp->SecurityID<<" "<<temp->ClosePrice<<std::endl;
+		m_Event_Q_ptr->enqueue(std::move(temp_event));
+
 		printf("OnRtnTrade: TradeID[%s] InvestorID[%s] SecurityID[%s] OrderRef[%d] OrderLocalID[%s] Price[%.2f] Volume[%d]\n",
 			pTrade->TradeID, pTrade->InvestorID, pTrade->SecurityID, pTrade->OrderRef, pTrade->OrderLocalID, pTrade->Price, pTrade->Volume);
 	}
@@ -470,6 +440,7 @@ private:
 	{
 		if (pInvestor)
 		{
+			strcpy(m_InvestorID , pInvestor->InvestorID);
 			printf("OnRspQryInvestor[%d]: InvestorID[%s] InvestorName[%s] Operways[%s]\n", nRequestID, pInvestor->InvestorID, pInvestor->InvestorName, pInvestor->Operways);
 		}
 
@@ -544,75 +515,3 @@ private:
 
 
 };
-
-
-
-int main(int argc, char* argv[])
-{
-	// 打印接口版本号
-	printf("TradeApiVersion:[%s]\n", CTORATstpTraderApi::GetApiVersion());
-
-	// 创建接口对象
-	// pszFlowPath为私有流和公有流文件存储路径，若订阅私有流和公有流且创建多个接口实例，每个接口实例应配置不同的路径
-	// bEncrypt为网络数据是否加密传输，考虑数据安全性，建议以互联网方式接入的终端设置为加密传输
-	CTORATstpTraderApi* demo_trade_api = CTORATstpTraderApi::CreateTstpTraderApi("./flow", false);
-
-	// 创建回调对象
-	DemoTradeSpi trade_spi(demo_trade_api);
-
-	// 注册回调接口
-	demo_trade_api->RegisterSpi(&trade_spi);
-
-
-#if 1	//模拟环境，TCP 直连Front方式
-	// 注册单个交易前置服务地址
-	const char* TD_TCP_FrontAddress = "tcp://210.14.72.21:4400";//仿真交易环境
-	//const char* TD_TCP_FrontAddress="tcp://210.14.72.15:4400";//24小时环境A套
-	//const char* TD_TCP_FrontAddress="tcp://210.14.72.16:9500";////24小时环境B套
-	demo_trade_api->RegisterFront((char*)TD_TCP_FrontAddress);
-	// 注册多个交易前置服务地址，用逗号隔开
-	//demo_trade_api->RegisterFront("tcp://10.0.1.101:6500,tcp://10.0.1.101:26500");
-	printf("TD_TCP_FensAddress[sim or 24H]::%s\n", TD_TCP_FrontAddress);
-
-#else	//模拟环境，FENS名字服务器方式
-	const char* TD_TCP_FensAddress = "tcp://210.14.72.21:42370";//模拟环境通用fens地址
-	/********************************************************************************
-	 * 注册 fens 地址前还需注册 fens 用户信息，包括环境编号、节点编号、Fens 用户代码等信息
-	 * 使用名字服务器的好处是当券商系统部署方式发生调整时外围终端无需做任何前置地址修改
-	 * *****************************************************************************/
-	CTORATstpFensUserInfoField fens_user_info_field;
-	memset(&fens_user_info_field, 0, sizeof(fens_user_info_field));
-	strcpy(fens_user_info_field.FensEnvID, "stock");//必填项，暂时固定为“stock”表示普通现货柜台
-	strcpy(fens_user_info_field.FensNodeID, "sim");//必填项，生产环境需按实际填写,仿真环境为sim
-	//strcpy(fens_user_info_field.FensNodeID, "24a");//必填项，生产环境需按实际填写,24小时A套环境为24a
-	//strcpy(fens_user_info_field.FensNodeID, "24b");//必填项，生产环境需按实际填写,24小时B套环境为24b
-	demo_trade_api->RegisterFensUserInfo(&fens_user_info_field);
-	demo_trade_api->RegisterNameServer((char*)TD_TCP_FensAddress);
-	printf("TD_TCP_FensAddress[%s]::%s\n", fens_user_info_field.FensNodeID, TD_TCP_FensAddress);
-
-#endif
-
-
-
-
-	// 订阅公有流和私有流
-	demo_trade_api->SubscribePrivateTopic(TORA_TERT_QUICK);
-	demo_trade_api->SubscribePublicTopic(TORA_TERT_QUICK);
-	/*	************************************
-	*	TORA_TERT_RESTART，从日初开始
-	*	TORA_TERT_RESUME,  从断开时候开始
-	*	TORA_TERT_QUICK ，从最新时刻开始
-	****************************************/
-
-	// 启动
-	demo_trade_api->Init();
-
-	// 等待结束
-	getchar();
-	//demo_trade_api->Join();
-
-	// 释放，注意不允许在回调函数内调用Release接口，否则会导致线程死锁
-	demo_trade_api->Release();
-
-	return 0;
-}

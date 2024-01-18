@@ -45,6 +45,7 @@ class SEEvent
 public:
     Eventtype e_type;
     std::shared_ptr<SEObject> event;
+    char S_id[31] = {};
 };
 
 class SETask
