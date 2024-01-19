@@ -2,6 +2,13 @@
 #include "StrategyBase.h"
 #include "Lv2dataModel.hpp"
 #include "OrderModels.hpp"
+#include "json.hpp"
 
+class Dispatcher;
 
-class Strategy : public StrategyBase 
+class HitBanStrategy : public StrategyBase 
+{
+private:
+    Dispatcher* m_dispatcher_ptr = nullptr;
+    json m_stratParams;
+}

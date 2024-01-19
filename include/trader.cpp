@@ -1,18 +1,9 @@
 /***********************************************************************
-*	@company	上海全创信息科技有限公司
-*	@file		demo_trade_stock.cpp
-*	@brief		traderapi demo
-*	@history	2022-8-26
-*	@author		n-sight
-*
-*	Windows：	1.请确认包.h .cpp 以及 .lib 文件都在相同目录；或者VS项目配置属性中【附加包含目录】以及【附加库目录】和【附加项依赖】正确设置相关路径
-*				2.预处理器定义 _CRT_SECURE_NO_WARNINGS ;
-*				3.使用VS2013以上版本编译通过
-*
-*	Linux：		1.库文件和头文件在同一目录下时， g++ demo_trade_stock.cpp -o demo -L. -lfasttraderapi
-*				2.当库文件和源文件不在同一目录时，请注意相应路径的不同
-				3.运行时若找不到动态库，可export $LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
+*	@history	2024-01-01
+*	@author		CosmoW
+*   @contact    Earth
 ***********************************************************************/
+
 #pragma once
 #include "TORATstpTraderApi.h"
 #include <stdio.h>
@@ -62,6 +53,7 @@ private:
 	LoggerPtr m_logger=nullptr;
 
 	std::unordered_map<std::string, double> limup_table; //<securityid , limup_price>
+	std::unordered_map<std::string, std::string> secID_name_table; //<securityid, SecurityName>
 	std::unordered_map<TTORATstpExchangeIDType, std::string> shareHolder_table; // <exchangeid , shareholderid>
 	std::unordered_map<std::string, char[33]> OrderSysid_Sinfo_map; //<OrderSysid , Sinfo>
 
@@ -449,6 +441,7 @@ private:
 		{
 			auto start = std::chrono::high_resolution_clock::now();
 			limup_table.emplace(std::string(pSecurity->SecurityID), pSecurity->UpperLimitPrice);
+			secID_name_table.emplace(std::string(pSecurity->SecurityID), std::string(pSecurity->SecurityName));
 			auto stop = std::chrono::high_resolution_clock::now();
 			auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
 			std::cout << "[Trader OnRspQrySecurity]: "

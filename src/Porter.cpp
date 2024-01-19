@@ -1,6 +1,35 @@
 #include "Porter.h"
 
+/*
 
+import ctypes
+import json
+
+# Example data
+data = {'integer': 1, 'float': 3.14, 'char': 'c', 'string': 'mystring'}
+json_str = json.dumps(data)
+
+# Call C++ function
+
+------------------------------------
+
+#include <nlohmann/json.hpp>
+
+extern "C" {
+    void process_json(const char* json_str) {
+        nlohmann::json j = nlohmann::json::parse(json_str);
+
+        // Access and cast data
+        int integer_value = j["integer"].get<int>();
+        float float_value = j["float"].get<float>();
+        char char_value = j["char"].get<std::string>()[0]; // Assuming single char in string
+        std::string string_value = j["string"].get<std::string>();
+
+        // Process the data as needed
+        // ...
+    }
+}
+*/
 
 Engine& getEngine()
 {
