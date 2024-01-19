@@ -24,12 +24,17 @@ void Engine::Start()
     strcpy(Password,"19359120");
     strcpy(mode,"test");
     std::cout<<"[Engine] user ,passwork copied"<< std::endl;
-    m_L2_quoter.init_queue(&dispatcher._event_q);
-    //m_L2_quoter.connect( UserID, Password,LEV2MD_TCP_FrontAddress,mode);
+
+    m_trader.init_trader(&dispatcher._event_q, m_logger);
+    m_trader.connect( UserID, Password,TD_TCP_FrontAddress,mode);
+    std::this_thread::sleep_for(std::chrono::milliseconds(20000));
+
+
+    m_L2_quoter.init_quoter(&dispatcher._event_q, m_logger);
+    m_L2_quoter.connect( UserID, Password,LEV2MD_TCP_FrontAddress,mode);
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
-    m_trader.init_queue(&dispatcher._event_q);
-    m_trader.connect( UserID, Password,TD_TCP_FrontAddress,mode);
+    
     m_logger->info("Engine started");
 }
 

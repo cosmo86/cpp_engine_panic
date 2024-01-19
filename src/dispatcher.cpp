@@ -77,23 +77,32 @@ void Dispatcher::dispatch()
 				return;
 			}
 
+			// Those events should only be dispatched to matching Strategies, thus the 'if' check
 			if (temp_event.e_type == Eventtype::CANCEL_ERROR ||
 			   temp_event.e_type == Eventtype::CANCEL_SUCCESS ||
 			   temp_event.e_type == Eventtype::ORDER_SUCCESS ||
 			   temp_event.e_type == Eventtype::ORDER_ERROR ||
 			   temp_event.e_type == Eventtype::TRADE )
 			   {
-					if (temp_event.S_id == '\0')
+					if (temp_event.S_id[0] == '\0') // S_id is SInfo, if its empty, then the order could be placed by another system or manuelly
 					{
 						std::cout<<"Sinfo is empty "<<temp_event.e_type<<temp_event.event<<std::endl;
 						return;
 					}
-					auto temp_strategy_iter = _strategy_map.find(std::stoi(temp_event.S_id));
-					if (temp_strategy_iter == _strategy_map.end()) {std::cout<<}
+
+					std::map<int, std::shared_ptr<Strategy>>::iterator temp_strategy_iter;
+					{
+						std::shared_lock<std::shared_mutex> lock(_strategy_mutex);
+						temp_strategy_iter = _strategy_map.find(std::stoi(temp_event.S_id));
+						// SInfo is not empty but strategy not found, stategy could be removed
+						if (temp_strategy_iter == _strategy_map.end()) {
+							std::cout<<"Strategy might be removed s_id: "<< temp_event.S_id << temp_event.e_type <<std::endl;}
+					}
 					SETask task( temp_event.event, func_to_call->second,  temp_strategy_iter->second );
 					_task_q.enqueue(std::move(task));
 			   }
-			// lock the task_q
+			
+			else 
 			{
 				std::shared_lock<std::shared_mutex> lock(_strategy_mutex);
 				for (const auto& pair : _strategy_map) 

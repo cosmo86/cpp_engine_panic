@@ -167,6 +167,8 @@ CMakeFiles/MyLibrary.dir/src/dispatcher.cpp.o: \
  /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/stl_queue.h \
  /opt/rh/devtoolset-7/root/usr/include/c++/7/mutex \
  /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/std_mutex.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/shared_mutex \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/condition_variable \
  /root/usr_1/cpp_engine_panic/include/Event.h \
  /root/usr_1/cpp_engine_panic/model/SEObject.hpp \
  /usr/local/include/jemalloc/jemalloc.h \

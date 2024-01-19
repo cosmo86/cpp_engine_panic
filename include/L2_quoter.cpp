@@ -60,10 +60,11 @@ public:
 	}
 
 public:
-	void init_queue(moodycamel::ConcurrentQueue<SEEvent>* m_Event_Q_ptr)
+	void init_quoter(moodycamel::ConcurrentQueue<SEEvent>* m_Event_Q_ptr, LoggerPtr logger_ptr)
 	{
 		std::cout<< "[Lev2MdSpi] pointer before init :"<<m_Event_Q_ptr<<std::endl;
 		this->m_Event_Q_ptr = m_Event_Q_ptr;
+		this->m_logger = logger_ptr;
 		std::cout<< "[Lev2MdSpi] pointer to queue inited, address is "<< m_Event_Q_ptr<<std::endl;
 	}
 	// connect to L2 server
@@ -433,6 +434,7 @@ public:
 		auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
 		std::cout << "[OnRtnTransaction]: "
               << duration.count() << " nanoseconds" << std::endl;
+		m_logger->info("{}, {}, {}, {}",pTransaction->SecurityID,pTransaction->TradeTime,pTransaction->TradePrice,pTransaction->TradeVolume);
 		//printf("OnRtnTransaction SecurityID[%s] ", pTransaction->SecurityID);
 		//printf("ExchangeID[%c] ", pTransaction->ExchangeID);
 		//������ʳɽ���TradeTime�ĸ�ʽΪ��ʱ������롿��������??100221530����ʾ10:02:21.530;

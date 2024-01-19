@@ -88,10 +88,11 @@ public:
 		}
 	}
 
-	void init_queue(moodycamel::ConcurrentQueue<SEEvent>* m_Event_Q_ptr)
+	void init_trader(moodycamel::ConcurrentQueue<SEEvent>* m_Event_Q_ptr,LoggerPtr logger_ptr)
 	{
 		std::cout<< "[TradeSpi] pointer before init :"<<m_Event_Q_ptr<<std::endl;
 		this->m_Event_Q_ptr = m_Event_Q_ptr;
+		this->m_logger = logger_ptr;
 		std::cout<< "[TradeSpi] pointer to queue inited, address is "<< m_Event_Q_ptr<<std::endl;
 	}
 	// connect to L2 server
@@ -298,6 +299,24 @@ private:
 		{
 			printf("OnRspOrderInsert: Error! [%d] [%d] [%s]\n", nRequestID, pRspInfo->ErrorID, pRspInfo->ErrorMsg);
 		}
+	}
+
+	virtual void OnErrRtnOrderInsert(CTORATstpInputOrderField *pInputOrderField, TORASTOCKAPI::CTORATstpRspInfoField *pRspInfoField, int nRequestID)
+	{
+		if(pInputOrderField->SInfo[0] == '\0'){
+			std::cout<<"[Trader:OnRtnOrder] SInfo is empty, please check order source "<< std::endl;
+			std::cout<<pInputOrderField->SecurityID<<" "<< pInputOrderField->Direction<<" OrdersysID: "<<pInputOrderField->OrderSysID<<std::endl;
+			return;
+		}
+
+		SEEvent temp_event;
+		std::shared_ptr<SE_InputOrderField> temp_InputOrderField = SEObject::Create<SE_InputOrderField>();
+		memcpy(temp_InputOrderField.get(),pInputOrderField,sizeof(SE_InputOrderField));
+		temp_event.e_type = Eventtype::ORDER_ERROR;
+		temp_event.event = temp_InputOrderField;
+		strcpy(temp_event.S_id, pInputOrderField->SInfo);
+		m_Event_Q_ptr->enqueue(std::move(temp_event));
+
 	}
 
 	virtual void OnRspOrderAction(CTORATstpInputOrderActionField* pInputOrderActionField, TORASTOCKAPI::CTORATstpRspInfoField* pRspInfo, int nRequestID)
