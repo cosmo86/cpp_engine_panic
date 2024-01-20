@@ -7,11 +7,10 @@
 #include <chrono>
 #include <iomanip>
 #include "SEObject.hpp"
-#include "L2_quoter.cpp"
 #include "log_handle.h"
 #include "dispatcher.h"
 #include "Strategy.hpp"
-#include "trader.cpp"
+
 
 class Engine
 {
