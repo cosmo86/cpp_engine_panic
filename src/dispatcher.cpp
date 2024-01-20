@@ -1,5 +1,6 @@
+#pragma once
 #include "dispatcher.h"
-#include <shared_mutex>
+
 
 void Dispatcher::init() 
 {
@@ -13,8 +14,8 @@ void Dispatcher::init()
 	this->bind_Callback(Eventtype::TRADE, &StrategyBase::on_trade);
 	this->bind_Callback(Eventtype::ORDER_SUCCESS, &StrategyBase::on_order_success);
 	this->bind_Callback(Eventtype::ORDER_ERROR, &StrategyBase::on_order_error);
-	this->bind_Callback(Eventtype::CANCEL_ERROR, &StrategyBase::on_cancle_error);
-	this->bind_Callback(Eventtype::CANCEL_SUCCESS, &StrategyBase::on_cancle_success);
+	this->bind_Callback(Eventtype::CANCEL_ERROR, &StrategyBase::on_cancel_error);
+	this->bind_Callback(Eventtype::CANCEL_SUCCESS, &StrategyBase::on_cancel_success);
 
 	
 	//this->bind_Callback(Eventtype::, &TaskBase::on_cus_event);

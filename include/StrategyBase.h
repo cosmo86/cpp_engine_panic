@@ -7,7 +7,7 @@
 #include <thread>
 #include <chrono>
 #include <cstring>
-
+#include <iostream>
 class SEObject;
 
 
@@ -37,8 +37,8 @@ public:
 	virtual void on_order_success(std::shared_ptr<SEObject> e) = 0;
 	virtual void on_order_error(std::shared_ptr<SEObject> e) = 0;
 
-	virtual void on_cancle_success(std::shared_ptr<SEObject> e) = 0;
-	virtual void on_cancle_error(std::shared_ptr<SEObject> e) = 0;
+	virtual void on_cancel_success(std::shared_ptr<SEObject> e) = 0;
+	virtual void on_cancel_error(std::shared_ptr<SEObject> e) = 0;
 	
 	virtual void on_trade(std::shared_ptr<SEObject> e) = 0;
 
