@@ -5,9 +5,17 @@ void Dispatcher::init()
 {
 	// bind the callback function of strategies or other moduels
 	std::cout<<"[Dispatcher] init, binding functions"<< std::endl;
+	
 	this->bind_Callback(Eventtype::L2TICK, &StrategyBase::on_tick);
 	this->bind_Callback(Eventtype::ORDER_DETIAL, &StrategyBase::on_orderDetial);
 	this->bind_Callback(Eventtype::TRANSACTION, &StrategyBase::on_transac);
+
+	this->bind_Callback(Eventtype::TRADE, &StrategyBase::on_trade);
+	this->bind_Callback(Eventtype::ORDER_SUCCESS, &StrategyBase::on_order_success);
+	this->bind_Callback(Eventtype::ORDER_ERROR, &StrategyBase::on_order_error);
+	this->bind_Callback(Eventtype::CANCEL_ERROR, &StrategyBase::on_cancle_error);
+	this->bind_Callback(Eventtype::CANCEL_SUCCESS, &StrategyBase::on_cancle_success);
+
 	
 	//this->bind_Callback(Eventtype::, &TaskBase::on_cus_event);
 	std::shared_ptr<Strategy> temp_strategy = std::make_shared<Strategy>(1);

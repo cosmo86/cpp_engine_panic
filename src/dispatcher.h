@@ -12,6 +12,8 @@
 #include "SEObject.hpp"
 #include "StrategyBase.h"
 #include "Strategy.hpp"
+#include "L2_quoter.cpp"
+#include "trader.cpp"
 
 #include "concurrentqueue.h"
 
@@ -48,6 +50,8 @@ public:
 	void dispatch();
 public:
 	moodycamel::ConcurrentQueue<SEEvent>  _event_q;
+	Lev2MdSpi* L2_quoter_ptr;
+    TradeSpi* trader_ptr;
 private:
 	bool _is_running;
 	std::thread _dispatcher_th;
@@ -58,7 +62,7 @@ private:
     std::mutex _pool_mutex;
 
 	size_t _poolsize = 2;
-	/// @brief 
+	
 	
 	//moodycamel::ConcurrentQueue<std::shared_ptr<SEObject>>  _event_q;
 	//std::queue<Task>  _task_q;
