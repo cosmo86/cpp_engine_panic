@@ -182,42 +182,28 @@ CMakeFiles/MyLibrary.dir/src/Porter.cpp.o: \
  /usr/include/bits/local_lim.h /usr/include/linux/limits.h \
  /usr/include/bits/posix2_lim.h /usr/include/bits/xopen_lim.h \
  /usr/include/strings.h /root/usr_1/cpp_engine_panic/include/Event.h \
- /root/usr_1/cpp_engine_panic/include/L2_quoter.cpp /usr/include/string.h \
- /root/usr_1/cpp_engine_panic/include/TORATstpLev2MdApi.h \
- /root/usr_1/cpp_engine_panic/include/TORATstpLev2ApiStruct.h \
- /root/usr_1/cpp_engine_panic/include/TORATstpLev2ApiDataType.h \
- /opt/rh/devtoolset-7/root/usr/lib/gcc/x86_64-redhat-linux/7/include/float.h \
- /root/usr_1/cpp_engine_panic/include/concurrentqueue.h \
- /opt/rh/devtoolset-7/root/usr/include/c++/7/atomic \
- /opt/rh/devtoolset-7/root/usr/include/c++/7/cassert \
- /usr/include/assert.h \
- /opt/rh/devtoolset-7/root/usr/include/c++/7/cstddef \
- /opt/rh/devtoolset-7/root/usr/include/c++/7/algorithm \
- /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/stl_algo.h \
- /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/algorithmfwd.h \
- /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/stl_heap.h \
- /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/uniform_int_dist.h \
- /opt/rh/devtoolset-7/root/usr/include/c++/7/climits \
+ /root/usr_1/cpp_engine_panic/include/log_handle.h \
  /opt/rh/devtoolset-7/root/usr/include/c++/7/thread \
- /opt/rh/devtoolset-7/root/usr/include/c++/7/mutex \
- /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/std_mutex.h \
- /root/usr_1/cpp_engine_panic/Strategy/Strategy.hpp \
- /root/usr_1/cpp_engine_panic/include/StrategyBase.h \
- /root/usr_1/cpp_engine_panic/model/Lv2dataModel.hpp \
- /root/usr_1/cpp_engine_panic/include/TORATstpLev2ApiDataType.h \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/spdlog.h \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/common.h \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/tweakme.h \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/null_mutex.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/atomic \
  /opt/rh/devtoolset-7/root/usr/include/c++/7/functional \
  /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/std_function.h \
  /opt/rh/devtoolset-7/root/usr/include/c++/7/unordered_map \
  /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/hashtable.h \
  /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/hashtable_policy.h \
  /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/unordered_map.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/stl_algo.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/algorithmfwd.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/stl_heap.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/uniform_int_dist.h \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/fmt/fmt.h \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/fmt/bundled/core.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/cstddef \
  /opt/rh/devtoolset-7/root/usr/include/c++/7/cstring \
+ /usr/include/string.h \
  /opt/rh/devtoolset-7/root/usr/include/c++/7/iterator \
  /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/stream_iterator.h \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/fmt/bundled/format.h \
@@ -242,12 +228,16 @@ CMakeFiles/MyLibrary.dir/src/Porter.cpp.o: \
  /opt/rh/devtoolset-7/root/usr/include/c++/7/tr1/riemann_zeta.tcc \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/fmt/bundled/core.h \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/fmt/bundled/format-inl.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/algorithm \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/climits \
  /opt/rh/devtoolset-7/root/usr/include/c++/7/cstdarg \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/fmt/bundled/format.h \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/common-inl.h \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/registry.h \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/periodic_worker.h \
  /opt/rh/devtoolset-7/root/usr/include/c++/7/condition_variable \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/std_mutex.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/mutex \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/periodic_worker-inl.h \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/registry-inl.h \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/logger.h \
@@ -267,6 +257,8 @@ CMakeFiles/MyLibrary.dir/src/Porter.cpp.o: \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/log_msg_buffer.h \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/log_msg_buffer-inl.h \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/circular_q.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/cassert \
+ /usr/include/assert.h \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/backtracer-inl.h \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/logger-inl.h \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/sinks/sink.h \
@@ -295,7 +287,6 @@ CMakeFiles/MyLibrary.dir/src/Porter.cpp.o: \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/thread_pool.h \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/mpmc_blocking_q.h \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/thread_pool-inl.h \
- /root/usr_1/cpp_engine_panic/include/log_handle.h \
  /root/usr_1/cpp_engine_panic/src/dispatcher.h \
  /opt/rh/devtoolset-7/root/usr/include/c++/7/list \
  /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/stl_list.h \
@@ -306,9 +297,36 @@ CMakeFiles/MyLibrary.dir/src/Porter.cpp.o: \
  /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/deque.tcc \
  /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/stl_queue.h \
  /opt/rh/devtoolset-7/root/usr/include/c++/7/shared_mutex \
+ /root/usr_1/cpp_engine_panic/include/StrategyBase.h \
+ /root/usr_1/cpp_engine_panic/model/Lv2dataModel.hpp \
+ /root/usr_1/cpp_engine_panic/include/TORATstpLev2ApiDataType.h \
+ /opt/rh/devtoolset-7/root/usr/lib/gcc/x86_64-redhat-linux/7/include/float.h \
+ /root/usr_1/cpp_engine_panic/model/OrderModels.hpp \
+ /root/usr_1/cpp_engine_panic/include/TORATstpUserApiDataType.h \
+ /root/usr_1/cpp_engine_panic/include/json.hpp \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/forward_list \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/forward_list.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/forward_list.tcc \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/valarray \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/valarray_array.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/valarray_array.tcc \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/valarray_before.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/slice_array.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/valarray_after.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/gslice.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/gslice_array.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/mask_array.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/indirect_array.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/numeric \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/stl_numeric.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/any \
+ /root/usr_1/cpp_engine_panic/Strategy/Strategy.hpp \
+ /root/usr_1/cpp_engine_panic/include/L2_quoter.cpp \
+ /root/usr_1/cpp_engine_panic/include/TORATstpLev2MdApi.h \
+ /root/usr_1/cpp_engine_panic/include/TORATstpLev2ApiStruct.h \
+ /root/usr_1/cpp_engine_panic/include/TORATstpLev2ApiDataType.h \
+ /root/usr_1/cpp_engine_panic/include/concurrentqueue.h \
  /root/usr_1/cpp_engine_panic/include/trader.cpp \
  /root/usr_1/cpp_engine_panic/include/TORATstpTraderApi.h \
  /root/usr_1/cpp_engine_panic/include/TORATstpUserApiStruct.h \
- /root/usr_1/cpp_engine_panic/include/TORATstpUserApiDataType.h \
- /root/usr_1/cpp_engine_panic/model/OrderModels.hpp \
  /root/usr_1/cpp_engine_panic/include/TORATstpUserApiDataType.h

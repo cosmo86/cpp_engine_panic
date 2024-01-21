@@ -181,17 +181,150 @@ CMakeFiles/MyLibrary.dir/src/dispatcher.cpp.o: \
  /usr/include/bits/posix2_lim.h /usr/include/bits/xopen_lim.h \
  /usr/include/strings.h \
  /root/usr_1/cpp_engine_panic/include/StrategyBase.h \
- /root/usr_1/cpp_engine_panic/Strategy/Strategy.hpp \
  /root/usr_1/cpp_engine_panic/model/Lv2dataModel.hpp \
  /root/usr_1/cpp_engine_panic/include/TORATstpLev2ApiDataType.h \
  /opt/rh/devtoolset-7/root/usr/lib/gcc/x86_64-redhat-linux/7/include/float.h \
- /root/usr_1/cpp_engine_panic/include/concurrentqueue.h \
- /opt/rh/devtoolset-7/root/usr/include/c++/7/atomic \
- /opt/rh/devtoolset-7/root/usr/include/c++/7/cassert \
- /usr/include/assert.h \
- /opt/rh/devtoolset-7/root/usr/include/c++/7/cstddef \
+ /root/usr_1/cpp_engine_panic/model/OrderModels.hpp \
+ /root/usr_1/cpp_engine_panic/include/TORATstpUserApiDataType.h \
+ /root/usr_1/cpp_engine_panic/include/json.hpp \
  /opt/rh/devtoolset-7/root/usr/include/c++/7/algorithm \
  /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/stl_algo.h \
  /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/algorithmfwd.h \
  /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/uniform_int_dist.h \
- /opt/rh/devtoolset-7/root/usr/include/c++/7/climits
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/cstddef \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/functional \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/std_function.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/unordered_map \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/hashtable.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/hashtable_policy.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/unordered_map.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/iterator \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/stream_iterator.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/forward_list \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/forward_list.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/forward_list.tcc \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/valarray \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/cmath /usr/include/math.h \
+ /usr/include/bits/huge_val.h /usr/include/bits/huge_valf.h \
+ /usr/include/bits/huge_vall.h /usr/include/bits/inf.h \
+ /usr/include/bits/nan.h /usr/include/bits/mathdef.h \
+ /usr/include/bits/mathcalls.h /usr/include/bits/mathinline.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/specfun.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/tr1/gamma.tcc \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/tr1/special_function_util.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/tr1/bessel_function.tcc \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/tr1/special_function_util.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/tr1/beta_function.tcc \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/tr1/ell_integral.tcc \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/tr1/exp_integral.tcc \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/tr1/hypergeometric.tcc \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/tr1/legendre_function.tcc \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/tr1/modified_bessel_func.tcc \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/tr1/poly_hermite.tcc \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/tr1/poly_laguerre.tcc \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/tr1/riemann_zeta.tcc \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/valarray_array.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/valarray_array.tcc \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/valarray_before.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/slice_array.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/valarray_after.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/gslice.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/gslice_array.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/mask_array.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/indirect_array.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/cassert \
+ /usr/include/assert.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/cstring \
+ /usr/include/string.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/numeric \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/stl_numeric.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/iomanip \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/locale \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/locale_facets_nonio.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/x86_64-redhat-linux/bits/time_members.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/x86_64-redhat-linux/bits/messages_members.h \
+ /usr/include/libintl.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/codecvt.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/locale_facets_nonio.tcc \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/locale_conv.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/stringfwd.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/allocator.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/codecvt.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/unique_ptr.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/quoted_string.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/sstream \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/sstream.tcc \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/any \
+ /root/usr_1/cpp_engine_panic/Strategy/Strategy.hpp \
+ /root/usr_1/cpp_engine_panic/include/L2_quoter.cpp \
+ /root/usr_1/cpp_engine_panic/include/TORATstpLev2MdApi.h \
+ /root/usr_1/cpp_engine_panic/include/TORATstpLev2ApiStruct.h \
+ /root/usr_1/cpp_engine_panic/include/TORATstpLev2ApiDataType.h \
+ /root/usr_1/cpp_engine_panic/include/concurrentqueue.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/atomic \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/climits \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/spdlog.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/common.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/tweakme.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/null_mutex.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/fmt/fmt.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/fmt/bundled/core.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/fmt/bundled/format.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/fmt/bundled/core.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/fmt/bundled/format-inl.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/cstdarg \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/fmt/bundled/format.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/common-inl.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/registry.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/periodic_worker.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/periodic_worker-inl.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/registry-inl.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/logger.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/log_msg.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/log_msg-inl.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/os.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/os-inl.h \
+ /usr/include/sys/stat.h /usr/include/bits/stat.h /usr/include/fcntl.h \
+ /usr/include/bits/fcntl.h /usr/include/bits/fcntl-linux.h \
+ /usr/include/bits/uio.h /usr/include/linux/falloc.h \
+ /usr/include/unistd.h /usr/include/bits/posix_opt.h \
+ /usr/include/bits/environments.h /usr/include/bits/confname.h \
+ /usr/include/getopt.h /usr/include/sys/syscall.h \
+ /usr/include/asm/unistd.h /usr/include/asm/unistd_64.h \
+ /usr/include/bits/syscall.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/backtracer.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/log_msg_buffer.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/log_msg_buffer-inl.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/circular_q.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/backtracer-inl.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/logger-inl.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/sinks/sink.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/formatter.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/sinks/sink-inl.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/pattern_formatter.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/pattern_formatter-inl.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/fmt_helper.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/sinks/ansicolor_sink.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/console_globals.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/sinks/ansicolor_sink-inl.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/version.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/synchronous_factory.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/spdlog-inl.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/sinks/stdout_color_sinks.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/sinks/stdout_color_sinks-inl.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/sinks/basic_file_sink.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/file_helper.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/file_helper-inl.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/sinks/base_sink.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/sinks/base_sink-inl.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/sinks/basic_file_sink-inl.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/async.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/async_logger.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/async_logger-inl.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/thread_pool.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/mpmc_blocking_q.h \
+ /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/thread_pool-inl.h \
+ /root/usr_1/cpp_engine_panic/include/trader.cpp \
+ /root/usr_1/cpp_engine_panic/include/TORATstpTraderApi.h \
+ /root/usr_1/cpp_engine_panic/include/TORATstpUserApiStruct.h \
+ /root/usr_1/cpp_engine_panic/include/TORATstpUserApiDataType.h

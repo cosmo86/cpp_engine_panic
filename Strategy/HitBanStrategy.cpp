@@ -225,7 +225,7 @@ public:
 		m_logger.info("cancel_error  OrderSysID:{} ", temp_orderActionField->OrderSysID);
 	}
 
-	void on _trade(std::shared_ptr<SEObject> e) override
+	void on_trade(std::shared_ptr<SEObject> e) override
 	{
 		std::shared_ptr<SE_InputOrderActionField> temp_orderActionField = std::static_pointer_cast<SE_InputOrderActionField>(e);
 		if (strcmp(temp_orderActionField->OrderSysID , strate_OrderSysID) != 0 ){
@@ -252,6 +252,9 @@ public:
 		}
 	}
 
-	void stop_strategy(){}
+	void stop_strategy()
+	{
+		this->m_dispatcher_ptr->remove_strategy(mstd::stoi(strate_SInfo));
+	}
 };
 

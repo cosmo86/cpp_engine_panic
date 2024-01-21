@@ -8,6 +8,8 @@
 #include <chrono>
 #include <cstring>
 #include <iostream>
+#include <string>
+#include <memory>
 class SEObject;
 
 
@@ -32,7 +34,7 @@ public:
 	virtual void on_tick(std::shared_ptr<SEObject> e) = 0;
 	virtual void on_orderDetial(std::shared_ptr<SEObject> e) = 0;
 	virtual void on_transac(std::shared_ptr<SEObject> e) = 0;
-	virtual void on_ngstick(std::shared_ptr<SEObject> e) = 0;
+	virtual void on_ngstick(std::shared_ptr<SEObject> e){};
 
 	virtual void on_order_success(std::shared_ptr<SEObject> e) = 0;
 	virtual void on_order_error(std::shared_ptr<SEObject> e) = 0;

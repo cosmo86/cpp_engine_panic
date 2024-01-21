@@ -26,6 +26,25 @@ public:
 		std::shared_ptr<SE_Lev2TransactionStruct> temp = std::static_pointer_cast<SE_Lev2TransactionStruct>(e);
 		std::cout << "[Strategy] " << id <<" on_transac triggered, value: " << temp->SecurityID << std::endl;
 	}
+
+	void on_cancel_success(std::shared_ptr<SEObject> e){
+		std::cout << "[Strategy] " << id << "on_cancel_success"<< std::endl;
+	
+	}
+	void on_cancel_error(std::shared_ptr<SEObject> e){
+		std::cout << "[Strategy] " << id << "on_cancel_error"<< std::endl;
+	} 
+	
+	void on_trade(std::shared_ptr<SEObject> e){
+		std::cout << "[Strategy] " << id << "on_trade"<< std::endl;
+	}
+
+	void on_order_success(std::shared_ptr<SEObject> e){
+		std::cout << "[Strategy] " << id << "on_order_success"<< std::endl;
+	}
+	void on_order_error(std::shared_ptr<SEObject> e){
+		std::cout << "[Strategy] " << id << "on_order_error"<< std::endl;
+	}
 	/*
 	void on_cus_event(std::shared_ptr<SEObject> e) 
 	{
