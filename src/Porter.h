@@ -2,6 +2,7 @@
 #include <iostream>
 #include "engine.h"
 #include "SEObject.hpp"
+#include "json.hpp"
 
 #ifndef EXPORT_FLAG
 #ifdef _MSC_VER
@@ -18,6 +19,8 @@ extern "C"
 
     EXPORT_FLAG const char* testreturnstr();
 
+    EXPORT_FLAG const char* TestRtnJsonStr(const char* json_str);
+
     EXPORT_FLAG int testreturnint();
 
     EXPORT_FLAG void testtakestr(const char* str);
@@ -28,9 +31,9 @@ extern "C"
 
     EXPORT_FLAG void initEngine();
 
-    EXPORT_FLAG void addStrategy(int s_id);
+    EXPORT_FLAG void AddStrategy(const char* json_str);
 
-    EXPORT_FLAG void removeStrategy(int s_id);
+    EXPORT_FLAG void RemoveStrategy(int s_id);
 
 #ifdef __cplusplus
 }

@@ -5,6 +5,39 @@ class Dispatcher;
 
 class HitBanStrategy : public StrategyBase 
 {
+public:
+	HitBanStrategy(const nlohmann::json& j, Dispatcher* ptr) : m_dispatcher_ptr(ptr)
+	{
+		this->buy_trigger_volume = j["BuyTriggerVolume"].get<int>();
+		this->cancel_trigger_volume = j["CancelVolume"].get<int>();
+		this->max_trigger_times = j["MaxTriggerTimes"].get<int>();
+		this->position = j["Position"].get<int>();
+		this->target_position = (static_cast<int>(this->position / this->strate_limup_price) / 100) * 100;
+
+		char strate_stock_code[31];
+		std::string tempStr_securityID = j["SecurityID"].get<std::string>();
+		std::strcpy(this->strate_stock_code, tempStr_securityID.c_str());
+
+		char strate_SInfo[33];
+		std::string tempStr_sinfo = j["ID"].get<std::string>();
+		std::strcpy(this->strate_SInfo, tempStr_sinfo.c_str());
+
+		char strate_stock_name[81];
+		std::string tempStr_sname = j["SecurityName"].get<std::string>();
+		std::strcpy(this->strate_SInfo, tempStr_sname.c_str());
+
+		this->strate_exchangeID = j["ExchangeID"].get<std::string>()[0];
+
+
+		std::cout<<"strate_stock_code"<<strate_stock_code<<std::endl;
+		std::cout<<"buy_trigger_volume"<<buy_trigger_volume<<std::endl;
+		std::cout<<"cancel_trigger_volume"<<cancel_trigger_volume<<std::endl;
+		std::cout<<"max_trigger_times"<<max_trigger_times<<std::endl;
+		std::cout<<"position"<<position<<std::endl;
+		std::cout<<"strate_SInfo"<<strate_SInfo<<std::endl;
+		std::cout<<"strate_stock_name"<<strate_stock_name<<std::endl;
+		std::cout<<"strate_exchangeID"<<strate_exchangeID<<std::endl;
+	}
 private:
     Dispatcher* m_dispatcher_ptr = nullptr;
     json m_stratParams;
@@ -21,7 +54,7 @@ public:
 	int max_trigger_times;
     // TODO :!!!!!!!!!! fix position
 	int position;
-	int target_position = (static_cast<int>(position / strate_limup_price) / 100) * 100;;
+	int target_position;
 	int current_position;
 
 	int current_trigger_times = 0;

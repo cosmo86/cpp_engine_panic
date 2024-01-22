@@ -1,7 +1,6 @@
 #pragma once
 #include "dispatcher.h"
 
-
 void Dispatcher::init() 
 {
 	// bind the callback function of strategies or other moduels

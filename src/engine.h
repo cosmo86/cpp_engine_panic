@@ -9,7 +9,7 @@
 #include "SEObject.hpp"
 #include "log_handle.h"
 #include "dispatcher.h"
-#include "Strategy.hpp"
+#include "HitBanStrategy.hpp"
 
 
 class Engine
@@ -27,7 +27,7 @@ public:
     void Start();
     void add_L2_quoter(){};
     void Stop();
-    void add_strategy(int id);
+    void add_strategy(const nlohmann::json& j);
     void remove_strategy(int id);
 
     

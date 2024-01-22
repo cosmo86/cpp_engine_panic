@@ -46,10 +46,11 @@ void Engine::Stop()
 }
 
 
-void Engine::add_strategy(int id)
+void Engine::add_strategy(const nlohmann::json& j)
 {
-    std::shared_ptr<Strategy> temp_strategy = std::make_shared<Strategy>(id);
-    dispatcher.add_strategy(id,temp_strategy);
+    std::shared_ptr<Strategy> temp_strategy = std::make_shared<HitBanStrategy>(j, &dispatcher);
+
+    dispatcher.add_strategy(temp_strategy.strate_SInfo,temp_strategy);
 
 }
 
