@@ -255,23 +255,17 @@ CMakeFiles/MyLibrary.dir/src/dispatcher.cpp.o: \
  /opt/rh/devtoolset-7/root/usr/include/c++/7/sstream \
  /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/sstream.tcc \
  /opt/rh/devtoolset-7/root/usr/include/c++/7/any \
- /root/usr_1/cpp_engine_panic/Strategy/Strategy.hpp \
- /root/usr_1/cpp_engine_panic/include/L2_quoter.cpp \
- /root/usr_1/cpp_engine_panic/include/TORATstpLev2MdApi.h \
- /root/usr_1/cpp_engine_panic/include/TORATstpLev2ApiStruct.h \
- /root/usr_1/cpp_engine_panic/include/TORATstpLev2ApiDataType.h \
- /root/usr_1/cpp_engine_panic/include/concurrentqueue.h \
- /opt/rh/devtoolset-7/root/usr/include/c++/7/atomic \
- /opt/rh/devtoolset-7/root/usr/include/c++/7/climits \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/spdlog.h \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/common.h \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/tweakme.h \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/null_mutex.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/atomic \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/fmt/fmt.h \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/fmt/bundled/core.h \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/fmt/bundled/format.h \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/fmt/bundled/core.h \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/fmt/bundled/format-inl.h \
+ /opt/rh/devtoolset-7/root/usr/include/c++/7/climits \
  /opt/rh/devtoolset-7/root/usr/include/c++/7/cstdarg \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/fmt/bundled/format.h \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/common-inl.h \
@@ -324,6 +318,12 @@ CMakeFiles/MyLibrary.dir/src/dispatcher.cpp.o: \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/thread_pool.h \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/mpmc_blocking_q.h \
  /root/usr_1/cpp_engine_panic/spdlog/spdlog/details/thread_pool-inl.h \
+ /root/usr_1/cpp_engine_panic/include/L2_quoter.cpp \
+ /root/usr_1/cpp_engine_panic/include/TORATstpLev2MdApi.h \
+ /root/usr_1/cpp_engine_panic/include/TORATstpLev2ApiStruct.h \
+ /root/usr_1/cpp_engine_panic/include/TORATstpLev2ApiDataType.h \
+ /root/usr_1/cpp_engine_panic/include/concurrentqueue.h \
+ /root/usr_1/cpp_engine_panic/Strategy/Strategy.hpp \
  /root/usr_1/cpp_engine_panic/include/trader.cpp \
  /root/usr_1/cpp_engine_panic/include/TORATstpTraderApi.h \
  /root/usr_1/cpp_engine_panic/include/TORATstpUserApiStruct.h \

@@ -54,7 +54,8 @@ void initEngine() // this should handle register logger
 
 void AddStrategy(const char* json_str)
 {
-    getEngine().add_strategy(s_id);
+    nlohmann::json j = nlohmann::json::parse(json_str);
+    getEngine().add_strategy(j);
 }
 
 void RemoveStrategy(int s_id)

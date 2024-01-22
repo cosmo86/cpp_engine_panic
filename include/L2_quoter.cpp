@@ -360,8 +360,7 @@ public:
 		m_Event_Q_ptr->enqueue(std::move(temp_event));
 		auto stop = std::chrono::high_resolution_clock::now();
 		auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
-		std::cout << "[OnRtnMarketData]: "
-              << duration.count() << " nanoseconds" << std::endl;
+		//std::cout << "[OnRtnMarketData]: "<< duration.count() << " nanoseconds" << std::endl;
 
 	
 		/*
@@ -432,9 +431,8 @@ public:
 		m_Event_Q_ptr->enqueue(std::move(temp_event));
 		auto stop = std::chrono::high_resolution_clock::now();
 		auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
-		std::cout << "[OnRtnTransaction]: "
-              << duration.count() << " nanoseconds" << std::endl;
-		m_logger->info("{}, {}, {}, {}",pTransaction->SecurityID,pTransaction->TradeTime,pTransaction->TradePrice,pTransaction->TradeVolume);
+		//std::cout << "[OnRtnTransaction]: "<< duration.count() << " nanoseconds" << std::endl;
+		//m_logger->info("{}, {}, {}, {}",pTransaction->SecurityID,pTransaction->TradeTime,pTransaction->TradePrice,pTransaction->TradeVolume);
 		//printf("OnRtnTransaction SecurityID[%s] ", pTransaction->SecurityID);
 		//printf("ExchangeID[%c] ", pTransaction->ExchangeID);
 		//������ʳɽ���TradeTime�ĸ�ʽΪ��ʱ������롿��������??100221530����ʾ10:02:21.530;
@@ -470,8 +468,7 @@ public:
 		m_Event_Q_ptr->enqueue(std::move(temp_event));
 		auto stop = std::chrono::high_resolution_clock::now();
 		auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
-		std::cout << "[OnRtnOrderDetail]: "
-              << duration.count() << " nanoseconds" << std::endl;
+		//std::cout << "[OnRtnOrderDetail]: "<< duration.count() << " nanoseconds" << std::endl;
 		
 		//printf("OnRtnOrderDetail SecurityID[%s] \n", pOrderDetail->SecurityID);
 		//printf("ExchangeID[%c] \n", pOrderDetail->ExchangeID);

@@ -8,8 +8,7 @@ void Engine::Init()
 
 void Engine::Start()
 {
-    dispatcher.init();
-    dispatcher.Start();
+
     std::cout<<"[Engine] dispatcher started"<< std::endl;
     m_logger->info("[Engine] dispatcher started");
     char LEV2MD_TCP_FrontAddress[64];
@@ -34,6 +33,8 @@ void Engine::Start()
     m_L2_quoter.connect( UserID, Password,LEV2MD_TCP_FrontAddress,mode);
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
+    dispatcher.init(&m_L2_quoter , &m_trader);
+    dispatcher.Start();
     
     m_logger->info("Engine started");
 }
@@ -48,15 +49,17 @@ void Engine::Stop()
 
 void Engine::add_strategy(const nlohmann::json& j)
 {
-    std::shared_ptr<Strategy> temp_strategy = std::make_shared<HitBanStrategy>(j, &dispatcher);
+    // Convert the string to an integer
+    std::string idStr = j["ID"].get<std::string>();
+    int idInt = std::atoi(idStr.c_str());
 
-    dispatcher.add_strategy(temp_strategy.strate_SInfo,temp_strategy);
+    std::shared_ptr<HitBanStrategy> temp_strategy = std::make_shared<HitBanStrategy>(j, &dispatcher,m_logger);
+
+    dispatcher.add_strategy(idInt,temp_strategy);
 
 }
 
 void Engine:: remove_strategy(int id)
 {
-    std::shared_ptr<Strategy> temp_strategy = std::make_shared<Strategy>(id);
     dispatcher.remove_strategy(id);
-
 }

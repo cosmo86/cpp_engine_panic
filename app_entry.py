@@ -20,7 +20,7 @@ mylib.TestRtnJsonStr.restype = ctypes.c_char_p
 # Configure argument types
 mylib.testtakestr.argtypes = [ctypes.c_char_p]
 mylib.TestRtnJsonStr.argtypes = [ctypes.c_char_p]
-
+mylib.AddStrategy.argtypes = [ctypes.c_char_p]
 
 @app.on_event('startup')
 def startup_event():

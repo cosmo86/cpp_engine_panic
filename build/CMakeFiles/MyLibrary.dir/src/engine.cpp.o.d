@@ -317,13 +317,14 @@ CMakeFiles/MyLibrary.dir/src/engine.cpp.o: \
  /opt/rh/devtoolset-7/root/usr/include/c++/7/numeric \
  /opt/rh/devtoolset-7/root/usr/include/c++/7/bits/stl_numeric.h \
  /opt/rh/devtoolset-7/root/usr/include/c++/7/any \
- /root/usr_1/cpp_engine_panic/Strategy/Strategy.hpp \
  /root/usr_1/cpp_engine_panic/include/L2_quoter.cpp \
  /root/usr_1/cpp_engine_panic/include/TORATstpLev2MdApi.h \
  /root/usr_1/cpp_engine_panic/include/TORATstpLev2ApiStruct.h \
  /root/usr_1/cpp_engine_panic/include/TORATstpLev2ApiDataType.h \
  /root/usr_1/cpp_engine_panic/include/concurrentqueue.h \
+ /root/usr_1/cpp_engine_panic/Strategy/Strategy.hpp \
  /root/usr_1/cpp_engine_panic/include/trader.cpp \
  /root/usr_1/cpp_engine_panic/include/TORATstpTraderApi.h \
  /root/usr_1/cpp_engine_panic/include/TORATstpUserApiStruct.h \
- /root/usr_1/cpp_engine_panic/include/TORATstpUserApiDataType.h
+ /root/usr_1/cpp_engine_panic/include/TORATstpUserApiDataType.h \
+ /root/usr_1/cpp_engine_panic/Strategy/HitBanStrategy.cpp

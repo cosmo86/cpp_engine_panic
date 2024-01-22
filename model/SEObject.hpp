@@ -60,13 +60,13 @@ class SETask
     typedef void (StrategyBase::* FuncPtr)(const std::shared_ptr<SEObject> e);
 public:
     SETask(){}
-    SETask(std::shared_ptr<SEObject> evt, FuncPtr cbFuncPtr, std::shared_ptr<Strategy> strat)
+    SETask(std::shared_ptr<SEObject> evt, FuncPtr cbFuncPtr, std::shared_ptr<StrategyBase> strat)
         : event(evt), _cb_funcPtr(cbFuncPtr), s(strat) { }
 
     std::shared_ptr<SEObject> event;
     FuncPtr _cb_funcPtr;
     //Strategy* s;
-    std::shared_ptr<Strategy> s;
+    std::shared_ptr<StrategyBase> s;
 
 };
 //l2 quoter ->  SE_task<tick,order,transac>

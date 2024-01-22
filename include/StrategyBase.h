@@ -10,8 +10,15 @@
 #include <iostream>
 #include <string>
 #include <memory>
-class SEObject;
+#include "spdlog/spdlog.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
+#include "spdlog/sinks/basic_file_sink.h"
+#include "spdlog/async.h"
+#include "SEObject.hpp"
 
+using LoggerPtr = std::shared_ptr<spdlog::async_logger>;
+
+class SEObject;
 
 enum StrategyStatus
 {

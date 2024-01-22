@@ -1,7 +1,7 @@
 #pragma once
 #include "dispatcher.h"
 
-void Dispatcher::init() 
+void Dispatcher::init(Lev2MdSpi* quoter_ptr,TradeSpi* trader_ptr) 
 {
 	// bind the callback function of strategies or other moduels
 	std::cout<<"[Dispatcher] init, binding functions"<< std::endl;
@@ -16,10 +16,12 @@ void Dispatcher::init()
 	this->bind_Callback(Eventtype::CANCEL_ERROR, &StrategyBase::on_cancel_error);
 	this->bind_Callback(Eventtype::CANCEL_SUCCESS, &StrategyBase::on_cancel_success);
 
-	
+	this->trader_ptr = trader_ptr;
+	this->L2_quoter_ptr = quoter_ptr;
 	//this->bind_Callback(Eventtype::, &TaskBase::on_cus_event);
-	std::shared_ptr<Strategy> temp_strategy = std::make_shared<Strategy>(1);
-	_strategy_map[1] = temp_strategy;
+	// !! test add a simple strategy
+	//std::shared_ptr<Strategy> temp_strategy = std::make_shared<Strategy>(1);
+	//_strategy_map[1] = temp_strategy;
 }
 
 void Dispatcher::Start()
@@ -98,7 +100,7 @@ void Dispatcher::dispatch()
 						return;
 					}
 
-					std::map<int, std::shared_ptr<Strategy>>::iterator temp_strategy_iter;
+					std::map<int, std::shared_ptr<StrategyBase>>::iterator temp_strategy_iter;
 					{
 						std::shared_lock<std::shared_mutex> lock(_strategy_mutex);
 						temp_strategy_iter = _strategy_map.find(std::stoi(temp_event.S_id));
@@ -154,7 +156,7 @@ void Dispatcher::worker_main()
 }
 
 
-void Dispatcher::add_strategy(int s_id, std::shared_ptr<Strategy> s)
+void Dispatcher::add_strategy(int s_id, std::shared_ptr<StrategyBase> s)
 {
 	std::unique_lock<std::shared_mutex> lock(_strategy_mutex);
 	_strategy_map.emplace(s_id , s);

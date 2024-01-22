@@ -241,45 +241,7 @@ private:
 	}
 
 
-	void Send_Order_LimitPrice( const char exchange_id, const int volume, const double price, TTORATstpSecurityIDType stock_id )
-	{
-		
-		// 请求报单
-		CTORATstpInputOrderField input_order_field;
-		memset(&input_order_field, 0, sizeof(input_order_field));
-		input_order_field.ExchangeID = exchange_id;
-		strcpy(input_order_field.ShareholderID ,shareHolder_table[exchange_id].c_str());
-		strcpy(input_order_field.SecurityID, stock_id);
-		input_order_field.Direction = TORA_TSTP_D_Buy;
-		input_order_field.VolumeTotalOriginal = volume;
-		input_order_field.LimitPrice = price;
-		input_order_field.OrderPriceType = TORA_TSTP_OPT_LimitPrice;
-		input_order_field.TimeCondition = TORA_TSTP_TC_GFD;
-		input_order_field.VolumeCondition = TORA_TSTP_VC_AV;
 
-		int ret_oi = m_api->ReqOrderInsert(&input_order_field, m_req_id++);
-		if (ret_oi != 0)
-		{
-			printf("ReqOrderInsert fail, ret[%d]\n", ret_oi);
-		}
-	}
-
-	void Send_Cancle_Order( const char exchange_id, TTORATstpOrderSysIDType order_sys_id )
-	{
-		// 请求撤单
-		CTORATstpInputOrderActionField input_order_action_field;
-		memset(&input_order_action_field, 0, sizeof(input_order_action_field));
-		input_order_action_field.ExchangeID = exchange_id;
-		input_order_action_field.ActionFlag = TORA_TSTP_AF_Delete;
-		strcpy(input_order_action_field.OrderSysID, order_sys_id);
-
-
-		int ret = m_api->ReqOrderAction(&input_order_action_field, m_req_id++);
-		if (ret != 0)
-		{
-			printf("ReqOrderAction fail, ret[%d]\n", ret);
-		}
-	}
 
 	virtual void OnRspOrderInsert(CTORATstpInputOrderField* pInputOrderField, TORASTOCKAPI::CTORATstpRspInfoField* pRspInfo, int nRequestID)
 	{
@@ -444,8 +406,7 @@ private:
 			secID_name_table.emplace(std::string(pSecurity->SecurityID), std::string(pSecurity->SecurityName));
 			auto stop = std::chrono::high_resolution_clock::now();
 			auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
-			std::cout << "[Trader OnRspQrySecurity]: "
-              << duration.count() << " nanoseconds" << std::endl;
+			//std::cout << "[Trader OnRspQrySecurity]: "<< duration.count() << " nanoseconds" << std::endl;
 		}
 		if (bIsLast)
 		{
@@ -530,6 +491,51 @@ private:
 			printf("[TraderSpi] 查询持仓结束[%d] ErrorID[%d] ErrorMsg[%s]\n", nRequestID, pRspInfo->ErrorID, pRspInfo->ErrorMsg);
 		}
 	}
+	
+public:
+		void Send_Order_LimitPrice( const char exchange_id, const int volume, const double price, TTORATstpSecurityIDType stock_id )
+	{
+		
+		// 请求报单
+		CTORATstpInputOrderField input_order_field;
+		memset(&input_order_field, 0, sizeof(input_order_field));
+		input_order_field.ExchangeID = exchange_id;
+		strcpy(input_order_field.ShareholderID ,shareHolder_table[exchange_id].c_str());
+		strcpy(input_order_field.SecurityID, stock_id);
+		input_order_field.Direction = TORA_TSTP_D_Buy;
+		input_order_field.VolumeTotalOriginal = volume;
+		input_order_field.LimitPrice = price;
+		input_order_field.OrderPriceType = TORA_TSTP_OPT_LimitPrice;
+		input_order_field.TimeCondition = TORA_TSTP_TC_GFD;
+		input_order_field.VolumeCondition = TORA_TSTP_VC_AV;
 
+		int ret_oi = m_api->ReqOrderInsert(&input_order_field, m_req_id++);
+		if (ret_oi != 0)
+		{
+			printf("ReqOrderInsert fail, ret[%d]\n", ret_oi);
+		}
+	}
+
+	void Send_Cancle_Order( const char exchange_id, TTORATstpOrderSysIDType order_sys_id )
+	{
+		// 请求撤单
+		CTORATstpInputOrderActionField input_order_action_field;
+		memset(&input_order_action_field, 0, sizeof(input_order_action_field));
+		input_order_action_field.ExchangeID = exchange_id;
+		input_order_action_field.ActionFlag = TORA_TSTP_AF_Delete;
+		strcpy(input_order_action_field.OrderSysID, order_sys_id);
+
+
+		int ret = m_api->ReqOrderAction(&input_order_action_field, m_req_id++);
+		if (ret != 0)
+		{
+			printf("ReqOrderAction fail, ret[%d]\n", ret);
+		}
+	}
+
+	float get_limup_price(std::string securityID)
+	{
+		return limup_table[securityID];
+	}
 
 };

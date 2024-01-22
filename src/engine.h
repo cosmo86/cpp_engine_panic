@@ -6,10 +6,12 @@
 #include <sstream>
 #include <chrono>
 #include <iomanip>
+#include <cstdlib>
+#include <string>
 #include "SEObject.hpp"
 #include "log_handle.h"
 #include "dispatcher.h"
-#include "HitBanStrategy.hpp"
+#include "HitBanStrategy.cpp"
 
 
 class Engine
