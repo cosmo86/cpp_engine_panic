@@ -29,4 +29,4 @@ class UserStrategyModel(BaseModel):
 
 
 class UserStrategyGroupModel(BaseModel):
-    StrategyGroup: list = [UserStrategyModel]
+    StrategyGroup: list = []

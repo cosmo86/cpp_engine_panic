@@ -247,11 +247,11 @@ private:
 	{
 		if (pRspInfo->ErrorID == 0)
 		{
-			printf("OnRspOrderInsert: OK! [%d] [%d] [%s]\n", nRequestID, pInputOrderField->OrderRef, pInputOrderField->OrderSysID);
+			//printf("OnRspOrderInsert: OK! [%d] [%d] [%s]\n", nRequestID, pInputOrderField->OrderRef, pInputOrderField->OrderSysID);
 		}
 		else
 		{
-			printf("OnRspOrderInsert: Error! [%d] [%d] [%s]\n", nRequestID, pRspInfo->ErrorID, pRspInfo->ErrorMsg);
+			//printf("OnRspOrderInsert: Error! [%d] [%d] [%s]\n", nRequestID, pRspInfo->ErrorID, pRspInfo->ErrorMsg);
 		}
 	}
 
@@ -276,8 +276,8 @@ private:
 	virtual void OnRspOrderAction(CTORATstpInputOrderActionField* pInputOrderActionField, TORASTOCKAPI::CTORATstpRspInfoField* pRspInfo, int nRequestID)
 	{
 		if(pInputOrderActionField->SInfo[0] == '\0'){
-			std::cout<<"[Trader:OnRspOrderAction] SInfo is empty, please check order source "<< std::endl;
-			printf("[%d] [%d] [%s] \n", nRequestID, pInputOrderActionField->OrderActionRef, pInputOrderActionField->CancelOrderSysID);
+			//std::cout<<"[Trader:OnRspOrderAction] SInfo is empty, please check order source "<< std::endl;
+			//printf("[%d] [%d] [%s] \n", nRequestID, pInputOrderActionField->OrderActionRef, pInputOrderActionField->CancelOrderSysID);
 			return;
 		}
 		SEEvent temp_event;
@@ -286,7 +286,7 @@ private:
 
 		if (pRspInfo->ErrorID == 0)
 		{
-			printf("OnRspOrderAction: OK! [%d] [%d] [%s] \n", nRequestID, pInputOrderActionField->OrderActionRef, pInputOrderActionField->CancelOrderSysID);
+			//printf("OnRspOrderAction: OK! [%d] [%d] [%s] \n", nRequestID, pInputOrderActionField->OrderActionRef, pInputOrderActionField->CancelOrderSysID);
 			temp_event.e_type = Eventtype::CANCEL_SUCCESS;
 			temp_event.event = InputOrderActionField;
 			strcpy(temp_event.S_id, pInputOrderActionField->SInfo);
@@ -294,7 +294,7 @@ private:
 		}
 		else
 		{
-			printf("OnRspOrderAction: Error! [%d] [%d] [%s]\n", nRequestID, pRspInfo->ErrorID, pRspInfo->ErrorMsg);
+			//printf("OnRspOrderAction: Error! [%d] [%d] [%s]\n", nRequestID, pRspInfo->ErrorID, pRspInfo->ErrorMsg);
 			temp_event.e_type = Eventtype::CANCEL_ERROR;
 			temp_event.event = InputOrderActionField;
 			strcpy(temp_event.S_id, pInputOrderActionField->SInfo);

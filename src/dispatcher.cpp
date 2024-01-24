@@ -258,6 +258,7 @@ nlohmann::json Dispatcher::check_running_strategy()
 			temp_json["MaxTriggerTimes"] = temp_strategy->current_trigger_times;
 			temp_json["OrderID"] = temp_strategy->strate_OrderSysID;
 			temp_json["SecurityName"] = temp_strategy->strate_stock_name;
+			temp_json["DelayTime"] = temp_strategy->delay_duration;
 			combinedJson.push_back(temp_json);
 		}
 	}
@@ -287,6 +288,7 @@ nlohmann::json Dispatcher::check_removed_strategy()
 			temp_json["MaxTriggerTimes"] = temp_strategy->current_trigger_times;
 			temp_json["OrderID"] = temp_strategy->strate_OrderSysID;
 			temp_json["SecurityName"] = temp_strategy->strate_stock_name;
+			temp_json["DelayTime"] = temp_strategy->delay_duration;
 			combinedJson.push_back(temp_json);
 		}
 	}

@@ -12,17 +12,28 @@ def status_mapping(row):
 def exchange_mapping(row):
     return EXCHANGE_MAPPING_TORA2ST[row]
 
-
+# Read cache data must be define before initing session states
+def read_cached_data():
+    res = requests.get(url="http://127.0.0.1:9000/read_cached_data")
+    if res.status_code == 200:
+        res_dict = res.json()
+        print("[read_cached_data]" , res_dict, "len is ",{len(res_dict["StrategyGroup"])})
+        if len(res_dict["StrategyGroup"]) >= 1:
+            return res_dict["StrategyGroup"]
+        else:
+            return [UserStrategyModel().model_dump()]
+    else:
+        st.error('缓存读取失败，请联系管理员', icon='🚨')
 # Init Session state
 
 if "strategy_id" not in st.session_state:
     st.session_state.strategy_id = 0
 if "running_strategy" not in st.session_state:
-    st.session_state.running_strategy = UserStrategyGroupModel().model_dump()
+    st.session_state.running_strategy = [UserStrategyModel().model_dump()]
 if "removed_strategy" not in st.session_state:
-    st.session_state.removed_strategy = UserStrategyGroupModel().model_dump()
+    st.session_state.removed_strategy = read_cached_data()
 if "strategy_container" not in st.session_state:
-    st.session_state.strategy_container = False
+    st.session_state.strategy_container = True
 
 
 # Page Title
@@ -50,10 +61,6 @@ def remove_strategy(user_input: UserStrategyModel):
     if res.status_code == 200:
         st.success('策略删除成功!', icon='✅')
         check_strategy()
-        if st.session_state.running_strategy == None:
-            st.session_state.strategy_container = False
-            st.session_state.strategy_id = 0
-
     else:
         st.error('策略删除异常', icon='🚨')
 
@@ -63,19 +70,23 @@ def check_strategy(container : st.container = None):
     removed_res = requests.get(url="http://127.0.0.1:9000/check_removed_strategy")
     if running_res.status_code == 200:
         st.success('运行策略查询成功', icon='✅')
-        st.session_state.running_strategy = running_res.json()
-    elif removed_res.status_code == 200:
+        print("[check_strategy] running_res",running_res.json())
+        st.session_state.running_strategy = running_res.json()["StrategyGroup"]
+    if removed_res.status_code == 200:
         st.success('删除策略查询成功', icon='✅')
-        st.session_state.removed_strategy = removed_res.json()
-    elif running_res.status_code != 200:
+        print("[check_strategy] ",removed_res.json() )
+        st.session_state.removed_strategy = removed_res.json()["StrategyGroup"]
+    if running_res.status_code != 200:
+        print("[check_strategy] running_res",running_res.json()["StrategyGroup"])
         st.error('运行策略查询异常', icon='🚨')
-    else:
+    if removed_res.status_code != 200:
         st.error('删除策略查询异常', icon='🚨')
 
 def delay_strategy(user_input: UserStrategyModel):
     res = requests.post(url="http://127.0.0.1:9000/update_strategy_delay_time", data=user_input.model_dump_json())
     if res.status_code == 200:
         st.success('策略添加延时成功!', icon='✅')
+        check_strategy()
     else:
         st.error('策略添加延时异常', icon='🚨')
 
@@ -113,7 +124,7 @@ with st.sidebar:
     delete_container.subheader('策略删除')
     delete_strategy_id = delete_container.number_input('输入策略编号', min_value=0, step=1, key="Delete")
     user_remove_strategy = UserStrategyModel()
-    user_remove_strategy.ID = delete_strategy_id
+    user_remove_strategy.ID = str(delete_strategy_id)
     remove = delete_container.button("删除策略", type="secondary", on_click=remove_strategy,
                                      args=(user_remove_strategy,),
                                      use_container_width=True)
@@ -122,6 +133,10 @@ with st.sidebar:
     delay_container = st.container()
     delay_strategy_id = delay_container.number_input('输入策略编号', min_value=0, step=1, key="delay_strategy_id")
     delay_duration = delay_container.number_input('输入触发撤单延时，单位毫秒', min_value=0, step=50,key="delay_duration")
+    delay_info = UserStrategyModel()
+    delay_info.ID = str(delay_strategy_id)
+    delay_info.DelayTime = delay_duration
+    delay_container.button('触发撤单延时', on_click= delay_strategy, args=(delay_info,), use_container_width=True)
 
 
 
@@ -136,7 +151,10 @@ container = st.container()
 container.header('策略管理')
 container.markdown("###### 运行策略")
 if st.session_state.strategy_container:
-    running_df = pd.DataFrame.from_dict(data=st.session_state.running_strategy['StrategyGroup'])
+    #running_df = pd.DataFrame.from_dict(data=st.session_state.running_strategy)
+    print("running_df",st.session_state.running_strategy)
+    running_df = pd.DataFrame(st.session_state.running_strategy)
+    #print(f"running_df {running_df}")
     running_df['Status'] = running_df['Status'].apply(status_mapping)
     running_df['ExchangeID'] = running_df['ExchangeID'].apply(exchange_mapping)
     container.dataframe(
@@ -161,7 +179,10 @@ if st.session_state.strategy_container:
         use_container_width=True
     )
     container.markdown("###### 删除策略")
-    removed_df = pd.DataFrame.from_dict(data=st.session_state.removed_strategy['StrategyGroup'])
+    ##removed_df = pd.DataFrame.from_dict(data=st.session_state.removed_strategy)
+    #print("removed_df" ,st.session_state.removed_strategy)
+    removed_df = pd.DataFrame(st.session_state.removed_strategy)
+    #print(f"removed_df {removed_df}")
     removed_df['Status'] = removed_df['Status'].apply(status_mapping)
     removed_df['ExchangeID'] = removed_df['ExchangeID'].apply(exchange_mapping)
     container.dataframe(

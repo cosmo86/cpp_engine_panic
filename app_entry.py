@@ -7,6 +7,7 @@ import json
 import uvicorn
 from fastapi import FastAPI, HTTPException
 
+
 ############### Cache Initialization Start ###############
 # Create the cache folder 
 folder_name = "program_cache"
@@ -18,12 +19,13 @@ yaml_file_path = os.path.join(folder_name, f"SE_{current_date_str}.yaml")
 if os.path.exists(yaml_file_path):
     with open(yaml_file_path, "r") as file:
         programCache_data = yaml.safe_load(file)
+        programCache_data["RunningGroup"] = {}
 else:
     programCache_data = {
         "LastCreated_SID": -1, 
         "Account info": {"username": "example_user", "balance": 1000},  # Example dictionary
-        "PreviousRunning_Strategy_Group": UserStrategyGroupModel().model_dump(),
-        "PreviousRemoved_Strategy_Group":UserStrategyGroupModel().model_dump(),
+        "PreviousRemoved_Strategy_Group":{}, # {int<s_id> , dict }
+        "RunningGroup": {}, # {int<s_id> , dict }
         "RecordTime" : datetime.now().strftime('%Y_%m_%d_%H:%M:%S'),
     }
 
@@ -69,39 +71,55 @@ def shutdown_event():
 
 @app.get('/read_cached_data')
 def read_cached_data():
-    return programCache_data
+    res = {"StrategyGroup":[]}
+    for key, value in programCache_data["PreviousRemoved_Strategy_Group"].items():
+        res["StrategyGroup"].append(value)
+    return res
 
 @app.post('/add_strategy')
 def add_strategy(user_input: UserStrategyModel):
+    if user_input.SecurityID.startswith('6') and user_input.ExchangeID == '2':#SZSE
+        raise  HTTPException(status_code=400, detail="Bad Request: [Wrong ExchangeID]")
+    if (user_input.SecurityID.startswith('0') or user_input.SecurityID.startswith('3')) and user_input.ExchangeID == '1':#SSE
+        raise  HTTPException(status_code=400, detail="Bad Request: [Wrong ExchangeID]")
     # Increament SID by 1 and assign it to user_input
     programCache_data["LastCreated_SID"] += 1
-    user_input.ID = programCache_data["LastCreated_SID"]
+    user_input.ID = str(programCache_data["LastCreated_SID"])
     json_str = user_input.model_dump_json()
     mylib.AddStrategy(json_str.encode('utf-8'))
+    print(f"type of user_input is {type(user_input)}")
+    programCache_data["PreviousRemoved_Strategy_Group"][int(user_input.ID)] = user_input.model_dump()
+    programCache_data["RunningGroup"][int(user_input.ID)] = user_input.model_dump()
 
 @app.post('/remove_strategy')
 def remove_strategy(user_input: UserStrategyModel):
-    mylib.RemoveStrategy(int(user_input.ID), user_input.SecurityID.encode('utf-8'),user_input.ExchangeID[0].encode('utf-8'))
+    ID_toRemove = int(user_input.ID)
+    SecurityID = programCache_data["RunningGroup"][ID_toRemove]["SecurityID"]
+    ExchangeID = programCache_data["RunningGroup"][ID_toRemove]["ExchangeID"]
+    mylib.RemoveStrategy(ID_toRemove, SecurityID.encode('utf-8'), ExchangeID[0].encode('utf-8'))
+    try:
+        del programCache_data["RunningGroup"][ID_toRemove]
+    except:
+        print("Wrong ID, current IDs are: ", list(programCache_data["RunningGroup"].keys()) )
 
 @app.post('/update_strategy_delay_time')
 def update_strategy_delay_time(user_input: UserStrategyModel):
     mylib.UpdateDelayDuration(int(user_input.ID),user_input.DelayTime)
-
 
 @app.get('/check_running_strategy')
 def check_running_strategy():
     res = mylib.CheckRunningStrategy()
     print(f"res is {res}, type is {type(res)}, res.decode() is {res.decode('utf-8')}, size is {len(res.decode('utf-8'))}type is {type(res.decode('utf-8'))}")
     if len(res.decode('utf-8'))>5:
-        strategy_group = UserStrategyGroupModel()
+        rtn = {"StrategyGroup":[]}
         json_dict = json.loads(res)
         for dict in json_dict:
             model_instance = UserStrategyModel(**dict)
-            strategy_group.StrategyGroup.append(model_instance)
-        return strategy_group
+            rtn["StrategyGroup"].append(model_instance)
+        return rtn
     else:
         print("No running strategy")
-        raise HTTPException(status_code=400, detail="Empty: [No running strategy]")
+        return {"StrategyGroup":[UserStrategyModel()]}
 
 
 @app.get('/check_removed_strategy')
@@ -109,47 +127,31 @@ def check_removed_strategy():
     res = mylib.CheckRemovedStrategy()
     print(f"res is {res}, type is {type(res)}, res.decode() is {res.decode('utf-8')}, size is {len(res.decode('utf-8'))}type is {type(res.decode('utf-8'))}")
     if len(res.decode('utf-8'))>50:
-        strategy_group = UserStrategyGroupModel()
+        rtn = {"StrategyGroup":[]}
+        for key, value in programCache_data["PreviousRemoved_Strategy_Group"].items():
+            if key not in programCache_data["RunningGroup"]:
+                rtn["StrategyGroup"].append(value)
+
         json_dict = json.loads(res)
         for dict in json_dict:
             model_instance = UserStrategyModel(**dict)
-            strategy_group.StrategyGroup.append(model_instance)
-        return strategy_group
+            rtn["StrategyGroup"][int(model_instance.ID)] = model_instance
+
+        return rtn
     else:
         print("No removed strategy")
-        raise HTTPException(status_code=400, detail="Empty: [No running strategy]")
+        rtn = {"StrategyGroup":[UserStrategyModel()]}
+        for key, value in programCache_data["PreviousRemoved_Strategy_Group"].items():
+            if key not in programCache_data["RunningGroup"]:
+                rtn["StrategyGroup"].append(value)
+        return rtn
+
+
 
 @app.get('/get_event_q_size')
 def get_event_q_size():
     res = mylib.GetEventQSize()
     print("event q size ", res)
-
-
-
-
-
-
-def call_cpp_function(model: UserStrategyModel) -> UserStrategyModel:
-    # Convert the Pydantic model to a JSON string and call the C++ function
-    json_str = model.model_dump_json()
-    print("JSON string being sent to C++:", json_str)
-    result_ptr = mylib.TestRtnJsonStr(json_str.encode('utf-8'))
-
-    # Convert the returned C-style string to a Python string
-    result_str = ctypes.c_char_p(result_ptr).value.decode('utf-8')
-
-    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    # Deallocate memory allocated in C++ (assuming you use 'new' in C++)
-    #lib.deallocate_string(result_ptr)
-    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-    model_dict = json.loads(result_str)
-
-    # Iterate through the dictionary and print key-value pairs
-    for key, value in model_dict.items():
-        print(f"{key}: {value}")
-    return
-
 
 if __name__ == "__main__":
     uvicorn.run(app,port = 9000)
