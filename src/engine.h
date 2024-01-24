@@ -33,6 +33,8 @@ public:
     void remove_strategy(int id,std::string SecurityID, const char& eid);
     int GetEvent_q_size();
     nlohmann::json check_runningStrategy();
+    nlohmann::json check_removedStrategy();
+    void update_delayDuration(int s_id, int new_delay_duration);
 
     
 

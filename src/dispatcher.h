@@ -25,7 +25,7 @@ public:
 	Dispatcher() { std::cout << "[Dispatcher] Dispatcher created"<<std::endl; }
 	~Dispatcher() { std::cout << "[Dispatcher] Dispatcher destoried" << std::endl; }
 
-	void init(Lev2MdSpi* quoter_ptr,TradeSpi* trader_ptr);
+	void init(Lev2MdSpi* quoter_ptr,TradeSpi* trader_ptr,LoggerPtr logger_ptr );
 	void Start();
 	void Stop();
 	void bind_Callback(Eventtype e_type, FuncPtr func);
@@ -38,6 +38,7 @@ public:
 	int get_event_q_size();
 	nlohmann::json check_running_strategy();
 	nlohmann::json check_removed_strategy();
+	void update_delay_duration(int s_id, int new_delay_duration);
 
 public:
 	moodycamel::ConcurrentQueue<SEEvent>  _event_q;
@@ -46,6 +47,8 @@ public:
 private:
 	bool _is_running;
 	std::thread _dispatcher_th;
+
+	LoggerPtr m_logger_ptr;
 
 	std::shared_mutex _strategy_mutex;
     std::mutex _event_mutex;
@@ -65,6 +68,7 @@ private:
 	// 2. keep track of which stocks to subscribe/unsubscribe
 	std::map<std::string, std::list<int>> stock_to_strategy_map; 
 	std::map<int, std::shared_ptr<StrategyBase>> _sID_strategyPtr_map;
+	std::map<int, std::shared_ptr<StrategyBase>> _removed_sID_strategyPtr_map;
 	std::vector<std::thread*> _tpool;
 
 

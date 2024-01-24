@@ -31,7 +31,7 @@ LoggerPtr GetLogger()
 
         // Create stdout color sink (console logging)
         auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-        console_sink->set_level(spdlog::level::info);
+        console_sink->set_level(spdlog::level::warn);
 
         // Create a basic file sink (multi-threaded)
         auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(filename, true);

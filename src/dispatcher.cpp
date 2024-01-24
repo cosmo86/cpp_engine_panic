@@ -3,7 +3,7 @@
 #include "HitBanStrategy.cpp"
 #include <type_traits>
 
-void Dispatcher::init(Lev2MdSpi* quoter_ptr,TradeSpi* trader_ptr) 
+void Dispatcher::init(Lev2MdSpi* quoter_ptr,TradeSpi* trader_ptr, LoggerPtr logger_ptr) 
 {
 	// bind the callback function of strategies or other moduels
 	std::cout<<"[Dispatcher] init, binding functions"<< std::endl;
@@ -20,6 +20,7 @@ void Dispatcher::init(Lev2MdSpi* quoter_ptr,TradeSpi* trader_ptr)
 
 	this->trader_ptr = trader_ptr;
 	this->L2_quoter_ptr = quoter_ptr;
+	this->m_logger_ptr = logger_ptr;
 	//this->bind_Callback(Eventtype::, &TaskBase::on_cus_event);
 	// !! test add a simple strategy
 	//std::shared_ptr<Strategy> temp_strategy = std::make_shared<Strategy>(1);
@@ -199,7 +200,11 @@ void Dispatcher::remove_strategy(int s_id,std::string SecurityID, const char& ei
 			Securities[0] = nonconst_SecurityID;
 			L2_quoter_ptr->UnSubscribe(Securities,1,eid);// 1 means only subscribe one stock
 		}
-		_sID_strategyPtr_map.erase(s_id);	
+		auto removed_strategy_node = _sID_strategyPtr_map.extract(s_id);
+		if (removed_strategy_node) 
+		{
+        	_removed_sID_strategyPtr_map.insert(std::move(removed_strategy_node));
+    	}
 	}
 	else {
 		// Handle the case where there is no callback for this event type
@@ -233,29 +238,71 @@ nlohmann::json Dispatcher::check_running_strategy()
 {
 	nlohmann::json combinedJson = nlohmann::json::array();
 
-	for (const auto& pair : _sID_strategyPtr_map) 
+	std::shared_lock<std::shared_mutex> lock(_strategy_mutex);
+	// shared lock scope
 	{
-		nlohmann::json temp_json;
-		//std::shared_ptr<StrategyBase> temp_base_ptr = pair.second;
-		//std::cout<<temp_base_ptr->test_var<<std::endl;
-		std::shared_ptr<HitBanStrategy> temp_strategy = std::static_pointer_cast<HitBanStrategy>(pair.second);
+		for (const auto& pair : _sID_strategyPtr_map) 
+		{
+			nlohmann::json temp_json;
+			//std::shared_ptr<StrategyBase> temp_base_ptr = pair.second;
+			//std::cout<<temp_base_ptr->test_var<<std::endl;
+			std::shared_ptr<HitBanStrategy> temp_strategy = std::static_pointer_cast<HitBanStrategy>(pair.second);
 
-
-
-		temp_json["ID"] = temp_strategy->strate_SInfo;
-		temp_json["SecurityID"] = temp_strategy->strate_stock_code;
-		temp_json["ExchangeID"] = temp_strategy->strate_exchangeID;
-		temp_json["BuyTriggerVolume"] = temp_strategy->buy_trigger_volume;
-		temp_json["CancelVolume"] = temp_strategy->cancel_trigger_volume;
-		temp_json["TargetPosition"] = temp_strategy->target_position;
-		temp_json["CurrPosition"] = temp_strategy->current_position;
-		temp_json["MaxTriggerTimes"] = temp_strategy->current_trigger_times;
-		temp_json["OrderID"] = temp_strategy->strate_OrderSysID;
-		temp_json["SecurityName"] = temp_strategy->strate_stock_name;
-		combinedJson.push_back(temp_json);
+			temp_json["ID"] = temp_strategy->strate_SInfo;
+			temp_json["SecurityID"] = temp_strategy->strate_stock_code;
+			temp_json["ExchangeID"] = std::string(1, temp_strategy->strate_exchangeID);
+			temp_json["BuyTriggerVolume"] = temp_strategy->buy_trigger_volume;
+			temp_json["CancelVolume"] = temp_strategy->cancel_trigger_volume;
+			temp_json["TargetPosition"] = temp_strategy->target_position;
+			temp_json["CurrPosition"] = temp_strategy->current_position;
+			temp_json["MaxTriggerTimes"] = temp_strategy->current_trigger_times;
+			temp_json["OrderID"] = temp_strategy->strate_OrderSysID;
+			temp_json["SecurityName"] = temp_strategy->strate_stock_name;
+			combinedJson.push_back(temp_json);
+		}
 	}
-
     return combinedJson;
 }
 
-nlohmann::json Dispatcher::check_removed_strategy(){}
+nlohmann::json Dispatcher::check_removed_strategy()
+{
+	nlohmann::json combinedJson = nlohmann::json::array();
+	std::shared_lock<std::shared_mutex> lock(_strategy_mutex);
+	// shared lock scope
+	{
+		for (const auto& pair : _removed_sID_strategyPtr_map) 
+		{
+			nlohmann::json temp_json;
+			//std::shared_ptr<StrategyBase> temp_base_ptr = pair.second;
+			//std::cout<<temp_base_ptr->test_var<<std::endl;
+			std::shared_ptr<HitBanStrategy> temp_strategy = std::static_pointer_cast<HitBanStrategy>(pair.second);
+
+			temp_json["ID"] = temp_strategy->strate_SInfo;
+			temp_json["SecurityID"] = temp_strategy->strate_stock_code;
+			temp_json["ExchangeID"] =  std::string(1, temp_strategy->strate_exchangeID);
+			temp_json["BuyTriggerVolume"] = temp_strategy->buy_trigger_volume;
+			temp_json["CancelVolume"] = temp_strategy->cancel_trigger_volume;
+			temp_json["TargetPosition"] = temp_strategy->target_position;
+			temp_json["CurrPosition"] = temp_strategy->current_position;
+			temp_json["MaxTriggerTimes"] = temp_strategy->current_trigger_times;
+			temp_json["OrderID"] = temp_strategy->strate_OrderSysID;
+			temp_json["SecurityName"] = temp_strategy->strate_stock_name;
+			combinedJson.push_back(temp_json);
+		}
+	}
+    return combinedJson;
+}
+
+void Dispatcher::update_delay_duration(int s_id, int new_delay_duration)
+{
+	auto S_toUpdate_iter = _sID_strategyPtr_map.find(s_id);
+	if (S_toUpdate_iter != _sID_strategyPtr_map.end())
+	{
+		std::shared_ptr<HitBanStrategy> temp_strategy = std::static_pointer_cast<HitBanStrategy>(S_toUpdate_iter->second);
+		temp_strategy->delay_duration = new_delay_duration;
+	}	
+	else
+	{
+		m_logger_ptr->warn("[update_delay_duration] s_id not found, input s_id is {}",s_id );
+	}
+}

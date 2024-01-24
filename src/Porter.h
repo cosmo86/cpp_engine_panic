@@ -39,6 +39,12 @@ extern "C"
 
     EXPORT_FLAG const char* CheckRunningStrategy();
 
+    EXPORT_FLAG const char* CheckRemovedStrategy();
+
+    EXPORT_FLAG void free_string(char* str);
+
+    EXPORT_FLAG void UpdateDelayDuration(int s_id, int new_delay_duration);
+
 #ifdef __cplusplus
 }
 #endif

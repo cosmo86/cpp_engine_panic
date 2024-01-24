@@ -33,7 +33,7 @@ void Engine::Start()
     m_L2_quoter.connect( UserID, Password,LEV2MD_TCP_FrontAddress,mode);
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
-    dispatcher.init(&m_L2_quoter , &m_trader);
+    dispatcher.init(&m_L2_quoter , &m_trader,m_logger);
     dispatcher.Start();
     
     m_logger->info("Engine started");
@@ -66,6 +66,10 @@ void Engine:: remove_strategy(int id, std::string SecurityID, const char& eid)
     dispatcher.remove_strategy(id,SecurityID, eid );
 }
 
+void Engine:: update_delayDuration(int s_id, int new_delay_duration)
+{
+    dispatcher.update_delay_duration(s_id,new_delay_duration);
+}
 
 int Engine:: GetEvent_q_size()
 {
@@ -75,4 +79,12 @@ int Engine:: GetEvent_q_size()
 nlohmann::json Engine:: check_runningStrategy()
 {
     return dispatcher.check_running_strategy();
+}
+                 
+nlohmann::json Engine:: check_removedStrategy()
+{
+    nlohmann::json res = dispatcher.check_removed_strategy();
+    std::cout<<"[Engine] "<<res[0]["SecurityID"]<<std::endl;
+    std::cout<<"[Engine] "<<res[0]["ID"]<<std::endl;
+    return res;
 }
