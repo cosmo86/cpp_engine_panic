@@ -46,6 +46,7 @@ target_link_libraries(MyLibrary PRIVATE
     ${lev2_LIB_PATH}
     ${trader_LIB_PATH}
     ${jemalloc_LIB_PATH}
+    stdc++fs
 )
 #target_link_libraries(MyLibrary PRIVATE ${lev2_LIB_PATH})
 #target_link_libraries(MyLibrary PRIVATE ${jemalloc_LIB_PATH})

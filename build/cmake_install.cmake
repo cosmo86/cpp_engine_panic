@@ -39,7 +39,7 @@ endif()
 
 # Set default install directory permissions.
 if(NOT DEFINED CMAKE_OBJDUMP)
-  set(CMAKE_OBJDUMP "/opt/rh/devtoolset-7/root/usr/bin/objdump")
+  set(CMAKE_OBJDUMP "/opt/rh/devtoolset-8/root/usr/bin/objdump")
 endif()
 
 if(CMAKE_INSTALL_COMPONENT)

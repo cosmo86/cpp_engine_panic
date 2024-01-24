@@ -73,57 +73,57 @@ CMakeFiles/MyLibrary.dir/src/Porter.cpp.o: CMakeFiles/MyLibrary.dir/flags.make
 CMakeFiles/MyLibrary.dir/src/Porter.cpp.o: /root/usr_1/cpp_engine_panic/src/Porter.cpp
 CMakeFiles/MyLibrary.dir/src/Porter.cpp.o: CMakeFiles/MyLibrary.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/root/usr_1/cpp_engine_panic/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/MyLibrary.dir/src/Porter.cpp.o"
-	/opt/rh/devtoolset-7/root/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/MyLibrary.dir/src/Porter.cpp.o -MF CMakeFiles/MyLibrary.dir/src/Porter.cpp.o.d -o CMakeFiles/MyLibrary.dir/src/Porter.cpp.o -c /root/usr_1/cpp_engine_panic/src/Porter.cpp
+	/opt/rh/devtoolset-8/root/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/MyLibrary.dir/src/Porter.cpp.o -MF CMakeFiles/MyLibrary.dir/src/Porter.cpp.o.d -o CMakeFiles/MyLibrary.dir/src/Porter.cpp.o -c /root/usr_1/cpp_engine_panic/src/Porter.cpp
 
 CMakeFiles/MyLibrary.dir/src/Porter.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/MyLibrary.dir/src/Porter.cpp.i"
-	/opt/rh/devtoolset-7/root/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /root/usr_1/cpp_engine_panic/src/Porter.cpp > CMakeFiles/MyLibrary.dir/src/Porter.cpp.i
+	/opt/rh/devtoolset-8/root/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /root/usr_1/cpp_engine_panic/src/Porter.cpp > CMakeFiles/MyLibrary.dir/src/Porter.cpp.i
 
 CMakeFiles/MyLibrary.dir/src/Porter.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/MyLibrary.dir/src/Porter.cpp.s"
-	/opt/rh/devtoolset-7/root/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /root/usr_1/cpp_engine_panic/src/Porter.cpp -o CMakeFiles/MyLibrary.dir/src/Porter.cpp.s
+	/opt/rh/devtoolset-8/root/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /root/usr_1/cpp_engine_panic/src/Porter.cpp -o CMakeFiles/MyLibrary.dir/src/Porter.cpp.s
 
 CMakeFiles/MyLibrary.dir/src/engine.cpp.o: CMakeFiles/MyLibrary.dir/flags.make
 CMakeFiles/MyLibrary.dir/src/engine.cpp.o: /root/usr_1/cpp_engine_panic/src/engine.cpp
 CMakeFiles/MyLibrary.dir/src/engine.cpp.o: CMakeFiles/MyLibrary.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/root/usr_1/cpp_engine_panic/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/MyLibrary.dir/src/engine.cpp.o"
-	/opt/rh/devtoolset-7/root/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/MyLibrary.dir/src/engine.cpp.o -MF CMakeFiles/MyLibrary.dir/src/engine.cpp.o.d -o CMakeFiles/MyLibrary.dir/src/engine.cpp.o -c /root/usr_1/cpp_engine_panic/src/engine.cpp
+	/opt/rh/devtoolset-8/root/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/MyLibrary.dir/src/engine.cpp.o -MF CMakeFiles/MyLibrary.dir/src/engine.cpp.o.d -o CMakeFiles/MyLibrary.dir/src/engine.cpp.o -c /root/usr_1/cpp_engine_panic/src/engine.cpp
 
 CMakeFiles/MyLibrary.dir/src/engine.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/MyLibrary.dir/src/engine.cpp.i"
-	/opt/rh/devtoolset-7/root/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /root/usr_1/cpp_engine_panic/src/engine.cpp > CMakeFiles/MyLibrary.dir/src/engine.cpp.i
+	/opt/rh/devtoolset-8/root/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /root/usr_1/cpp_engine_panic/src/engine.cpp > CMakeFiles/MyLibrary.dir/src/engine.cpp.i
 
 CMakeFiles/MyLibrary.dir/src/engine.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/MyLibrary.dir/src/engine.cpp.s"
-	/opt/rh/devtoolset-7/root/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /root/usr_1/cpp_engine_panic/src/engine.cpp -o CMakeFiles/MyLibrary.dir/src/engine.cpp.s
+	/opt/rh/devtoolset-8/root/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /root/usr_1/cpp_engine_panic/src/engine.cpp -o CMakeFiles/MyLibrary.dir/src/engine.cpp.s
 
 CMakeFiles/MyLibrary.dir/src/dispatcher.cpp.o: CMakeFiles/MyLibrary.dir/flags.make
 CMakeFiles/MyLibrary.dir/src/dispatcher.cpp.o: /root/usr_1/cpp_engine_panic/src/dispatcher.cpp
 CMakeFiles/MyLibrary.dir/src/dispatcher.cpp.o: CMakeFiles/MyLibrary.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/root/usr_1/cpp_engine_panic/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/MyLibrary.dir/src/dispatcher.cpp.o"
-	/opt/rh/devtoolset-7/root/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/MyLibrary.dir/src/dispatcher.cpp.o -MF CMakeFiles/MyLibrary.dir/src/dispatcher.cpp.o.d -o CMakeFiles/MyLibrary.dir/src/dispatcher.cpp.o -c /root/usr_1/cpp_engine_panic/src/dispatcher.cpp
+	/opt/rh/devtoolset-8/root/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/MyLibrary.dir/src/dispatcher.cpp.o -MF CMakeFiles/MyLibrary.dir/src/dispatcher.cpp.o.d -o CMakeFiles/MyLibrary.dir/src/dispatcher.cpp.o -c /root/usr_1/cpp_engine_panic/src/dispatcher.cpp
 
 CMakeFiles/MyLibrary.dir/src/dispatcher.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/MyLibrary.dir/src/dispatcher.cpp.i"
-	/opt/rh/devtoolset-7/root/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /root/usr_1/cpp_engine_panic/src/dispatcher.cpp > CMakeFiles/MyLibrary.dir/src/dispatcher.cpp.i
+	/opt/rh/devtoolset-8/root/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /root/usr_1/cpp_engine_panic/src/dispatcher.cpp > CMakeFiles/MyLibrary.dir/src/dispatcher.cpp.i
 
 CMakeFiles/MyLibrary.dir/src/dispatcher.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/MyLibrary.dir/src/dispatcher.cpp.s"
-	/opt/rh/devtoolset-7/root/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /root/usr_1/cpp_engine_panic/src/dispatcher.cpp -o CMakeFiles/MyLibrary.dir/src/dispatcher.cpp.s
+	/opt/rh/devtoolset-8/root/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /root/usr_1/cpp_engine_panic/src/dispatcher.cpp -o CMakeFiles/MyLibrary.dir/src/dispatcher.cpp.s
 
 CMakeFiles/MyLibrary.dir/include/log_handle.cpp.o: CMakeFiles/MyLibrary.dir/flags.make
 CMakeFiles/MyLibrary.dir/include/log_handle.cpp.o: /root/usr_1/cpp_engine_panic/include/log_handle.cpp
 CMakeFiles/MyLibrary.dir/include/log_handle.cpp.o: CMakeFiles/MyLibrary.dir/compiler_depend.ts
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/root/usr_1/cpp_engine_panic/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/MyLibrary.dir/include/log_handle.cpp.o"
-	/opt/rh/devtoolset-7/root/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/MyLibrary.dir/include/log_handle.cpp.o -MF CMakeFiles/MyLibrary.dir/include/log_handle.cpp.o.d -o CMakeFiles/MyLibrary.dir/include/log_handle.cpp.o -c /root/usr_1/cpp_engine_panic/include/log_handle.cpp
+	/opt/rh/devtoolset-8/root/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/MyLibrary.dir/include/log_handle.cpp.o -MF CMakeFiles/MyLibrary.dir/include/log_handle.cpp.o.d -o CMakeFiles/MyLibrary.dir/include/log_handle.cpp.o -c /root/usr_1/cpp_engine_panic/include/log_handle.cpp
 
 CMakeFiles/MyLibrary.dir/include/log_handle.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/MyLibrary.dir/include/log_handle.cpp.i"
-	/opt/rh/devtoolset-7/root/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /root/usr_1/cpp_engine_panic/include/log_handle.cpp > CMakeFiles/MyLibrary.dir/include/log_handle.cpp.i
+	/opt/rh/devtoolset-8/root/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /root/usr_1/cpp_engine_panic/include/log_handle.cpp > CMakeFiles/MyLibrary.dir/include/log_handle.cpp.i
 
 CMakeFiles/MyLibrary.dir/include/log_handle.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/MyLibrary.dir/include/log_handle.cpp.s"
-	/opt/rh/devtoolset-7/root/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /root/usr_1/cpp_engine_panic/include/log_handle.cpp -o CMakeFiles/MyLibrary.dir/include/log_handle.cpp.s
+	/opt/rh/devtoolset-8/root/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /root/usr_1/cpp_engine_panic/include/log_handle.cpp -o CMakeFiles/MyLibrary.dir/include/log_handle.cpp.s
 
 # Object files for target MyLibrary
 MyLibrary_OBJECTS = \
