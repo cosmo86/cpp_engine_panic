@@ -258,7 +258,7 @@ private:
 	virtual void OnErrRtnOrderInsert(CTORATstpInputOrderField *pInputOrderField, TORASTOCKAPI::CTORATstpRspInfoField *pRspInfoField, int nRequestID)
 	{
 		if(pInputOrderField->SInfo[0] == '\0'){
-			std::cout<<"[Trader:OnRtnOrder] SInfo is empty, please check order source "<< std::endl;
+			std::cout<<"[Trader:OnErrRtnOrderInsert] SInfo is empty, please check order source "<< std::endl;
 			std::cout<<pInputOrderField->SecurityID<<" "<< pInputOrderField->Direction<<" OrdersysID: "<<pInputOrderField->OrderSysID<<std::endl;
 			return;
 		}
@@ -276,7 +276,7 @@ private:
 	virtual void OnRspOrderAction(CTORATstpInputOrderActionField* pInputOrderActionField, TORASTOCKAPI::CTORATstpRspInfoField* pRspInfo, int nRequestID)
 	{
 		if(pInputOrderActionField->SInfo[0] == '\0'){
-			std::cout<<"[Trader:OnRtnOrder] SInfo is empty, please check order source "<< std::endl;
+			std::cout<<"[Trader:OnRspOrderAction] SInfo is empty, please check order source "<< std::endl;
 			printf("[%d] [%d] [%s] \n", nRequestID, pInputOrderActionField->OrderActionRef, pInputOrderActionField->CancelOrderSysID);
 			return;
 		}
@@ -370,7 +370,7 @@ private:
 		auto temp_map_ptr = OrderSysid_Sinfo_map.find(std::string(pTrade->OrderSysID));
 		// If ordersysid not in the map, then the order to this trade was not sent by this program, probably done other platform manuelly
 		if(temp_map_ptr== OrderSysid_Sinfo_map.end() ){
-			std::cout<<"[Trader:OnRtnOrder] SInfo is empty, please check order source "<< std::endl;
+			std::cout<<"[Trader:OnRtnTrade] SInfo is empty, please check order source "<< std::endl;
 			printf("OnRtnTrade: TradeID[%s] InvestorID[%s] SecurityID[%s] OrderRef[%d] OrderLocalID[%s] Price[%.2f] Volume[%d]\n",
 			pTrade->TradeID, pTrade->InvestorID, pTrade->SecurityID, pTrade->OrderRef, pTrade->OrderLocalID, pTrade->Price, pTrade->Volume);
 			return;

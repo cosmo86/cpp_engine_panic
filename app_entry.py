@@ -1,15 +1,35 @@
 import ctypes
 import os
-import time
+import yaml
+from datetime import datetime
 from fastapi_model.dataModels import UserStrategyModel,UserStrategyGroupModel
 import json
 import uvicorn
 from fastapi import FastAPI, HTTPException
 
-app = FastAPI()
-# Print the current working directory
-print(os.getcwd())
+############### Cache Initialization Start ###############
+# Create the cache folder 
+folder_name = "program_cache"
+current_date_str = datetime.now().strftime('%Y_%m_%d')
+if not os.path.exists(folder_name):
+    os.makedirs(folder_name)
+# Define the YAML file path
+yaml_file_path = os.path.join(folder_name, f"SE_{current_date_str}.yaml")
+if os.path.exists(yaml_file_path):
+    with open(yaml_file_path, "r") as file:
+        programCache_data = yaml.safe_load(file)
+else:
+    programCache_data = {
+        "LastCreated_SID": -1, 
+        "Account info": {"username": "example_user", "balance": 1000},  # Example dictionary
+        "PreviousRunning_Strategy_Group": UserStrategyGroupModel().model_dump(),
+        "PreviousRemoved_Strategy_Group":UserStrategyGroupModel().model_dump(),
+        "RecordTime" : datetime.now().strftime('%Y_%m_%d_%H:%M:%S'),
+    }
 
+############### Cache Initialization Done ###############
+
+############### Linked Library Initialization Start ###############
 mylib = ctypes.CDLL('build/lib/libMyLibrary.so')
 
 # Configure return types
@@ -26,6 +46,13 @@ mylib.TestRtnJsonStr.argtypes = [ctypes.c_char_p]
 mylib.AddStrategy.argtypes = [ctypes.c_char_p]
 mylib.RemoveStrategy.argtypes = [ctypes.c_int, ctypes.c_char_p,ctypes.c_char]
 mylib.UpdateDelayDuration.argtypes = [ctypes.c_int, ctypes.c_int]
+############### Linked Library Initialization Done ###############
+
+###############
+# Start FastApi
+app = FastAPI()
+print(os.getcwd())
+
 
 @app.on_event('startup')
 def startup_event():
@@ -36,10 +63,19 @@ def startup_event():
 @app.on_event('shutdown')
 def shutdown_event():
     mylib.stopEngine()
-    print("Engine stopped")
+    with open(yaml_file_path, "w") as file:
+        yaml.dump(programCache_data, file)
+    print("Engine stopped, Strategy cached")
+
+@app.get('/read_cached_data')
+def read_cached_data():
+    return programCache_data
 
 @app.post('/add_strategy')
 def add_strategy(user_input: UserStrategyModel):
+    # Increament SID by 1 and assign it to user_input
+    programCache_data["LastCreated_SID"] += 1
+    user_input.ID = programCache_data["LastCreated_SID"]
     json_str = user_input.model_dump_json()
     mylib.AddStrategy(json_str.encode('utf-8'))
 

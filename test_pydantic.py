@@ -1,4 +1,4 @@
-from fastapi_model.dataModels import UserStrategyModel
+from fastapi_model.dataModels import UserStrategyModel,UserStrategyGroupModel
 import json
 
 data = {
@@ -16,8 +16,6 @@ data = {
   "OrderID": " ",
   "SecurityName": ""
 }
-print(f"type is {type(data)}, data:{ data['BuyTriggerVolume']}")
 
-model_instance = UserStrategyModel(**data)
-print(model_instance)
-print(model_instance.BuyTriggerVolume)
+model_instance = UserStrategyGroupModel().model_dump()
+print(model_instance['StrategyGroup'])
