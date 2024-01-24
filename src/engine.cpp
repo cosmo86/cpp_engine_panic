@@ -51,15 +51,28 @@ void Engine::add_strategy(const nlohmann::json& j)
 {
     // Convert the string to an integer
     std::string idStr = j["ID"].get<std::string>();
+    std::string SecurityID = j["SecurityID"].get<std::string>();
+    char strate_exchangeID = j["ExchangeID"].get<std::string>()[0];
     int idInt = std::atoi(idStr.c_str());
 
     std::shared_ptr<HitBanStrategy> temp_strategy = std::make_shared<HitBanStrategy>(j, &dispatcher,m_logger);
 
-    dispatcher.add_strategy(idInt,temp_strategy);
+    dispatcher.add_strategy(idInt,SecurityID, strate_exchangeID , temp_strategy);
 
 }
 
-void Engine:: remove_strategy(int id)
+void Engine:: remove_strategy(int id, std::string SecurityID, const char& eid)
 {
-    dispatcher.remove_strategy(id);
+    dispatcher.remove_strategy(id,SecurityID, eid );
+}
+
+
+int Engine:: GetEvent_q_size()
+{
+    return dispatcher.get_event_q_size();
+}
+
+nlohmann::json Engine:: check_runningStrategy()
+{
+    return dispatcher.check_running_strategy();
 }

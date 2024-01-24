@@ -327,4 +327,5 @@ CMakeFiles/MyLibrary.dir/src/dispatcher.cpp.o: \
  /root/usr_1/cpp_engine_panic/include/trader.cpp \
  /root/usr_1/cpp_engine_panic/include/TORATstpTraderApi.h \
  /root/usr_1/cpp_engine_panic/include/TORATstpUserApiStruct.h \
- /root/usr_1/cpp_engine_panic/include/TORATstpUserApiDataType.h
+ /root/usr_1/cpp_engine_panic/include/TORATstpUserApiDataType.h \
+ /root/usr_1/cpp_engine_panic/Strategy/HitBanStrategy.cpp

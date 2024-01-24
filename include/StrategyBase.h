@@ -52,7 +52,7 @@ public:
 	virtual void on_trade(std::shared_ptr<SEObject> e) = 0;
 
 	//tual void on_cus_event(std::shared_ptr<SEObject> e) {};
-
+	int test_var = 1;
 private:
 
 

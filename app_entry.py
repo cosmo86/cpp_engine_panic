@@ -16,11 +16,14 @@ mylib = ctypes.CDLL('build/lib/libMyLibrary.so')
 mylib.testreturnstr.restype = ctypes.c_char_p
 mylib.testreturnint.restype = ctypes.c_int
 mylib.TestRtnJsonStr.restype = ctypes.c_char_p
+mylib.GetEventQSize = ctypes.c_int
+mylib.CheckRunningStrategy.restype = ctypes.c_char_p
 
 # Configure argument types
 mylib.testtakestr.argtypes = [ctypes.c_char_p]
 mylib.TestRtnJsonStr.argtypes = [ctypes.c_char_p]
 mylib.AddStrategy.argtypes = [ctypes.c_char_p]
+mylib.RemoveStrategy.argtypes = [ctypes.c_int, ctypes.c_char_p,ctypes.c_char]
 
 @app.on_event('startup')
 def startup_event():
@@ -40,7 +43,7 @@ def add_strategy(user_input: UserStrategyModel):
 
 @app.post('/remove_strategy')
 def remove_strategy(user_input: UserStrategyModel):
-    mylib.RemoveStrategy(user_input.ID)
+    mylib.RemoveStrategy(int(user_input.ID), user_input.SecurityID.encode('utf-8'),user_input.ExchangeID[0].encode('utf-8'))
 
 @app.post('/update_strategy_delay_time')
 def update_strategy_delay_time(user_input: UserStrategyModel):
@@ -48,11 +51,19 @@ def update_strategy_delay_time(user_input: UserStrategyModel):
 
 @app.get('/check_running_strategy')
 def check_strategy():
-    pass
+    res = mylib.CheckRunningStrategy()
+    json_dict = json.loads(res)
+    print("[Python] ",json_dict)
 
 @app.get('/check_removed_strategy')
 def check_removed_strategy():
     pass
+
+@app.get('/get_event_q_size')
+def get_event_q_size():
+    res = mylib.GetEventQSize()
+    print("event q size ", res)
+
 
 
 

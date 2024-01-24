@@ -32,9 +32,13 @@ public:
 	void unbind_Callback(Eventtype e_type);
 
 	void worker_main();
-	void add_strategy(int s_id,std::shared_ptr<StrategyBase> s);
-	void remove_strategy(int s_id);
+	void add_strategy(int s_id, std::string, const char&, std::shared_ptr<StrategyBase> s);
+	void remove_strategy(int s_id,std::string SecurityID, const char& eid);
 	void dispatch();
+	int get_event_q_size();
+	nlohmann::json check_running_strategy();
+	nlohmann::json check_removed_strategy();
+
 public:
 	moodycamel::ConcurrentQueue<SEEvent>  _event_q;
 	Lev2MdSpi* L2_quoter_ptr;
@@ -56,8 +60,11 @@ private:
 	moodycamel::ConcurrentQueue<SETask>  _task_q;
 	std::map<Eventtype, FuncPtr > _cb_mapping;
 
-	//std::map<int , Strategy*>  _strategy_map;
-	std::map<int, std::shared_ptr<StrategyBase>> _strategy_map;
+	// use case for stock_to_strategy_map
+	// 1. iterate through to assign task for quoter-related Tasks, no need to use index to get elements
+	// 2. keep track of which stocks to subscribe/unsubscribe
+	std::map<std::string, std::list<int>> stock_to_strategy_map; 
+	std::map<int, std::shared_ptr<StrategyBase>> _sID_strategyPtr_map;
 	std::vector<std::thread*> _tpool;
 
 

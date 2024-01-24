@@ -30,7 +30,9 @@ public:
     void add_L2_quoter(){};
     void Stop();
     void add_strategy(const nlohmann::json& j);
-    void remove_strategy(int id);
+    void remove_strategy(int id,std::string SecurityID, const char& eid);
+    int GetEvent_q_size();
+    nlohmann::json check_runningStrategy();
 
     
 

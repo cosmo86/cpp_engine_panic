@@ -1,5 +1,6 @@
 #pragma once
 #include "StrategyBase.h"
+#include "dispatcher.h"
 
 class Dispatcher;
 
@@ -310,7 +311,8 @@ public:
 
 	void stop_strategy()
 	{
-		this->m_dispatcher_ptr->remove_strategy(std::stoi(strate_SInfo));
+		std::string SecurityID(this->strate_stock_code);
+		this->m_dispatcher_ptr->remove_strategy(std::stoi(strate_SInfo), SecurityID,this->strate_exchangeID);
 	}
 
 	double get_limup_price()

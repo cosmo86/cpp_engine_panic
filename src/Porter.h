@@ -33,7 +33,11 @@ extern "C"
 
     EXPORT_FLAG void AddStrategy(const char* json_str);
 
-    EXPORT_FLAG void RemoveStrategy(int s_id);
+    EXPORT_FLAG void RemoveStrategy(int s_id, const char* str , char eid);
+
+    EXPORT_FLAG int GetEventQSize();
+
+    EXPORT_FLAG const char* CheckRunningStrategy();
 
 #ifdef __cplusplus
 }
