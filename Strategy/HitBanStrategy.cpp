@@ -78,33 +78,38 @@ public:
 
 	int curr_FengBan_volume = 0;
 
+	bool can_resend_order = true;
+
 	bool if_order_sent = false;
 	bool if_cancel_sent = false;
 	int delay_duration; // in milliseconds
 
-	bool order_created = false;
+	bool order_accepted = false;
 	char strate_OrderSysID[21];
 
 public:
 
 	void action()
 	{
-
+		// No locks here because the context where action() is called should be already locked
 		bool __condition_buy = curr_FengBan_volume * strate_limup_price >= buy_trigger_volume;
         bool __condition_cancel = curr_FengBan_volume * strate_limup_price <= cancel_trigger_volume;
 
-		if(if_order_sent==false || __condition_buy )
+		if(if_order_sent == false || __condition_buy || this->can_resend_order )
 		{
 			m_dispatcher_ptr->trader_ptr->Send_Order_LimitPrice(this->strate_exchangeID, target_position, strate_limup_price,strate_stock_code );
-			if_order_sent = true;
+			this->if_order_sent = true;
+			// Set to false to avoid resend while limup and above trigger_volume
+			this->can_resend_order = false
 			m_logger->info("order sent");
 			std::this_thread::sleep_for(std::chrono::milliseconds(delay_duration));
 			return;
 		}
 
-		if (order_created != false || if_cancel_sent == false || __condition_cancel)
+		if (order_accepted == true || if_cancel_sent == false || __condition_cancel)
 		{
 			m_dispatcher_ptr->trader_ptr->Send_Cancle_Order(strate_exchangeID,strate_OrderSysID);
+			if_cancel_sent = true;
 			m_logger->info("cancel request sent");
 			return;
 		}
@@ -126,7 +131,17 @@ public:
 		// unique_lock scope
 		{
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
-			if(temp_tick->BidPrice1 < this->strate_limup_price){return;}
+			if(temp_tick->BidPrice1 < this->strate_limup_price)
+			{
+				// If true remain true to enable send order
+				if (this->can_resend_order){return;}
+				else{
+				// If false, set tp true to enable send order
+					this->can_resend_order = True;
+					return;
+				}
+			}
+			// Stock is limup
 			curr_FengBan_volume += temp_tick->BidVolume1;
 			action();
 		}
@@ -150,7 +165,16 @@ public:
 		//unique share-lock
 		{
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
-			if (temp_orderdetial->Price < this->strate_limup_price){return;}
+			if (temp_orderdetial->Price < this->strate_limup_price)
+			{
+				// If true remain true to enable send order
+				if (this->can_resend_order){return;}
+				else{
+				// If false, set tp true to enable send order
+					this->can_resend_order = True;
+					return;
+				}
+			}
 
 			//buy order not cancled, add buy volume to fengban_volume
 			if (temp_orderdetial->Price == this->strate_limup_price || temp_orderdetial->Side == '1' || temp_orderdetial->OrderStatus != 'D')
@@ -187,7 +211,16 @@ public:
 		{
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
 
-			if (temp_transac->TradePrice < strate_limup_price){return;}
+			if (temp_transac->TradePrice < strate_limup_price)
+			{
+				// If true remain true to enable send order
+				if (this->can_resend_order){return;}
+				else{
+				// If false, set tp true to enable send order
+					this->can_resend_order = True;
+					return;
+				}
+			}
 			curr_FengBan_volume -= temp_transac->TradeVolume;
 			this->action();
 			return;
@@ -216,6 +249,8 @@ public:
 		{
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
 			this->running_status = StrategyStatus::ORDER_SENT;
+			this->order_accepted = true;
+			this->if_order_sent = false;
 			m_logger->info("order_success, securityID:{}, SInfo:{}, OrderSysID: {}", 
 			temp_orderField->SecurityID, temp_orderField->SInfo , temp_orderField->OrderSysID);
 		}
@@ -267,6 +302,7 @@ public:
 				return;
 			}
 			this->running_status = StrategyStatus::ORDER_CANCELED;
+			this->if_order_sent = false;
 		}
 		m_logger->info("ORDER CANCELED, SIfo:{}, OrderSysID:{}",temp_orderActionField->SInfo,temp_orderActionField->OrderSysID);
 	}

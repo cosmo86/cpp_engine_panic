@@ -437,7 +437,7 @@ private:
 			secID_name_table.emplace(std::string(pSecurity->SecurityID), convertEncoding(pSecurity->SecurityName, "GBK", "UTF-8"));
 			auto stop = std::chrono::high_resolution_clock::now();
 			auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
-			std::cout << "[Trader OnRspQrySecurity]: "<< convertEncoding(pSecurity->SecurityName, "GBK", "UTF-8")<<" "<< pSecurity->SecurityName << std::endl;
+			//std::cout << "[Trader OnRspQrySecurity]: "<< convertEncoding(pSecurity->SecurityName, "GBK", "UTF-8")<<" "<< pSecurity->SecurityName << std::endl;
 			//printf("[测试中文 Trader OnRspQrySecurity]: %s\n", pSecurity->SecurityName);
 		}
 		if (bIsLast)
