@@ -3,6 +3,7 @@
 #include "OrderModels.hpp"
 #include "json.hpp"
 #include <mutex>
+#include <stdexcept>
 #include <shared_mutex>
 #include <thread>
 #include <chrono>

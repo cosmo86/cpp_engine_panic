@@ -31,6 +31,8 @@ public:
 
 
 		this->strate_limup_price = get_limup_price();
+		// this sets the securityName
+		get_security_name();
 		this->target_position = (static_cast<int>(this->position / this->strate_limup_price) / 100) * 100;
 
 		std::cout<<"strate_stock_code"<<strate_stock_code<<std::endl;
@@ -44,6 +46,7 @@ public:
 		std::cout<<"target_position"<<target_position<<std::endl;
 		std::cout<<"delay_duration"<<delay_duration<<std::endl;
 		std::cout<<"strate_limup_price"<<strate_limup_price<<std::endl;
+		std::cout<<"strate_stock_name"<<strate_stock_name<<std::endl;
 	}
 
 	~HitBanStrategy(){std::cout<<"[HitBanStrategy] destoryed"<<std::endl;}
@@ -319,7 +322,23 @@ public:
 	double get_limup_price()
 	{
 		std::string stock_str(this->strate_stock_code);
-		return m_dispatcher_ptr->trader_ptr->get_limup_price(stock_str);
+		double res = m_dispatcher_ptr->trader_ptr->get_limup_price(stock_str);
+		if(res<0)
+		{
+			throw std::invalid_argument("limup price must be greater than 0");
+		}
+		return res;
+	}
+
+	void get_security_name()
+	{	
+		std::string stock_str(this->strate_stock_code);
+		std::string securityName = m_dispatcher_ptr->trader_ptr->get_security_name(stock_str);
+		if(securityName=="NOTFOUND")
+		{
+			throw std::invalid_argument("Security not found");
+		}
+		strcpy(this->strate_stock_name, securityName.c_str());
 	}
 };
 

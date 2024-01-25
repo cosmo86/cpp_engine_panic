@@ -154,4 +154,4 @@ def get_event_q_size():
     print("event q size ", res)
 
 if __name__ == "__main__":
-    uvicorn.run(app,port = 9000)
+    uvicorn.run(app,port = 9001)

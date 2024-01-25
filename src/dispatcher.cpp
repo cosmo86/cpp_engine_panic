@@ -200,6 +200,9 @@ void Dispatcher::remove_strategy(int s_id,std::string SecurityID, const char& ei
 			Securities[0] = nonconst_SecurityID;
 			L2_quoter_ptr->UnSubscribe(Securities,1,eid);// 1 means only subscribe one stock
 		}
+		// _sID_strategyPtr_map essentially keeps track of running stategies,
+		// _sID_strategyPtr_map.extract removes a strategy from the map
+		// thus stopping allocating new tasks to it
 		auto removed_strategy_node = _sID_strategyPtr_map.extract(s_id);
 		if (removed_strategy_node) 
 		{
