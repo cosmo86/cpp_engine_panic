@@ -21,11 +21,17 @@ LoggerPtr GetLogger()
         size_t thread_count = 1;    // Number of threads in the thread pool
         spdlog::init_thread_pool(queue_size, thread_count);
 
-        std::string filename = "log_" + getCurrentTimestamp() + ".log";
+        // Create the "program_log" directory if it doesn't exist
+        std::filesystem::path logDir("Engine_log");
+        if (!std::filesystem::exists(logDir)) {
+            std::filesystem::create_directory(logDir);
+        }
+        // Construct the full file path for the log file
+        std::string filename = logDir.string() + "/log_" + getCurrentTimestamp() + ".log";  
 
         // Create stdout color sink (console logging)
         auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-        console_sink->set_level(spdlog::level::info);
+        console_sink->set_level(spdlog::level::warn);
 
         // Create a basic file sink (multi-threaded)
         auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(filename, true);
@@ -34,6 +40,7 @@ LoggerPtr GetLogger()
 
         std::vector<spdlog::sink_ptr> sinks{ console_sink, file_sink };
         logger = std::make_shared<spdlog::async_logger>("async_logger", sinks.begin(), sinks.end(), spdlog::thread_pool(), spdlog::async_overflow_policy::block);
+        logger->flush_on(spdlog::level::info);
     }
     return logger;
 }

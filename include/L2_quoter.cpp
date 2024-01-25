@@ -60,10 +60,11 @@ public:
 	}
 
 public:
-	void init_queue(moodycamel::ConcurrentQueue<SEEvent>* m_Event_Q_ptr)
+	void init_quoter(moodycamel::ConcurrentQueue<SEEvent>* m_Event_Q_ptr, LoggerPtr logger_ptr)
 	{
 		std::cout<< "[Lev2MdSpi] pointer before init :"<<m_Event_Q_ptr<<std::endl;
 		this->m_Event_Q_ptr = m_Event_Q_ptr;
+		this->m_logger = logger_ptr;
 		std::cout<< "[Lev2MdSpi] pointer to queue inited, address is "<< m_Event_Q_ptr<<std::endl;
 	}
 	// connect to L2 server
@@ -92,10 +93,10 @@ public:
 	virtual void OnFrontConnected()
 	{
 		std::cout<<"OnFrontConnected!"<<std::endl;
-		CTORATstpReqUserLoginField acc;
+		TORALEV2API::CTORATstpReqUserLoginField acc;
 		memset(&acc, 0, sizeof(acc));
 		strcpy(acc.LogInAccount, m_userid);
-		acc.LogInAccountType = TORA_TSTP_LACT_UserID;
+		acc.LogInAccountType = TORALEV2API::TORA_TSTP_LACT_UserID;
 		strcpy(acc.Password, m_password);
 		strcpy(acc.UserProductInfo ,"HX5ZJ0C1PV");
 		m_api->ReqUserLogin(&acc, ++m_req_id);
@@ -114,13 +115,13 @@ public:
 	};
 
 	/// Error response
-	virtual void OnRspError(CTORATstpRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
+	virtual void OnRspError(TORALEV2API::CTORATstpRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
 	{
 		printf("OnRspError!\n");
 	};
 
 	/// Login request response
-	virtual void OnRspUserLogin(CTORATstpRspUserLoginField* pRspUserLogin, CTORATstpRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
+	virtual void OnRspUserLogin(TORALEV2API::CTORATstpRspUserLoginField* pRspUserLogin, TORALEV2API::CTORATstpRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
 	{
 		if (pRspInfo && pRspInfo->ErrorID == 0)
 		{
@@ -128,7 +129,7 @@ public:
 			
 			char* Securities[1];
 			Securities[0] = (char*) "300377";
-			int eid =  TORA_TSTP_EXD_SZSE;
+			int eid =  TORALEV2API::TORA_TSTP_EXD_SZSE;
 			Subscribe(Securities,1,eid);
 		}
 
@@ -141,7 +142,7 @@ public:
     // Subscribe 
 	virtual void Subscribe( char* ppSecurityID[], int nCount, TTORATstpExchangeIDType ExchageID)
 	{
-		if (ExchageID == TORA_TSTP_EXD_SSE) 
+		if (ExchageID == TORALEV2API::TORA_TSTP_EXD_SSE) 
 		{
 			//Subscribe NGTS (orderdetial and trasaction together)
 			int ret_nt = m_api->SubscribeNGTSTick(ppSecurityID, sizeof(ppSecurityID) / sizeof(char*), ExchageID);
@@ -199,7 +200,7 @@ public:
     //UnSubscribe
 	virtual void UnSubscribe(char* ppSecurityID[], int nCount, TTORATstpExchangeIDType ExchageID)
 	{
-		if (ExchageID == TORA_TSTP_EXD_SSE) 
+		if (ExchageID == TORALEV2API::TORA_TSTP_EXD_SSE) 
 		{
 			//Subscribe NGTS (orderdetial and trasaction together)
 			int ret_nt = m_api->UnSubscribeNGTSTick(ppSecurityID, sizeof(ppSecurityID) / sizeof(char*), ExchageID);
@@ -258,14 +259,14 @@ public:
 
 	/*********************************** Return Data Callback Function***********************************/
 	/// Logout
-	virtual void OnRspUserLogout(CTORATstpUserLogoutField* pUserLogout, CTORATstpRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
+	virtual void OnRspUserLogout(TORALEV2API::CTORATstpUserLogoutField* pUserLogout, TORALEV2API::CTORATstpRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
 	{
 		printf("OnRspUserLogout!\n");
 
 	};
 
 	/// Subscribe NGTSTICK
-	virtual void OnRspSubNGTSTick(CTORATstpSpecificSecurityField* pSpecificSecurity, CTORATstpRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
+	virtual void OnRspSubNGTSTick(CTORATstpSpecificSecurityField* pSpecificSecurity, TORALEV2API::CTORATstpRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
 	{
 		if (pRspInfo && pRspInfo->ErrorID == 0 && pSpecificSecurity)
 		{
@@ -275,7 +276,7 @@ public:
 	};
 
 	/// OnRspSubMarketData
-	virtual void OnRspSubMarketData(CTORATstpSpecificSecurityField* pSpecificSecurity, CTORATstpRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
+	virtual void OnRspSubMarketData(CTORATstpSpecificSecurityField* pSpecificSecurity, TORALEV2API::CTORATstpRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
 	{
 		if (pRspInfo && pRspInfo->ErrorID == 0 && pSpecificSecurity)
 		{
@@ -285,7 +286,7 @@ public:
 	};
 
 	/// OnRspUnSubMarketData
-	virtual void OnRspUnSubMarketData(CTORATstpSpecificSecurityField* pSpecificSecurity, CTORATstpRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
+	virtual void OnRspUnSubMarketData(CTORATstpSpecificSecurityField* pSpecificSecurity, TORALEV2API::CTORATstpRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
 	{
 		printf("OnRspUnSubMarketData SecurityID[%s] ExchangeID[%c]!\n", pSpecificSecurity->SecurityID, pSpecificSecurity->ExchangeID);
 
@@ -293,7 +294,7 @@ public:
 
 
 	// OnRspSubTransaction
-	virtual void OnRspSubTransaction(CTORATstpSpecificSecurityField* pSpecificSecurity, CTORATstpRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
+	virtual void OnRspSubTransaction(CTORATstpSpecificSecurityField* pSpecificSecurity, TORALEV2API::CTORATstpRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
 	{
 		if (pRspInfo && pRspInfo->ErrorID == 0 && pSpecificSecurity)
 		{
@@ -303,7 +304,7 @@ public:
 	};
 
 	/// OnRspSubOrderDetail
-	virtual void OnRspSubOrderDetail(CTORATstpSpecificSecurityField* pSpecificSecurity, CTORATstpRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
+	virtual void OnRspSubOrderDetail(CTORATstpSpecificSecurityField* pSpecificSecurity, TORALEV2API::CTORATstpRspInfoField* pRspInfo, int nRequestID, bool bIsLast)
 	{
 		if (pRspInfo && pRspInfo->ErrorID == 0 && pSpecificSecurity)
 		{
@@ -359,8 +360,7 @@ public:
 		m_Event_Q_ptr->enqueue(std::move(temp_event));
 		auto stop = std::chrono::high_resolution_clock::now();
 		auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
-		std::cout << "[OnRtnMarketData]: "
-              << duration.count() << " nanoseconds" << std::endl;
+		//std::cout << "[OnRtnMarketData]: "<< duration.count() << " nanoseconds" << std::endl;
 
 	
 		/*
@@ -431,8 +431,8 @@ public:
 		m_Event_Q_ptr->enqueue(std::move(temp_event));
 		auto stop = std::chrono::high_resolution_clock::now();
 		auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
-		std::cout << "[OnRtnTransaction]: "
-              << duration.count() << " nanoseconds" << std::endl;
+		//std::cout << "[OnRtnTransaction]: "<< duration.count() << " nanoseconds" << std::endl;
+		//m_logger->info("{}, {}, {}, {}",pTransaction->SecurityID,pTransaction->TradeTime,pTransaction->TradePrice,pTransaction->TradeVolume);
 		//printf("OnRtnTransaction SecurityID[%s] ", pTransaction->SecurityID);
 		//printf("ExchangeID[%c] ", pTransaction->ExchangeID);
 		//������ʳɽ���TradeTime�ĸ�ʽΪ��ʱ������롿��������??100221530����ʾ10:02:21.530;
@@ -468,8 +468,7 @@ public:
 		m_Event_Q_ptr->enqueue(std::move(temp_event));
 		auto stop = std::chrono::high_resolution_clock::now();
 		auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
-		std::cout << "[OnRtnOrderDetail]: "
-              << duration.count() << " nanoseconds" << std::endl;
+		//std::cout << "[OnRtnOrderDetail]: "<< duration.count() << " nanoseconds" << std::endl;
 		
 		//printf("OnRtnOrderDetail SecurityID[%s] \n", pOrderDetail->SecurityID);
 		//printf("ExchangeID[%c] \n", pOrderDetail->ExchangeID);

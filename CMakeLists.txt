@@ -40,10 +40,13 @@ set_target_properties(MyLibrary PROPERTIES
 
 
 set(lev2_LIB_PATH "${PROJECT_SOURCE_DIR}/include/liblev2mdapi.so")
+set(trader_LIB_PATH "${PROJECT_SOURCE_DIR}/include/libtraderapi.so")
 set(jemalloc_LIB_PATH "${PROJECT_SOURCE_DIR}/include/libjemalloc.so.2")
 target_link_libraries(MyLibrary PRIVATE
     ${lev2_LIB_PATH}
+    ${trader_LIB_PATH}
     ${jemalloc_LIB_PATH}
+    stdc++fs
 )
 #target_link_libraries(MyLibrary PRIVATE ${lev2_LIB_PATH})
 #target_link_libraries(MyLibrary PRIVATE ${jemalloc_LIB_PATH})
