@@ -43,6 +43,7 @@ public:
 		std::cout<<"strate_exchangeID"<<strate_exchangeID<<std::endl;
 		std::cout<<"target_position"<<target_position<<std::endl;
 		std::cout<<"delay_duration"<<delay_duration<<std::endl;
+		std::cout<<"strate_limup_price"<<strate_limup_price<<std::endl;
 	}
 
 	~HitBanStrategy(){std::cout<<"[HitBanStrategy] destoryed"<<std::endl;}

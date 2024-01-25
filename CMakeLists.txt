@@ -11,7 +11,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # Add include directories
 
 #set(JEMALLOC_INCLUDE_DIR "C:/Users/ROG/Desktop/vcpkg/vcpkg/installed/x64-windows/include")
-set(JEMALLOC_INCLUDE_DIR "/usr/local/include")
+#set(JEMALLOC_INCLUDE_DIR "/usr/local/include")
+set(JEMALLOC_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include")
 
 #include_directories(include)
 include_directories(
