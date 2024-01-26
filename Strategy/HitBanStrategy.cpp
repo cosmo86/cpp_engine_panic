@@ -123,7 +123,7 @@ public:
 																this->strate_SInfo );
 			this->if_order_sent = true;
 			// Set to false to avoid resend while limup and above trigger_volume
-			this->can_resend_order = false
+			this->can_resend_order = false;
 			m_logger->info("order sent");
 			std::this_thread::sleep_for(std::chrono::milliseconds(delay_duration));
 			return;
@@ -161,7 +161,7 @@ public:
 				if (this->can_resend_order){return;}
 				else{
 				// If false, set tp true to enable send order
-					this->can_resend_order = True;
+					this->can_resend_order = true;
 					return;
 				}
 			}
@@ -194,7 +194,7 @@ public:
 				if (this->can_resend_order){return;}
 				else{
 				// If false, set tp true to enable send order
-					this->can_resend_order = True;
+					this->can_resend_order = true;
 					return;
 				}
 			}
@@ -240,7 +240,7 @@ public:
 				if (this->can_resend_order){return;}
 				else{
 				// If false, set tp true to enable send order
-					this->can_resend_order = True;
+					this->can_resend_order = true;
 					return;
 				}
 			}
