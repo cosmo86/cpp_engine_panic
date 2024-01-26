@@ -257,7 +257,8 @@ nlohmann::json Dispatcher::check_running_strategy()
 			temp_json["BuyTriggerVolume"] = temp_strategy->buy_trigger_volume;
 			temp_json["CancelVolume"] = temp_strategy->cancel_trigger_volume;
 			temp_json["TargetPosition"] = temp_strategy->target_position;
-			temp_json["CurrPosition"] = temp_strategy->current_position;
+			temp_json["CurrPosition"] = temp_strategy->current_position.load();
+			temp_json["Status"] = temp_strategy->running_status.load();
 			temp_json["MaxTriggerTimes"] = temp_strategy->current_trigger_times;
 			temp_json["OrderID"] = temp_strategy->strate_OrderSysID;
 			temp_json["SecurityName"] = temp_strategy->strate_stock_name;
@@ -287,7 +288,8 @@ nlohmann::json Dispatcher::check_removed_strategy()
 			temp_json["BuyTriggerVolume"] = temp_strategy->buy_trigger_volume;
 			temp_json["CancelVolume"] = temp_strategy->cancel_trigger_volume;
 			temp_json["TargetPosition"] = temp_strategy->target_position;
-			temp_json["CurrPosition"] = temp_strategy->current_position;
+			temp_json["CurrPosition"] = temp_strategy->current_position.load();
+			temp_json["Status"] = temp_strategy->running_status.load();
 			temp_json["MaxTriggerTimes"] = temp_strategy->current_trigger_times;
 			temp_json["OrderID"] = temp_strategy->strate_OrderSysID;
 			temp_json["SecurityName"] = temp_strategy->strate_stock_name;

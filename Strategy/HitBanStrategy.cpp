@@ -4,6 +4,21 @@
 
 class Dispatcher;
 
+// Hitban specific Status
+enum StrategyStatus
+{
+    RUNNING = 0,
+    ORDER_SENT = 1,
+    ORDER_CANCELED = 2,
+    FULLY_TRADED = 3,
+    PART_TRADED = 7,
+    STOPPED = 4,
+    ORDER_CANCELED_ABNORMAL = 5,
+    PAUSED = 6,
+    REJECTED = -1
+};
+
+
 class HitBanStrategy : public StrategyBase 
 {
 public:
@@ -68,10 +83,14 @@ public:
     // TODO :!!!!!!!!!! fix position
 	int position;
 	int target_position;
-	int current_position;
-
 	int current_trigger_times = 0;
-	StrategyStatus running_status;
+	
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// Please refer to dispatcher.check_running_strategy() 
+	// to understand why those two values must be atomic<int>
+	std::atomic<int> current_position;
+	std::atomic<int> running_status;
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 	int max_order_error_tolerance = 2;
 	int order_error_tolerance_count = 0;
@@ -97,7 +116,11 @@ public:
 
 		if(if_order_sent == false || __condition_buy || this->can_resend_order )
 		{
-			m_dispatcher_ptr->trader_ptr->Send_Order_LimitPrice(this->strate_exchangeID, target_position, strate_limup_price,strate_stock_code );
+			m_dispatcher_ptr->trader_ptr->Send_Order_LimitPrice(this->strate_exchangeID, 
+																this->target_position, 
+																this->strate_limup_price,
+																this->strate_stock_code, 
+																this->strate_SInfo );
 			this->if_order_sent = true;
 			// Set to false to avoid resend while limup and above trigger_volume
 			this->can_resend_order = false
@@ -108,7 +131,9 @@ public:
 
 		if (order_accepted == true || if_cancel_sent == false || __condition_cancel)
 		{
-			m_dispatcher_ptr->trader_ptr->Send_Cancle_Order(strate_exchangeID,strate_OrderSysID);
+			m_dispatcher_ptr->trader_ptr->Send_Cancle_Order(this->strate_exchangeID, 
+															this->strate_OrderSysID,
+															this->strate_SInfo);
 			if_cancel_sent = true;
 			m_logger->info("cancel request sent");
 			return;
@@ -122,7 +147,6 @@ public:
 
 		m_logger->info("on_tick, security id {} limup {} curr price {}", temp_tick->SecurityID, this->strate_limup_price,temp_tick->BidPrice1 );
 		//std::cout<<"on_orderDetial, security id "<< temp_tick->SecurityID<<std::endl;
-
 
 		if (strcmp(temp_tick->SecurityID, strate_stock_code) != 0){
 			return;
@@ -146,7 +170,6 @@ public:
 			action();
 		}
 		m_logger->info("on_tick {}, {}, {}",temp_tick->DataTimeStamp, temp_tick->BidPrice1, temp_tick->BidVolume1);
-
 
 	}
 
@@ -248,7 +271,7 @@ public:
 
 		{
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
-			this->running_status = StrategyStatus::ORDER_SENT;
+			this->running_status.store(StrategyStatus::ORDER_SENT);
 			this->order_accepted = true;
 			this->if_order_sent = false;
 			m_logger->info("order_success, securityID:{}, SInfo:{}, OrderSysID: {}", 
@@ -277,7 +300,7 @@ public:
 				return;
 			}
 			// Update running status and increment order_error_tolerance_count by 1
-			this->running_status = StrategyStatus::REJECTED;
+			this->running_status.store(StrategyStatus::REJECTED);
             this->order_error_tolerance_count += 1 ;
 			m_logger->info("order_error, securityID:{}, SInfo:{}, OrderSysID: {}", 
 			temp_orderField->SecurityID,temp_orderField->SInfo, temp_orderField->OrderSysID);
@@ -301,7 +324,7 @@ public:
 				m_logger->info("max trigger time reached, stategy stopped");
 				return;
 			}
-			this->running_status = StrategyStatus::ORDER_CANCELED;
+			this->running_status.store(StrategyStatus::ORDER_CANCELED);
 			this->if_order_sent = false;
 		}
 		m_logger->info("ORDER CANCELED, SIfo:{}, OrderSysID:{}",temp_orderActionField->SInfo,temp_orderActionField->OrderSysID);
@@ -317,7 +340,7 @@ public:
 
 		{
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
-			this->running_status = StrategyStatus::ORDER_CANCELED_ABNORMAL;
+			this->running_status.store(StrategyStatus::ORDER_CANCELED_ABNORMAL);
 		}
 		m_logger->info("cancel_error  OrderSysID:{} ", temp_orderActionField->OrderSysID);
 	}
@@ -334,8 +357,8 @@ public:
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
 			if (temp_TradeField->Volume == this->target_position)
 			{
-				current_position += temp_TradeField->Volume;
-				this->running_status = StrategyStatus::FULLY_TRADED;
+				this->current_position.fetch_add(temp_TradeField->Volume);
+				this->running_status.store(StrategyStatus::FULLY_TRADED);
 				this->stop_strategy();
 				m_logger->info("fully traded, security {}, trade_volume: {}",temp_TradeField->SecurityID, temp_TradeField->Volume);
 				return;
@@ -343,7 +366,8 @@ public:
 			else
 			{
 				m_logger->info("Part traded, security {}, trade_volume: {}",temp_TradeField->SecurityID, temp_TradeField->Volume);
-				this->running_status = StrategyStatus::PART_TRADED;
+				this->current_position.fetch_add(temp_TradeField->Volume);
+				this->running_status.store(StrategyStatus::PART_TRADED);
 				return;
 			}
 		}
