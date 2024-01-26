@@ -142,7 +142,7 @@ public:
 				}
 			}
 			// Stock is limup
-			curr_FengBan_volume += temp_tick->BidVolume1;
+			curr_FengBan_volume = temp_tick->BidVolume1;
 			action();
 		}
 		m_logger->info("on_tick {}, {}, {}",temp_tick->DataTimeStamp, temp_tick->BidPrice1, temp_tick->BidVolume1);
