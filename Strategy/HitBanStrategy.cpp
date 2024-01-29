@@ -114,7 +114,7 @@ public:
 		bool __condition_buy = curr_FengBan_volume * strate_limup_price >= buy_trigger_volume;
         bool __condition_cancel = curr_FengBan_volume * strate_limup_price <= cancel_trigger_volume;
 
-		if(if_order_sent == false || __condition_buy || this->can_resend_order )
+		if(if_order_sent == false && __condition_buy && this->can_resend_order )
 		{
 			m_dispatcher_ptr->trader_ptr->Send_Order_LimitPrice(this->strate_exchangeID, 
 																this->target_position, 
@@ -124,18 +124,28 @@ public:
 			this->if_order_sent = true;
 			// Set to false to avoid resend while limup and above trigger_volume
 			this->can_resend_order = false;
-			m_logger->info("order sent");
+			m_logger->info("S,{}, [ACTION] , code: {}, order sent, curr_volume: {},trigger_volume: {}", 
+							this->strate_SInfo,
+							this->strate_stock_code,
+							this->curr_FengBan_volume,
+							this->buy_trigger_volume
+							);
 			std::this_thread::sleep_for(std::chrono::milliseconds(delay_duration));
 			return;
 		}
 
-		if (order_accepted == true || if_cancel_sent == false || __condition_cancel)
+		if (order_accepted == true && if_cancel_sent == false && __condition_cancel)
 		{
 			m_dispatcher_ptr->trader_ptr->Send_Cancle_Order(this->strate_exchangeID, 
 															this->strate_OrderSysID,
 															this->strate_SInfo);
 			if_cancel_sent = true;
-			m_logger->info("cancel request sent");
+			m_logger->info("S,{}, [ACTION] , code: {}, cancle sent, curr_volume: {}, cancle_volume: {}", 
+							this->strate_SInfo,
+							this->strate_stock_code,
+							this->curr_FengBan_volume,
+							this->cancel_trigger_volume
+							);
 			return;
 		}
 
@@ -145,7 +155,7 @@ public:
 	{
 		std::shared_ptr<SE_Lev2MarketDataField> temp_tick = std::static_pointer_cast<SE_Lev2MarketDataField>(e);
 
-		m_logger->info("on_tick, security id {} limup {} curr price {}", temp_tick->SecurityID, this->strate_limup_price,temp_tick->BidPrice1 );
+		
 		//std::cout<<"on_orderDetial, security id "<< temp_tick->SecurityID<<std::endl;
 
 		if (strcmp(temp_tick->SecurityID, strate_stock_code) != 0){
@@ -166,20 +176,23 @@ public:
 				}
 			}
 			// Stock is limup
-			curr_FengBan_volume = temp_tick->BidVolume1;
+			this->curr_FengBan_volume = temp_tick->BidVolume1;
 			action();
+			m_logger->info("S,{}, [ON_TICK] , code: {} limup: {} curr price: {}, curr_volume: {}, trigger_volume:{},cancle_volume: {} ",
+						 this->strate_SInfo,
+						 temp_tick->SecurityID, 
+						 this->strate_limup_price,
+						 temp_tick->BidPrice1,
+						 this->curr_FengBan_volume,
+						 this->buy_trigger_volume,
+						 this->cancel_trigger_volume );
 		}
-		m_logger->info("on_tick {}, {}, {}",temp_tick->DataTimeStamp, temp_tick->BidPrice1, temp_tick->BidVolume1);
-
 	}
 
 	void on_orderDetial(std::shared_ptr<SEObject> e) override
 	{
 
 		std::shared_ptr<SE_Lev2OrderDetailField> temp_orderdetial = std::static_pointer_cast<SE_Lev2OrderDetailField>(e);
-
-		m_logger->info("on_orderDetial, security id {} limup price {} price {}", temp_orderdetial->SecurityID,this->strate_limup_price, temp_orderdetial->Price);
-		//std::cout<<"on_orderDetial, security id "<< temp_orderdetial->SecurityID<<std::endl;
 
 		if (strcmp(temp_orderdetial->SecurityID, strate_stock_code) != 0){
 			return;
@@ -200,20 +213,34 @@ public:
 			}
 
 			//buy order not cancled, add buy volume to fengban_volume
-			if (temp_orderdetial->Price == this->strate_limup_price || temp_orderdetial->Side == '1' || temp_orderdetial->OrderStatus != 'D')
+			if (temp_orderdetial->Price == this->strate_limup_price && temp_orderdetial->Side == '1' && temp_orderdetial->OrderStatus != 'D')
 			{
 				curr_FengBan_volume += temp_orderdetial->Volume;
 				action();
-				m_logger->info("{},curr_FengBan_volume{}",temp_orderdetial->OrderTime, curr_FengBan_volume);
+				m_logger->info("S,{}, [ON_ORDERDETIAL] , code: {} limup: {} curr price: {}, curr_volume: {}, trigger_volume:{},cancle_volume: {} ",
+						 this->strate_SInfo,
+						 temp_orderdetial->SecurityID, 
+						 this->strate_limup_price,
+						 temp_orderdetial->Price,
+						 this->curr_FengBan_volume,
+						 this->buy_trigger_volume,
+						 this->cancel_trigger_volume );
 				return;
 			}
 			// buy order and cancled, subtract volume from fengban,ExchangeID == '1' is SSE
-			if (temp_orderdetial->ExchangeID == '1' || temp_orderdetial->Price == this->strate_limup_price || 
-				temp_orderdetial->Side == '1' || temp_orderdetial->OrderStatus == 'D')
+			if (temp_orderdetial->ExchangeID == '1' && temp_orderdetial->Price == this->strate_limup_price && 
+				temp_orderdetial->Side == '1' && temp_orderdetial->OrderStatus == 'D')
 			{
 				curr_FengBan_volume -= temp_orderdetial->Volume;
 				action();
-				m_logger->info("{},curr_FengBan_volume{}",temp_orderdetial->OrderTime, curr_FengBan_volume);
+				m_logger->info("S,{}, [ON_ORDERDETIAL] , code: {} limup: {} curr price: {}, curr_volume: {}, trigger_volume:{},cancle_volume: {} ",
+				         this->strate_SInfo,
+						 temp_orderdetial->SecurityID, 
+						 this->strate_limup_price,
+						 temp_orderdetial->Price,
+						 this->curr_FengBan_volume,
+						 this->buy_trigger_volume,
+						 this->cancel_trigger_volume );
 				return;
 			}
 		}
@@ -222,9 +249,6 @@ public:
 	void on_transac(std::shared_ptr<SEObject> e) override
 	{
 		std::shared_ptr<SE_Lev2TransactionStruct> temp_transac = std::static_pointer_cast<SE_Lev2TransactionStruct>(e);
-
-		m_logger->info("on_transac, security id {},limup price {} trade_price {}", temp_transac->SecurityID,this->strate_limup_price, temp_transac->TradePrice);
-		//std::cout<<"on_transac, security id "<< temp_transac->SecurityID<<std::endl;
 
 		if (strcmp(temp_transac->SecurityID, strate_stock_code) != 0){
 			return;
@@ -244,18 +268,24 @@ public:
 					return;
 				}
 			}
-			curr_FengBan_volume -= temp_transac->TradeVolume;
+			this->curr_FengBan_volume -= temp_transac->TradeVolume;
 			this->action();
-			return;
 		}
 		// ExchangeID == '2' SZSE , ExecType == '2' cancel order  
 		if (temp_transac->ExchangeID == '2' and temp_transac->ExecType == '2')
 		{
-			m_logger->info("SZSE cancel {} price {} volume[{}] BuyNo[{}] SellNo[{}]", temp_transac->TradeTime,
+			m_logger->info("S,{}, [ON_TRANSAC] SZSE cancel, tradetime {}, price {}, volume[{}], BuyNo[{}]. SellNo[{}]", 
+			this->strate_SInfo,
+			temp_transac->TradeTime,
 			temp_transac->TradePrice,temp_transac->TradeVolume,temp_transac->BuyNo,temp_transac->SellNo);
 		}		
-		m_logger->info("SZSE transaction {} Exectype {} curr_FengBan_volume[{}] ", temp_transac->TradeTime,
-			temp_transac->ExecType,curr_FengBan_volume);
+		m_logger->info("S,{}, [ON_TRANSAC] ,SZSE transaction, tradetime {}, trade_price {}, volume {}, Exectype {}, curr_FengBan_volume{}, ", 
+					this->strate_SInfo,
+					temp_transac->TradeTime,
+					temp_transac->TradePrice,
+					temp_transac->TradeVolume,
+					temp_transac->ExecType,
+					this->curr_FengBan_volume);
 	}
 
 	void on_order_success(std::shared_ptr<SEObject> e) override
@@ -265,17 +295,21 @@ public:
 			return;
 		}
 		if (strcmp(temp_orderField->SInfo , strate_SInfo) != 0 ){
-			m_logger->info("SInfo dont match event:{},  Strategy{}",temp_orderField->SInfo, this->strate_SInfo);
+			m_logger->info("S,{}, [ORDER_SUCCESS] ,SInfo dont match{},  Strategy{}",
+							this->strate_SInfo,
+							temp_orderField->SInfo, this->strate_SInfo);
 			return;
 		}
 
 		{
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
 			this->running_status.store(StrategyStatus::ORDER_SENT);
+			strcpy(this->strate_OrderSysID,temp_orderField->OrderSysID);
 			this->order_accepted = true;
 			this->if_order_sent = false;
-			m_logger->info("order_success, securityID:{}, SInfo:{}, OrderSysID: {}", 
-			temp_orderField->SecurityID, temp_orderField->SInfo , temp_orderField->OrderSysID);
+			m_logger->info("S,{}, [ORDER_SUCCESS] , securityID:{}, SInfo:{}, OrderSysID: {}",
+							this->strate_SInfo, 
+							temp_orderField->SecurityID, temp_orderField->SInfo , temp_orderField->OrderSysID);
 		}
 	}
 
@@ -286,7 +320,7 @@ public:
 			return;
 		}
 		if (strcmp(temp_orderField->SInfo , strate_SInfo) != 0 ){
-			m_logger->info("SInfo dont match event:{},  Strategy{}",temp_orderField->SInfo, this->strate_SInfo);
+			m_logger->info("S,{}, [ORDER_ERROR] ,SInfo dont match {},  Strategy{}",this->strate_SInfo,temp_orderField->SInfo, this->strate_SInfo);
 			return;
 		}
 
@@ -296,14 +330,15 @@ public:
 			if (this->order_error_tolerance_count > this->max_order_error_tolerance)
 			{
 				this->stop_strategy();
-				m_logger->info("on_order ERROR, max order error reached, please check");
+				m_logger->info("S,{}, [ORDER_ERROR] , max order error reached, please check",this->strate_SInfo);
 				return;
 			}
 			// Update running status and increment order_error_tolerance_count by 1
 			this->running_status.store(StrategyStatus::REJECTED);
             this->order_error_tolerance_count += 1 ;
-			m_logger->info("order_error, securityID:{}, SInfo:{}, OrderSysID: {}", 
-			temp_orderField->SecurityID,temp_orderField->SInfo, temp_orderField->OrderSysID);
+			m_logger->info("S,{}, [ORDER_ERROR] , securityID:{}, SInfo:{}, OrderSysID: {}",
+							this->strate_SInfo, 
+							temp_orderField->SecurityID,temp_orderField->SInfo, temp_orderField->OrderSysID);
 		}
 	}
 
@@ -312,7 +347,7 @@ public:
 	{
 		std::shared_ptr<SE_InputOrderActionField> temp_orderActionField = std::static_pointer_cast<SE_InputOrderActionField>(e);
 		if (strcmp(temp_orderActionField->SInfo , strate_SInfo) != 0 ){
-		m_logger->info("SInfo dont match event:{},  Strategy{}",temp_orderActionField->SInfo, this->strate_SInfo);
+		m_logger->info("S,{}, [CANCEL_SUCCESS] ,SInfo dont match {},  Strategy{}",this->strate_SInfo,temp_orderActionField->SInfo, this->strate_SInfo);
 		return;
 		}
 
@@ -321,20 +356,20 @@ public:
 			this->current_trigger_times += 1;
 			if (this->current_trigger_times >= this->max_trigger_times ){
 				this->stop_strategy();
-				m_logger->info("max trigger time reached, stategy stopped");
+				m_logger->info("S,{}, [CANCEL_SUCCESS] ,max trigger time reached, stategy stopped",this->strate_SInfo);
 				return;
 			}
 			this->running_status.store(StrategyStatus::ORDER_CANCELED);
 			this->if_order_sent = false;
 		}
-		m_logger->info("ORDER CANCELED, SIfo:{}, OrderSysID:{}",temp_orderActionField->SInfo,temp_orderActionField->OrderSysID);
+		m_logger->info("S,{}, [CANCEL_SUCCESS] , SIfo:{}, OrderSysID:{}",this->strate_SInfo,temp_orderActionField->SInfo,temp_orderActionField->OrderSysID);
 	}
 
 	void on_cancel_error(std::shared_ptr<SEObject> e) override
 	{
 		std::shared_ptr<SE_InputOrderActionField> temp_orderActionField = std::static_pointer_cast<SE_InputOrderActionField>(e);
 		if (strcmp(temp_orderActionField->SInfo , strate_SInfo) != 0 ){
-		m_logger->info("SInfo dont match event:{},  Strategy{}",temp_orderActionField->SInfo, this->strate_SInfo);
+		m_logger->info("S,{}, [CANCLE_ERROR] , SInfo dont match:{},  Strategy{}",this->strate_SInfo,temp_orderActionField->SInfo, this->strate_SInfo);
 		return;
 		}
 
@@ -342,14 +377,14 @@ public:
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
 			this->running_status.store(StrategyStatus::ORDER_CANCELED_ABNORMAL);
 		}
-		m_logger->info("cancel_error  OrderSysID:{} ", temp_orderActionField->OrderSysID);
+		m_logger->info("S,{}, [CANCLE_ERROR] ,  OrderSysID:{} ",this->strate_SInfo, temp_orderActionField->OrderSysID);
 	}
 
 	void on_trade(std::shared_ptr<SEObject> e) override //SE_TradeField
 	{
 		std::shared_ptr<SE_TradeField> temp_TradeField = std::static_pointer_cast<SE_TradeField>(e);
 		if (strcmp(temp_TradeField->OrderSysID , strate_OrderSysID) != 0 ){
-		m_logger->info("OrderSysID dont match OrderSysID:{},  strate_OrderSysID{}",temp_TradeField->OrderSysID, this->strate_OrderSysID);
+		m_logger->info("S,{}, [ON_TRADE] ,OrderSysID dont match OrderSysID:{},  strate_OrderSysID{}",this->strate_SInfo,temp_TradeField->OrderSysID, this->strate_OrderSysID);
 		return;
 		}
 
@@ -360,12 +395,12 @@ public:
 				this->current_position.fetch_add(temp_TradeField->Volume);
 				this->running_status.store(StrategyStatus::FULLY_TRADED);
 				this->stop_strategy();
-				m_logger->info("fully traded, security {}, trade_volume: {}",temp_TradeField->SecurityID, temp_TradeField->Volume);
+				m_logger->info("S,{}, [ON_TRADE] ,fully traded, security {}, trade_volume: {}",this->strate_SInfo,temp_TradeField->SecurityID, temp_TradeField->Volume);
 				return;
 			}
 			else
 			{
-				m_logger->info("Part traded, security {}, trade_volume: {}",temp_TradeField->SecurityID, temp_TradeField->Volume);
+				m_logger->info("S,{}, [ON_TRADE] ,Part traded, security {}, trade_volume: {}",this->strate_SInfo,temp_TradeField->SecurityID, temp_TradeField->Volume);
 				this->current_position.fetch_add(temp_TradeField->Volume);
 				this->running_status.store(StrategyStatus::PART_TRADED);
 				return;
