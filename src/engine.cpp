@@ -6,9 +6,9 @@ void Engine::Init()
     
 }
 
-void Engine::Start(std::string mode)
+void Engine::Start(std::string mode_str)
 {
-    if(mode == "test")
+    if(mode_str == "test")
     {
         std::cout<<"[Engine] [TEST] dispatcher started"<< std::endl;
         m_logger->info("[Engine] dispatcher started");
@@ -36,7 +36,7 @@ void Engine::Start(std::string mode)
         dispatcher.Start();
         m_logger->info("Engine Test started");
     }
-    else if(mode == "server")
+    else if(mode_str == "server")
     {
         std::cout<<"[Engine] [SERVER] dispatcher started"<< std::endl;
         m_logger->info("[Engine] dispatcher started");
