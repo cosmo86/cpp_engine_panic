@@ -49,10 +49,10 @@ class Lev2MdSpi : public CTORATstpLev2MdSpi
 public:
 	Lev2MdSpi()
 	{
-		std::cout<<"[Lev2MdSpi] creating m_api"<< std::endl;
-		m_api = CTORATstpLev2MdApi::CreateTstpLev2MdApi();
-		std::cout<<"[Lev2MdSpi]  m_api created"<< std::endl;
-		//m_api = api;
+		//std::cout<<"[Lev2MdSpi] creating m_api"<< std::endl;
+		//m_api = CTORATstpLev2MdApi::CreateTstpLev2MdApi();
+		//std::cout<<"[Lev2MdSpi]  m_api created"<< std::endl;
+		// //m_api = api;
 	}
 
 	~Lev2MdSpi(void)
@@ -83,11 +83,15 @@ public:
 		std::cout<<"[Lev2MdSpi] user ,passwork inited"<< std::endl;
 		if (strcmp(mode, "test") == 0)
 		{
+			std::cout<<"[Lev2MdSpi]  test TCP"<< std::endl;
+			m_api = CTORATstpLev2MdApi::CreateTstpLev2MdApi(TORA_TSTP_MST_TCP,true);
 			m_api->RegisterFront(m_address);
 		}
 		else
 		{
-			m_api->RegisterMulticast(m_address,"172.16.2121.1","")
+			std::cout<<"[Lev2MdSpi]  server udp "<< std::endl;
+			m_api = CTORATstpLev2MdApi::CreateTstpLev2MdApi( TORA_TSTP_MST_MCAST,true);
+			m_api->RegisterMulticast(m_address,"172.16.2121.1","");
 		}
 		std::cout<<"[Lev2MdSpi] RegisterFront"<< std::endl;
 		m_api->RegisterSpi(this);

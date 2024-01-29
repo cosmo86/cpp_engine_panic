@@ -61,7 +61,7 @@ print(os.getcwd())
 def startup_event():
     print("[fastAPI] start engine")
     mylib.initEngine()
-    running_mode = "server"
+    running_mode = "test"
     running_mode=running_mode.encode('utf-8')
     mylib.startEngine(running_mode)
 

@@ -36,7 +36,7 @@ void Engine::Start(std::string mode_str)
         dispatcher.Start();
         m_logger->info("Engine Test started");
     }
-    else if(mode == "server")
+    else if(mode_str == "server")
     {
         std::cout<<"[Engine] [SERVER] dispatcher started"<< std::endl;
         m_logger->info("[Engine] dispatcher started");
