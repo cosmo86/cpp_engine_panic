@@ -274,12 +274,12 @@ public:
 		// ExchangeID == '2' SZSE , ExecType == '2' cancel order  
 		if (temp_transac->ExchangeID == '2' and temp_transac->ExecType == '2')
 		{
-			m_logger->info("S,{}, [ON_TRANSAC] SZSE cancel, tradetime {}, price {}, volume[{}], BuyNo[{}]. SellNo[{}]", 
+			m_logger->info("S,{}, [ON_TRANSAC] SZSE cancel, tradetime {}, price {}, volume {}, BuyNo {}. SellNo {}", 
 			this->strate_SInfo,
 			temp_transac->TradeTime,
 			temp_transac->TradePrice,temp_transac->TradeVolume,temp_transac->BuyNo,temp_transac->SellNo);
 		}		
-		m_logger->info("S,{}, [ON_TRANSAC] ,SZSE transaction, tradetime {}, trade_price {}, volume {}, Exectype {}, curr_FengBan_volume{}, ", 
+		m_logger->info("S,{}, [ON_TRANSAC] ,SZSE transaction, tradetime {}, trade_price {}, volume {}, Exectype {}, curr_FengBan_volume {}", 
 					this->strate_SInfo,
 					temp_transac->TradeTime,
 					temp_transac->TradePrice,
