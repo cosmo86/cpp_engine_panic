@@ -25,7 +25,7 @@ extern "C"
 
     EXPORT_FLAG void testtakestr(const char* str);
 
-    EXPORT_FLAG void startEngine();
+    EXPORT_FLAG void startEngine(const char* mode);
 
     EXPORT_FLAG void stopEngine();
 

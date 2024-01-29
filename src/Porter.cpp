@@ -37,9 +37,10 @@ Engine& getEngine()
     return engine;
 }
 
-void startEngine()
+void startEngine(const char* mode)
 {
-    getEngine().Start();
+    std::string mode_str(mode);
+    getEngine().Start(mode_str);
 }
 
 void stopEngine()

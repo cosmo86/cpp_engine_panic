@@ -44,6 +44,7 @@ mylib.CheckRemovedStrategy.restype = ctypes.c_char_p
 
 # Configure argument types
 mylib.testtakestr.argtypes = [ctypes.c_char_p]
+mylib.startEngine.argtypes = [ctypes.c_char_p]
 mylib.TestRtnJsonStr.argtypes = [ctypes.c_char_p]
 mylib.AddStrategy.argtypes = [ctypes.c_char_p]
 mylib.RemoveStrategy.argtypes = [ctypes.c_int, ctypes.c_char_p,ctypes.c_char]
@@ -60,7 +61,9 @@ print(os.getcwd())
 def startup_event():
     print("[fastAPI] start engine")
     mylib.initEngine()
-    mylib.startEngine()
+    running_mode = "server"
+    running_mode=running_mode.encode('utf-8')
+    mylib.startEngine(running_mode)
 
 @app.on_event('shutdown')
 def shutdown_event():
