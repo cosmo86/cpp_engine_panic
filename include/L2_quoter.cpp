@@ -81,7 +81,14 @@ public:
 		strcpy(m_mode, mode);
 		std::cout<< userid<< " "<<address<<std::endl;
 		std::cout<<"[Lev2MdSpi] user ,passwork inited"<< std::endl;
-		m_api->RegisterFront(m_address);
+		if (strcmp(mode, "test") == 0)
+		{
+			m_api->RegisterFront(m_address);
+		}
+		else
+		{
+			m_api->RegisterMulticast(m_address,"172.16.2121.1","")
+		}
 		std::cout<<"[Lev2MdSpi] RegisterFront"<< std::endl;
 		m_api->RegisterSpi(this);
 		std::cout<<"[Lev2MdSpi] RegisterSpi"<< std::endl;

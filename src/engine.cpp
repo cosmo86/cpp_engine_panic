@@ -6,9 +6,9 @@ void Engine::Init()
     
 }
 
-void Engine::Start(std::string mode)
+void Engine::Start(std::string mode_str)
 {
-    if(mode == "test")
+    if(mode_str == "test")
     {
         std::cout<<"[Engine] [TEST] dispatcher started"<< std::endl;
         m_logger->info("[Engine] dispatcher started");
