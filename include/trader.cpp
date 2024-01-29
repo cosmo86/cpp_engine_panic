@@ -11,6 +11,7 @@
 #include <string>
 #include <map>
 
+#include "iconv.h"
 #include "concurrentqueue.h"
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
@@ -33,6 +34,36 @@ using namespace TORASTOCKAPI;
 5. demo_trade_api->Init();
 	
 */
+
+// Helper function
+inline std::string convertEncoding(const char* originalStr, const char* fromEncoding, const char* toEncoding) {
+    iconv_t conv = iconv_open(toEncoding, fromEncoding);
+    if (conv == (iconv_t)-1) {
+        // Handle error
+        return "";
+    }
+
+    size_t originalLen = strlen(originalStr);
+    size_t outputBufferSize = originalLen * 3 + 1;  // Estimate size needed for UTF-8
+    std::vector<char> outputBuffer(outputBufferSize);
+    char* outputPtr = outputBuffer.data();
+
+    // Create a temporary pointer for iconv
+    char* tempInputPtr = const_cast<char*>(originalStr);
+
+    size_t result = iconv(conv, &tempInputPtr, &originalLen, &outputPtr, &outputBufferSize);
+    if (result == (size_t)-1) {
+        // Handle conversion error
+        iconv_close(conv);
+        return "";
+    }
+
+    iconv_close(conv);
+    return std::string(outputBuffer.data(), outputPtr - outputBuffer.data());
+}
+
+
+
 
 class TradeSpi : public CTORATstpTraderSpi
 {
@@ -403,15 +434,16 @@ private:
 		{
 			auto start = std::chrono::high_resolution_clock::now();
 			limup_table.emplace(std::string(pSecurity->SecurityID), pSecurity->UpperLimitPrice);
-			secID_name_table.emplace(std::string(pSecurity->SecurityID), std::string(pSecurity->SecurityName));
+			secID_name_table.emplace(std::string(pSecurity->SecurityID), convertEncoding(pSecurity->SecurityName, "GBK", "UTF-8"));
 			auto stop = std::chrono::high_resolution_clock::now();
 			auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
-			//std::cout << "[Trader OnRspQrySecurity]: "<< duration.count() << " nanoseconds" << std::endl;
+			//std::cout << "[Trader OnRspQrySecurity]: "<< convertEncoding(pSecurity->SecurityName, "GBK", "UTF-8")<<" "<< pSecurity->SecurityName << std::endl;
+			//printf("[测试中文 Trader OnRspQrySecurity]: %s\n", pSecurity->SecurityName);
 		}
 		if (bIsLast)
 		{
 			std::cout<<"[TraderSpi] size of limup map is  "<<limup_table.size()<<std::endl;
-			std::cout<<"[TraderSpi] 600519 limupPrice is "<<limup_table["600519"]<<std::endl;
+			std::cout<<"[TraderSpi] 600519 name is "<<secID_name_table["600519"]<<std::endl;
 		}
 	}
 
@@ -493,9 +525,8 @@ private:
 	}
 	
 public:
-		void Send_Order_LimitPrice( const char exchange_id, const int volume, const double price, TTORATstpSecurityIDType stock_id )
+	void Send_Order_LimitPrice( const char exchange_id, const int volume, const double price, TTORATstpSecurityIDType stock_id , const char* req_sinfo)
 	{
-		
 		// 请求报单
 		CTORATstpInputOrderField input_order_field;
 		memset(&input_order_field, 0, sizeof(input_order_field));
@@ -508,7 +539,7 @@ public:
 		input_order_field.OrderPriceType = TORA_TSTP_OPT_LimitPrice;
 		input_order_field.TimeCondition = TORA_TSTP_TC_GFD;
 		input_order_field.VolumeCondition = TORA_TSTP_VC_AV;
-
+		strcpy(input_order_field.SInfo, req_sinfo );
 		int ret_oi = m_api->ReqOrderInsert(&input_order_field, m_req_id++);
 		if (ret_oi != 0)
 		{
@@ -516,7 +547,7 @@ public:
 		}
 	}
 
-	void Send_Cancle_Order( const char exchange_id, TTORATstpOrderSysIDType order_sys_id )
+	void Send_Cancle_Order( const char exchange_id, TTORATstpOrderSysIDType order_sys_id ,const char* req_sinfo )
 	{
 		// 请求撤单
 		CTORATstpInputOrderActionField input_order_action_field;
@@ -524,7 +555,7 @@ public:
 		input_order_action_field.ExchangeID = exchange_id;
 		input_order_action_field.ActionFlag = TORA_TSTP_AF_Delete;
 		strcpy(input_order_action_field.OrderSysID, order_sys_id);
-
+		strcpy(input_order_action_field.SInfo , req_sinfo);
 
 		int ret = m_api->ReqOrderAction(&input_order_action_field, m_req_id++);
 		if (ret != 0)
@@ -533,9 +564,22 @@ public:
 		}
 	}
 
-	float get_limup_price(std::string securityID)
+	double get_limup_price(std::string securityID)
 	{
-		return limup_table[securityID];
+		auto limup_table_iter = limup_table.find(securityID);
+		if (limup_table_iter != limup_table.end()) {
+			return limup_table[securityID];
+		} 
+		else {return -1.0;}
+	}
+
+	std::string get_security_name(std::string securityID)
+	{
+		auto securityName_table_iter = secID_name_table.find(securityID);
+		if (securityName_table_iter != secID_name_table.end()) {
+			return secID_name_table[securityID];
+		} 
+		else {return "NOTFOUND";}
 	}
 
 };

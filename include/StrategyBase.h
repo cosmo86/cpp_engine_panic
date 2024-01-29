@@ -3,12 +3,14 @@
 #include "OrderModels.hpp"
 #include "json.hpp"
 #include <mutex>
+#include <stdexcept>
 #include <shared_mutex>
 #include <thread>
 #include <chrono>
 #include <cstring>
 #include <iostream>
 #include <string>
+#include <atomic>
 #include <memory>
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
@@ -19,19 +21,6 @@
 using LoggerPtr = std::shared_ptr<spdlog::async_logger>;
 
 class SEObject;
-
-enum StrategyStatus
-{
-    RUNNING = 0,
-    ORDER_SENT = 1,
-    ORDER_CANCELED = 2,
-    FULLY_TRADED = 3,
-    PART_TRADED = 7,
-    STOPPED = 4,
-    ORDER_CANCELED_ABNORMAL = 5,
-    PAUSED = 6,
-    REJECTED = -1
-};
 
 class StrategyBase
 {

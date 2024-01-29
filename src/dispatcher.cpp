@@ -200,6 +200,9 @@ void Dispatcher::remove_strategy(int s_id,std::string SecurityID, const char& ei
 			Securities[0] = nonconst_SecurityID;
 			L2_quoter_ptr->UnSubscribe(Securities,1,eid);// 1 means only subscribe one stock
 		}
+		// _sID_strategyPtr_map essentially keeps track of running stategies,
+		// _sID_strategyPtr_map.extract removes a strategy from the map
+		// thus stopping allocating new tasks to it
 		auto removed_strategy_node = _sID_strategyPtr_map.extract(s_id);
 		if (removed_strategy_node) 
 		{
@@ -254,7 +257,8 @@ nlohmann::json Dispatcher::check_running_strategy()
 			temp_json["BuyTriggerVolume"] = temp_strategy->buy_trigger_volume;
 			temp_json["CancelVolume"] = temp_strategy->cancel_trigger_volume;
 			temp_json["TargetPosition"] = temp_strategy->target_position;
-			temp_json["CurrPosition"] = temp_strategy->current_position;
+			temp_json["CurrPosition"] = temp_strategy->current_position.load();
+			temp_json["Status"] = temp_strategy->running_status.load();
 			temp_json["MaxTriggerTimes"] = temp_strategy->current_trigger_times;
 			temp_json["OrderID"] = temp_strategy->strate_OrderSysID;
 			temp_json["SecurityName"] = temp_strategy->strate_stock_name;
@@ -284,7 +288,8 @@ nlohmann::json Dispatcher::check_removed_strategy()
 			temp_json["BuyTriggerVolume"] = temp_strategy->buy_trigger_volume;
 			temp_json["CancelVolume"] = temp_strategy->cancel_trigger_volume;
 			temp_json["TargetPosition"] = temp_strategy->target_position;
-			temp_json["CurrPosition"] = temp_strategy->current_position;
+			temp_json["CurrPosition"] = temp_strategy->current_position.load();
+			temp_json["Status"] = temp_strategy->running_status.load();
 			temp_json["MaxTriggerTimes"] = temp_strategy->current_trigger_times;
 			temp_json["OrderID"] = temp_strategy->strate_OrderSysID;
 			temp_json["SecurityName"] = temp_strategy->strate_stock_name;

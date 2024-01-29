@@ -14,7 +14,7 @@ def exchange_mapping(row):
 
 # Read cache data must be define before initing session states
 def read_cached_data():
-    res = requests.get(url="http://127.0.0.1:9000/read_cached_data")
+    res = requests.get(url="http://127.0.0.1:9001/read_cached_data")
     if res.status_code == 200:
         res_dict = res.json()
         print("[read_cached_data]" , res_dict, "len is ",{len(res_dict["StrategyGroup"])})
@@ -50,14 +50,14 @@ st.sidebar.header("策略编辑")
 
 
 def add_strategy(user_input: UserStrategyModel):
-    res = requests.post(url="http://127.0.0.1:9000/add_strategy", data=user_input.model_dump_json())
+    res = requests.post(url="http://127.0.0.1:9001/add_strategy", data=user_input.model_dump_json())
     if res.status_code == 200:
         check_strategy()
     else:
         st.error('策略提交异常', icon='🚨')
 
 def remove_strategy(user_input: UserStrategyModel):
-    res = requests.post(url="http://127.0.0.1:9000/remove_strategy", data=user_input.model_dump_json())
+    res = requests.post(url="http://127.0.0.1:9001/remove_strategy", data=user_input.model_dump_json())
     if res.status_code == 200:
         st.success('策略删除成功!', icon='✅')
         check_strategy()
@@ -66,8 +66,8 @@ def remove_strategy(user_input: UserStrategyModel):
 
 def check_strategy(container : st.container = None):
     st.session_state.strategy_container = True
-    running_res = requests.get(url="http://127.0.0.1:9000/check_running_strategy")
-    removed_res = requests.get(url="http://127.0.0.1:9000/check_removed_strategy")
+    running_res = requests.get(url="http://127.0.0.1:9001/check_running_strategy")
+    removed_res = requests.get(url="http://127.0.0.1:9001/check_removed_strategy")
     if running_res.status_code == 200:
         st.success('运行策略查询成功', icon='✅')
         print("[check_strategy] running_res",running_res.json())
@@ -83,7 +83,7 @@ def check_strategy(container : st.container = None):
         st.error('删除策略查询异常', icon='🚨')
 
 def delay_strategy(user_input: UserStrategyModel):
-    res = requests.post(url="http://127.0.0.1:9000/update_strategy_delay_time", data=user_input.model_dump_json())
+    res = requests.post(url="http://127.0.0.1:9001/update_strategy_delay_time", data=user_input.model_dump_json())
     if res.status_code == 200:
         st.success('策略添加延时成功!', icon='✅')
         check_strategy()
@@ -171,10 +171,10 @@ if st.session_state.strategy_container:
             "Status": "策略状态",
             "OrderID": "策略委托",
             "DelayTime" : "延迟触发",
-            "Name" : "股票名称"
+            "SecurityName" : "股票名称"
         },
             
-        column_order=('ID', 'SecurityID','Name','ExchangeID', 'LimitVolume', 'CancelVolume', 'TargetPosition', 'CurrPosition', 'DelayTime' ,'Count','Status','OrderID'),
+        column_order=('ID', 'SecurityID','SecurityName','ExchangeID', 'LimitVolume', 'CancelVolume', 'TargetPosition', 'CurrPosition', 'DelayTime' ,'Count','Status','OrderID'),
         hide_index=True,
         use_container_width=True
     )
@@ -199,10 +199,10 @@ if st.session_state.strategy_container:
             "Status": "策略删除时状态",
             "OrderID": "策略委托",
             "DelayTime" : "延迟触发",
-            "Name" : "股票名称"
+            "SecurityName" : "股票名称"
         },
             
-        column_order=('ID', 'SecurityID','Name','ExchangeID', 'LimitVolume', 'CancelVolume', 'TargetPosition', 'CurrPosition', 'DelayTime' ,'Count','Status','OrderID'),
+        column_order=('ID', 'SecurityID','SecurityName','ExchangeID', 'LimitVolume', 'CancelVolume', 'TargetPosition', 'CurrPosition', 'DelayTime' ,'Count','Status','OrderID'),
         hide_index=True,
         use_container_width=True
     )
