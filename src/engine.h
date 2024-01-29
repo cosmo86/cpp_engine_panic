@@ -26,7 +26,7 @@ public:
     };
 
     void Init();
-    void Start();
+    void Start(std::string mode);
     void add_L2_quoter(){};
     void Stop();
     void add_strategy(const nlohmann::json& j);

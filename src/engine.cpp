@@ -6,37 +6,66 @@ void Engine::Init()
     
 }
 
-void Engine::Start()
+void Engine::Start(std::string mode)
 {
+    if(mode == "test")
+    {
+        std::cout<<"[Engine] [TEST] dispatcher started"<< std::endl;
+        m_logger->info("[Engine] dispatcher started");
+        char LEV2MD_TCP_FrontAddress[64];
+        const char* TD_TCP_FrontAddress = "tcp://210.14.72.21:4400";
+        char UserID[21];
+        char Password[41];
+        char mode[21];
+        std::cout<<"[Engine] user ,passwork inited"<< std::endl;
+        m_logger->info("[Engine] user ,passwork inited");
+        strcpy(LEV2MD_TCP_FrontAddress,"tcp://210.14.72.17:6900");
+        strcpy(UserID,"00032129");
+        strcpy(Password,"19359120");
+        strcpy(mode,"test");
 
-    std::cout<<"[Engine] dispatcher started"<< std::endl;
-    m_logger->info("[Engine] dispatcher started");
-    char LEV2MD_TCP_FrontAddress[64];
-    const char* TD_TCP_FrontAddress = "tcp://210.14.72.21:4400";
-    char UserID[21];
-    char Password[41];
-    char mode[21];
-    std::cout<<"[Engine] user ,passwork inited"<< std::endl;
-    m_logger->info("[Engine] user ,passwork inited");
-    strcpy(LEV2MD_TCP_FrontAddress,"tcp://210.14.72.17:6900");
-    strcpy(UserID,"00032129");
-    strcpy(Password,"19359120");
-    strcpy(mode,"test");
-    std::cout<<"[Engine] user ,passwork copied"<< std::endl;
+        m_trader.init_trader(&dispatcher._event_q, m_logger);
+        m_trader.connect( UserID, Password,TD_TCP_FrontAddress,mode);
+        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
-    m_trader.init_trader(&dispatcher._event_q, m_logger);
-    m_trader.connect( UserID, Password,TD_TCP_FrontAddress,mode);
-    std::this_thread::sleep_for(std::chrono::milliseconds(20000));
+        m_L2_quoter.init_quoter(&dispatcher._event_q, m_logger);
+        m_L2_quoter.connect( UserID, Password,LEV2MD_TCP_FrontAddress,mode);
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+        dispatcher.init(&m_L2_quoter , &m_trader,m_logger);
+        dispatcher.Start();
+        m_logger->info("Engine Test started");
+    }
+    else if(mode == "server")
+    {
+        std::cout<<"[Engine] [SERVER] dispatcher started"<< std::endl;
+        m_logger->info("[Engine] dispatcher started");
+        char LEV2MD_TCP_FrontAddress[64];
+        const char* TD_TCP_FrontAddress = "tcp://10.224.78.106:6500";
+        char UserID[21];
+        char Password[41];
+        char mode[21];
+        std::cout<<"[Engine] user ,passwork inited"<< std::endl;
+        m_logger->info("[Engine] user ,passwork inited");
+        strcpy(LEV2MD_TCP_FrontAddress,"udp://224.224.2.2:7889");
+        strcpy(UserID,"320000077997");
+        strcpy(Password,"298500");
+        strcpy(mode,"server");
+
+        m_trader.init_trader(&dispatcher._event_q, m_logger);
+        m_trader.connect( UserID, Password,TD_TCP_FrontAddress,mode);
+        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+
+        m_L2_quoter.init_quoter(&dispatcher._event_q, m_logger);
+        m_L2_quoter.connect( UserID, Password,LEV2MD_TCP_FrontAddress,mode);
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+        dispatcher.init(&m_L2_quoter , &m_trader,m_logger);
+        dispatcher.Start();
+        m_logger->info("Engine Server started");
+    }
 
 
-    m_L2_quoter.init_quoter(&dispatcher._event_q, m_logger);
-    m_L2_quoter.connect( UserID, Password,LEV2MD_TCP_FrontAddress,mode);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-
-    dispatcher.init(&m_L2_quoter , &m_trader,m_logger);
-    dispatcher.Start();
-    
-    m_logger->info("Engine started");
 }
 
 void Engine::Stop()
