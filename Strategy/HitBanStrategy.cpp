@@ -22,7 +22,10 @@ enum StrategyStatus
 class HitBanStrategy : public StrategyBase 
 {
 public:
-	HitBanStrategy(const nlohmann::json& j, Dispatcher* ptr, LoggerPtr log_ptr) : m_dispatcher_ptr(ptr) , m_logger(log_ptr)
+	HitBanStrategy(const nlohmann::json& j, Dispatcher* ptr, LoggerPtr log_ptr) : m_dispatcher_ptr(ptr),
+	  m_logger(log_ptr),
+	  current_position(0), 
+      running_status(0) 
 	{
 		std::cout<<"[HitBanStrategy] One instance created"<<std::endl;
 		this->buy_trigger_volume = j["BuyTriggerVolume"].get<int>();
