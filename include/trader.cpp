@@ -306,6 +306,7 @@ private:
 
 	virtual void OnRspOrderAction(CTORATstpInputOrderActionField* pInputOrderActionField, TORASTOCKAPI::CTORATstpRspInfoField* pRspInfo, int nRequestID)
 	{
+		printf("[TRADER OnRspOrderAction]  [%d] [%d] [%s] \n", nRequestID, pInputOrderActionField->OrderActionRef, pInputOrderActionField->CancelOrderSysID);
 		if(pInputOrderActionField->SInfo[0] == '\0'){
 			//std::cout<<"[Trader:OnRspOrderAction] SInfo is empty, please check order source "<< std::endl;
 			//printf("[%d] [%d] [%s] \n", nRequestID, pInputOrderActionField->OrderActionRef, pInputOrderActionField->CancelOrderSysID);
@@ -336,6 +337,25 @@ private:
 
 	virtual void OnRtnOrder(CTORATstpOrderField* pOrder)
 	{
+		printf(
+			"[TRADER OnRtnOrder]:::\n"
+			"---RequestID[%d] SecurityID[%s] OrderRef[%d] OrderLocalID[%s] OrderSysID[%s]\n"
+			"---OrderType[%c] LimitPrice[%.2f]\n"
+			"---OrderStatus[%c] StatusMsg[%s] OrderSubmitStatus[%c]\n"
+			"---VolumeTotalOriginal[%d] VolumeTraded[%d] VolumeCanceled[%d]\n"
+			"---InsertUser[%s] InsertDate[%s] InsertTime[%s] AcceptTime[%s]\n"
+			"---CancelUser[%s] CancelTime[%s]"
+			"---PbuID[%s]"
+			"\n"
+			, pOrder->RequestID, pOrder->SecurityID, pOrder->OrderRef, pOrder->OrderLocalID, pOrder->OrderSysID
+			, pOrder->OrderType, pOrder->LimitPrice
+			, pOrder->OrderStatus, pOrder->StatusMsg, pOrder->OrderSubmitStatus
+			, pOrder->VolumeTotalOriginal, pOrder->VolumeTraded, pOrder->VolumeCanceled
+			, pOrder->InsertUser, pOrder->InsertDate, pOrder->InsertTime, pOrder->AcceptTime
+			, pOrder->CancelUser, pOrder->CancelTime
+			, pOrder->PbuID
+		    );
+
 		if(pOrder->SInfo[0] == '\0'){
 			std::cout<<"[Trader:OnRtnOrder] SInfo is empty, please check order source "<< std::endl;
 			printf(
@@ -397,7 +417,10 @@ private:
 
 	virtual void OnRtnTrade(CTORATstpTradeField* pTrade)
 	{
-		
+		printf("[TRADER OnRtnTrade]: TradeID[%s] InvestorID[%s] SecurityID[%s] OrderRef[%d] OrderLocalID[%s] Price[%.2f] Volume[%d]\n",
+			pTrade->TradeID, pTrade->InvestorID, pTrade->SecurityID, pTrade->OrderRef, pTrade->OrderLocalID, pTrade->Price, pTrade->Volume);
+
+
 		auto temp_map_ptr = OrderSysid_Sinfo_map.find(std::string(pTrade->OrderSysID));
 		// If ordersysid not in the map, then the order to this trade was not sent by this program, probably done other platform manuelly
 		if(temp_map_ptr== OrderSysid_Sinfo_map.end() ){
