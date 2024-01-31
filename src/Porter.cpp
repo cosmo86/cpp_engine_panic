@@ -76,6 +76,7 @@ const char* CheckRunningStrategy()
     std::string res_string = res.dump();
     char* cstr = new char[res_string.length() + 1]; 
     strcpy(cstr, res_string.c_str());
+    std::cout<<"[Porter - running strategy] "<<cstr<<std::endl;
     return cstr;
 }
 
@@ -87,7 +88,7 @@ const char* CheckRemovedStrategy()
     std::string res_string = res.dump();
     char* cstr = new char[res_string.length() + 1]; 
     strcpy(cstr, res_string.c_str());
-    std::cout<<"[Porter] "<<cstr<<std::endl;
+    std::cout<<"[Porter - removed strategy] "<<cstr<<std::endl;
     return cstr;
 }
 

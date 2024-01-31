@@ -264,6 +264,8 @@ nlohmann::json Dispatcher::check_running_strategy()
 			temp_json["SecurityName"] = temp_strategy->strate_stock_name;
 			temp_json["DelayTime"] = temp_strategy->delay_duration;
 			combinedJson.push_back(temp_json);
+
+			std::cout<<"[Dispatcher check running] "<<combinedJson<<std::endl;
 		}
 	}
     return combinedJson;
