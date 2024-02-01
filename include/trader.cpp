@@ -20,6 +20,7 @@
 #include "SEObject.hpp"
 #include "Event.h"
 #include "OrderModels.hpp"
+#include "helper_functions.hpp"
 
 using LoggerPtr = std::shared_ptr<spdlog::async_logger>;
 
@@ -337,6 +338,12 @@ private:
 
 	virtual void OnRtnOrder(CTORATstpOrderField* pOrder)
 	{
+		m_logger->warn("T,{}, [OnRtnOrder] ,{},{},{},{}",
+		pOrder->SInfo,
+		pOrder->SecurityID,
+		pOrder->OrderSysID,
+		pOrder->OrderStatus, 
+		pOrder->OrderSubmitStatus);
 		printf(
 			"[TRADER OnRtnOrder]:::\n"
 			"---RequestID[%d] SecurityID[%s] OrderRef[%d] OrderLocalID[%s] OrderSysID[%s]\n"
