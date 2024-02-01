@@ -133,7 +133,7 @@ public:
 		std::cout<<"[TradeSpi] RegisterFront"<< std::endl;
 		std::cout<<"[TradeSpi] RegisterSpi"<< std::endl;
 		m_api->SubscribePrivateTopic(TORA_TERT_QUICK);
-        m_api->SubscribePublicTopic(TORA_TERT_QUICK);
+		m_api->SubscribePublicTopic(TORA_TERT_QUICK);
 		std::cout<<"[TradeSpi] Register private topic"<< std::endl;
 		m_api->Init();
 		std::cout<<"[TradeSpi] Init"<< std::endl;
