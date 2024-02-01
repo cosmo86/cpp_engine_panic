@@ -21,6 +21,7 @@
 #include "Event.h"
 #include "OrderModels.hpp"
 #include "helper_functions.hpp"
+#include <pthread.h>
 
 using LoggerPtr = std::shared_ptr<spdlog::async_logger>;
 
@@ -226,6 +227,21 @@ private:
 		if (pRspInfo->ErrorID == 0)
 		{
 			printf("[TradeSpi] TradeApi OnRspUserLogin: OK! [%d]\n", nRequestID);
+
+			// Set cpu affinity if mode is server
+			if (strcmp(m_mode,"server") ==0)
+			{
+				cpu_set_t cpu_set;
+				CPU_ZERO(&cpu_set);
+				CPU_SET(49, &cpu_set);
+				int ret = pthread_setaffinity_np(pthread_self(), sizeof(cpu_set),&cpu_set);
+				if (ret != 0) 
+				{
+					std::cerr << "Failed to set thread affinity" << std::endl;
+				}
+				m_logger->warn("T,-1, [OnRspUserLogin] ,setaffinity DONE, 49");
+			}
+			
 
 			m_front_id = pRspUserLoginField->FrontID;
 			m_session_id = pRspUserLoginField->SessionID;
