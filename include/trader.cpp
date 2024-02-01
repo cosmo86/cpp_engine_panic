@@ -132,6 +132,9 @@ public:
 		m_api->RegisterFront(m_address);
 		std::cout<<"[TradeSpi] RegisterFront"<< std::endl;
 		std::cout<<"[TradeSpi] RegisterSpi"<< std::endl;
+		m_api->SubscribePrivateTopic(TORA_TERT_QUICK);
+        m_api->SubscribePublicTopic(TORA_TERT_QUICK);
+		std::cout<<"[TradeSpi] Register private topic"<< std::endl;
 		m_api->Init();
 		std::cout<<"[TradeSpi] Init"<< std::endl;
 	}
@@ -229,7 +232,7 @@ private:
 			printf("[TradeSpi] TradeApi OnRspUserLogin: OK! [%d]\n", nRequestID);
 
 			// Set cpu affinity if mode is server
-			if (strcmp(m_mode,"server") ==0)
+			if (strcmp(m_mode,"test") ==0)
 			{
 				cpu_set_t cpu_set;
 				CPU_ZERO(&cpu_set);
