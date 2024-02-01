@@ -326,6 +326,7 @@ CMakeFiles/MyLibrary.dir/src/dispatcher.cpp.o: \
  /root/usr_1/cpp_engine_panic/include/TORATstpLev2ApiDataType.h \
  /root/usr_1/cpp_engine_panic/include/concurrentqueue.h \
  /root/usr_1/cpp_engine_panic/Strategy/Strategy.hpp \
+ /root/usr_1/cpp_engine_panic/include/helper_functions.hpp \
  /root/usr_1/cpp_engine_panic/include/trader.cpp \
  /root/usr_1/cpp_engine_panic/include/TORATstpTraderApi.h \
  /root/usr_1/cpp_engine_panic/include/TORATstpUserApiStruct.h \
