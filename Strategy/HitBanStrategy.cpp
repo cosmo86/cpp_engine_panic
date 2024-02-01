@@ -309,7 +309,6 @@ public:
 			this->running_status.store(StrategyStatus::ORDER_SENT);
 			strcpy(this->strate_OrderSysID,temp_orderField->OrderSysID);
 			this->order_accepted = true;
-			this->if_order_sent = false;
 			m_logger->info("S,{}, [ORDER_SUCCESS] , securityID:{}, SInfo:{}, OrderSysID: {}",
 							this->strate_SInfo, 
 							temp_orderField->SecurityID, temp_orderField->SInfo , temp_orderField->OrderSysID);
@@ -329,6 +328,7 @@ public:
 
 		{
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
+			this->if_order_sent = false;
 			// Reached max order reject time, stop stategy
 			if (this->order_error_tolerance_count > this->max_order_error_tolerance)
 			{
