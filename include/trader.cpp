@@ -88,7 +88,8 @@ private:
 	std::unordered_map<std::string, double> limup_table; //<securityid , limup_price>
 	std::unordered_map<std::string, std::string> secID_name_table; //<securityid, SecurityName>
 	std::unordered_map<TTORATstpExchangeIDType, std::string> shareHolder_table; // <exchangeid , shareholderid>
-	std::unordered_map<std::string, char[33]> OrderSysid_Sinfo_map; //<OrderSysid , Sinfo>
+	//std::unordered_map<std::string, char[33]> OrderSysid_Sinfo_map; //<OrderSysid , Sinfo>
+	std::unordered_map<std::string, std::string> OrderSysid_Sinfo_map;
 
 public:
 	TradeSpi()
@@ -419,6 +420,7 @@ private:
 			//std::shared_ptr<SE_Lev2MarketDataField> temp = std::static_pointer_cast<SE_Lev2MarketDataField>(temp_event.event);
 			//std::cout<<temp->SecurityID<<" "<<temp->ClosePrice<<std::endl;
 			m_Event_Q_ptr->enqueue(std::move(temp_event));
+			OrderSysid_Sinfo_map[std::string(pOrder->OrderSysID)] = std::string(pOrder->SInfo);
 
 			printf(
 				"OnRtnOrder:::\n"
@@ -462,7 +464,7 @@ private:
 
 		temp_event.e_type = Eventtype::TRADE;
 		temp_event.event = TradeField;
-		strcpy(temp_event.S_id, temp_map_ptr->second);
+		strcpy(temp_event.S_id, temp_map_ptr->second.c_str());
 
 		//std::shared_ptr<SE_Lev2MarketDataField> temp = std::static_pointer_cast<SE_Lev2MarketDataField>(temp_event.event);
 		//std::cout<<temp->SecurityID<<" "<<temp->ClosePrice<<std::endl;
