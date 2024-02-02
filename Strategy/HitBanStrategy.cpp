@@ -104,7 +104,7 @@ public:
 
 	bool if_order_sent = false;
 	bool if_cancel_sent = false;
-	int delay_duration; // in milliseconds
+	int delay_duration = 500; // in milliseconds
 
 	bool order_accepted = false;
 	char strate_OrderSysID[21];

@@ -102,8 +102,8 @@ with st.sidebar:
         exchange='1'
     if exchange == 'SZSE':
         exchange = '2'
-    limit_volume = submit_container.number_input('封单金额(万)：', min_value=1000, step=1000)
-    cancel_volume = submit_container.number_input('撤单金额(万)：', min_value=1000, step=1000)
+    limit_volume = submit_container.number_input('封单金额(万)：', min_value=100, step=100)
+    cancel_volume = submit_container.number_input('撤单金额(万)：', min_value=100, step=100)
     position = submit_container.number_input('打板金额(万)：', min_value=0.1, step=100.0)
     count = submit_container.number_input('撤单次数：', min_value=1, step=1)
     try:
@@ -162,7 +162,7 @@ if st.session_state.strategy_container:
         column_config={
             'SecurtiyID': '证券代码',
             'ExchangeID': '交易所',
-            'LimitVolume': '封单额',
+            'BuyTriggerVolume': '封单额',
             'CancelVolume': '撤单额',
             'TargetPosition': '目标仓位（股）',
             'CurrPosition': '已买仓位（股）',
@@ -174,7 +174,7 @@ if st.session_state.strategy_container:
             "SecurityName" : "股票名称"
         },
             
-        column_order=('ID', 'SecurityID','SecurityName','ExchangeID', 'LimitVolume', 'CancelVolume', 'TargetPosition', 'CurrPosition', 'DelayTime' ,'Count','Status','OrderID'),
+        column_order=('ID', 'SecurityID','SecurityName','ExchangeID', 'BuyTriggerVolume', 'CancelVolume', 'TargetPosition', 'CurrPosition', 'DelayTime' ,'Count','Status','OrderID'),
         hide_index=True,
         use_container_width=True
     )
@@ -190,7 +190,7 @@ if st.session_state.strategy_container:
         column_config={
             'SecurtiyID': '证券代码',
             'ExchangeID': '交易所',
-            'LimitVolume': '封单额',
+            'BuyTriggerVolume': '封单额',
             'CancelVolume': '撤单额',
             'TargetPosition': '目标仓位（股）',
             'CurrPosition': '已买仓位（股）',
@@ -202,7 +202,7 @@ if st.session_state.strategy_container:
             "SecurityName" : "股票名称"
         },
             
-        column_order=('ID', 'SecurityID','SecurityName','ExchangeID', 'LimitVolume', 'CancelVolume', 'TargetPosition', 'CurrPosition', 'DelayTime' ,'Count','Status','OrderID'),
+        column_order=('ID', 'SecurityID','SecurityName','ExchangeID', 'BuyTriggerVolume', 'CancelVolume', 'TargetPosition', 'CurrPosition', 'DelayTime' ,'Count','Status','OrderID'),
         hide_index=True,
         use_container_width=True
     )

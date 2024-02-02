@@ -1,3 +1,0 @@
-/root/usr_1/cpp_engine_panic/build/CMakeFiles/MyLibrary.dir
-/root/usr_1/cpp_engine_panic/build/CMakeFiles/edit_cache.dir
-/root/usr_1/cpp_engine_panic/build/CMakeFiles/rebuild_cache.dir

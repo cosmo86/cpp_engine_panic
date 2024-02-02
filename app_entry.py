@@ -140,7 +140,7 @@ def check_removed_strategy():
         json_dict = json.loads(res)
         for dict in json_dict:
             model_instance = UserStrategyModel(**dict)
-            rtn["StrategyGroup"][int(model_instance.ID)] = model_instance
+            rtn["StrategyGroup"].append(model_instance)
 
         return rtn
     else:
