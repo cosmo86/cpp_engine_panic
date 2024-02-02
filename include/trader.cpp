@@ -21,6 +21,7 @@
 #include "Event.h"
 #include "OrderModels.hpp"
 #include "helper_functions.hpp"
+#include <pthread.h>
 
 using LoggerPtr = std::shared_ptr<spdlog::async_logger>;
 
@@ -87,7 +88,8 @@ private:
 	std::unordered_map<std::string, double> limup_table; //<securityid , limup_price>
 	std::unordered_map<std::string, std::string> secID_name_table; //<securityid, SecurityName>
 	std::unordered_map<TTORATstpExchangeIDType, std::string> shareHolder_table; // <exchangeid , shareholderid>
-	std::unordered_map<std::string, char[33]> OrderSysid_Sinfo_map; //<OrderSysid , Sinfo>
+	//std::unordered_map<std::string, char[33]> OrderSysid_Sinfo_map; //<OrderSysid , Sinfo>
+	std::unordered_map<std::string, std::string> OrderSysid_Sinfo_map;
 
 public:
 	TradeSpi()
@@ -131,6 +133,9 @@ public:
 		m_api->RegisterFront(m_address);
 		std::cout<<"[TradeSpi] RegisterFront"<< std::endl;
 		std::cout<<"[TradeSpi] RegisterSpi"<< std::endl;
+		m_api->SubscribePrivateTopic(TORA_TERT_QUICK);
+		m_api->SubscribePublicTopic(TORA_TERT_QUICK);
+		std::cout<<"[TradeSpi] Register private topic"<< std::endl;
 		m_api->Init();
 		std::cout<<"[TradeSpi] Init"<< std::endl;
 	}
@@ -226,6 +231,21 @@ private:
 		if (pRspInfo->ErrorID == 0)
 		{
 			printf("[TradeSpi] TradeApi OnRspUserLogin: OK! [%d]\n", nRequestID);
+
+			// Set cpu affinity if mode is server
+			if (strcmp(m_mode,"test") ==0)
+			{
+				cpu_set_t cpu_set;
+				CPU_ZERO(&cpu_set);
+				CPU_SET(49, &cpu_set);
+				int ret = pthread_setaffinity_np(pthread_self(), sizeof(cpu_set),&cpu_set);
+				if (ret != 0) 
+				{
+					std::cerr << "Failed to set thread affinity" << std::endl;
+				}
+				m_logger->warn("T,-1, [OnRspUserLogin] ,setaffinity DONE, 49");
+			}
+			
 
 			m_front_id = pRspUserLoginField->FrontID;
 			m_session_id = pRspUserLoginField->SessionID;
@@ -400,6 +420,7 @@ private:
 			//std::shared_ptr<SE_Lev2MarketDataField> temp = std::static_pointer_cast<SE_Lev2MarketDataField>(temp_event.event);
 			//std::cout<<temp->SecurityID<<" "<<temp->ClosePrice<<std::endl;
 			m_Event_Q_ptr->enqueue(std::move(temp_event));
+			OrderSysid_Sinfo_map[std::string(pOrder->OrderSysID)] = std::string(pOrder->SInfo);
 
 			printf(
 				"OnRtnOrder:::\n"
@@ -443,7 +464,7 @@ private:
 
 		temp_event.e_type = Eventtype::TRADE;
 		temp_event.event = TradeField;
-		strcpy(temp_event.S_id, temp_map_ptr->second);
+		strcpy(temp_event.S_id, temp_map_ptr->second.c_str());
 
 		//std::shared_ptr<SE_Lev2MarketDataField> temp = std::static_pointer_cast<SE_Lev2MarketDataField>(temp_event.event);
 		//std::cout<<temp->SecurityID<<" "<<temp->ClosePrice<<std::endl;

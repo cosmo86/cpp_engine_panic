@@ -81,6 +81,8 @@ def read_cached_data():
 
 @app.post('/add_strategy')
 def add_strategy(user_input: UserStrategyModel):
+    if len(user_input.SecurityID) != 6:
+        raise  HTTPException(status_code=400, detail="Bad Request: [Wrong SecurityID format]")
     if user_input.SecurityID.startswith('6') and user_input.ExchangeID == '2':#SZSE
         raise  HTTPException(status_code=400, detail="Bad Request: [Wrong ExchangeID]")
     if (user_input.SecurityID.startswith('0') or user_input.SecurityID.startswith('3')) and user_input.ExchangeID == '1':#SSE
