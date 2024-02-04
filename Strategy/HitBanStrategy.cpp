@@ -137,12 +137,12 @@ public:
 			return;
 		}
 
-		if (order_accepted == true && if_cancel_sent == false && __condition_cancel)
+		if (this->order_accepted == true && this->if_cancel_sent == false && __condition_cancel)
 		{
 			m_dispatcher_ptr->trader_ptr->Send_Cancle_Order(this->strate_exchangeID, 
 															this->strate_OrderSysID,
 															this->strate_SInfo);
-			if_cancel_sent = true;
+			this->if_cancel_sent = true;
 			m_logger->info("S,{}, [ACTION] , code: {}, cancle sent, curr_volume: {}, cancle_volume: {}", 
 							this->strate_SInfo,
 							this->strate_stock_code,
@@ -168,13 +168,17 @@ public:
 		// unique_lock scope
 		{
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
-			if(temp_tick->BidPrice1 < this->strate_limup_price)
+			if(temp_tick->LastPrice < this->strate_limup_price)
 			{
 				// If true remain true to enable send order
 				if (this->can_resend_order){return;}
 				else{
 				// If false, set tp true to enable send order
 					this->can_resend_order = true;
+					m_logger->warn("S,{}, [ON_TICK] , limup price is {},Last price is {}, Bitsetting can_resend_order  to true. ",
+									this->strate_SInfo,
+									this->strate_limup_price,
+									temp_tick->LastPrice);
 					return;
 				}
 			}
@@ -206,13 +210,8 @@ public:
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
 			if (temp_orderdetial->Price < this->strate_limup_price)
 			{
-				// If true remain true to enable send order
-				if (this->can_resend_order){return;}
-				else{
-				// If false, set tp true to enable send order
-					this->can_resend_order = true;
-					return;
-				}
+				// Not updating can_resend_order because order price can be lower than limup while still limup
+				return;
 			}
 
 			//buy order not cancled, add buy volume to fengban_volume
@@ -268,6 +267,12 @@ public:
 				else{
 				// If false, set tp true to enable send order
 					this->can_resend_order = true;
+					m_logger->warn("S,{}, [on_transac] , limup price is {},Trade price is {}, Bitsetting can_resend_order  to true. strate_limup_price and this->strate_limup_price {},{} ",
+									this->strate_SInfo,
+									this->strate_limup_price,
+									temp_transac->TradePrice,
+									strate_limup_price,
+									this->strate_limup_price);
 					return;
 				}
 			}
@@ -309,6 +314,7 @@ public:
 			this->running_status.store(StrategyStatus::ORDER_SENT);
 			strcpy(this->strate_OrderSysID,temp_orderField->OrderSysID);
 			this->order_accepted = true;
+			this->if_cancel_sent = false;
 			m_logger->info("S,{}, [ORDER_SUCCESS] , securityID:{}, SInfo:{}, OrderSysID: {}",
 							this->strate_SInfo, 
 							temp_orderField->SecurityID, temp_orderField->SInfo , temp_orderField->OrderSysID);
@@ -378,6 +384,7 @@ public:
 
 		{
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
+			this->if_cancel_sent = false;
 			this->running_status.store(StrategyStatus::ORDER_CANCELED_ABNORMAL);
 		}
 		m_logger->info("S,{}, [CANCLE_ERROR] ,  OrderSysID:{} ",this->strate_SInfo, temp_orderActionField->OrderSysID);

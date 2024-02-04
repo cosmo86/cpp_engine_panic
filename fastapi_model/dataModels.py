@@ -12,7 +12,7 @@ class UserStrategyModel(BaseModel):
     Position: int = 0
     TargetPosition: int = 0
     CurrPosition : int = 0
-    DelayTime: int = 0
+    DelayTime: int = 500
     MaxTriggerTimes: int = 0 
     ID: str = ""
     Status: int = 0
