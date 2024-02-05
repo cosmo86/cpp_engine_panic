@@ -50,10 +50,6 @@ class Lev2MdSpi : public CTORATstpLev2MdSpi
 public:
 	Lev2MdSpi()
 	{
-		//std::cout<<"[Lev2MdSpi] creating m_api"<< std::endl;
-		//m_api = CTORATstpLev2MdApi::CreateTstpLev2MdApi();
-		//std::cout<<"[Lev2MdSpi]  m_api created"<< std::endl;
-		// //m_api = api;
 	}
 
 	~Lev2MdSpi(void)
@@ -66,7 +62,7 @@ public:
 		std::cout<< "[Lev2MdSpi] pointer before init :"<<m_Event_Q_ptr<<std::endl;
 		this->m_Event_Q_ptr = m_Event_Q_ptr;
 		this->m_logger = logger_ptr;
-		std::cout<< "[Lev2MdSpi] pointer to queue inited, address is "<< m_Event_Q_ptr<<std::endl;
+		m_logger->warn( "Q, [Lev2MdSpi] pointer to queue inited address is {}", static_cast<void*>(m_Event_Q_ptr));
 	}
 	// connect to L2 server
 	virtual void connect(const char* const userid, const char* const password, const char* const address, const char* const mode)
@@ -122,8 +118,7 @@ public:
 
 	virtual void OnFrontDisconnected(int nReason)
 	{
-		printf("OnFrontDisconnected! nReason[%d]\n", nReason);
-
+		m_logger->warn("Q, [OnFrontDisconnected], nReason:{}", nReason);
 	};
 
 	/// Error response
@@ -137,7 +132,7 @@ public:
 	{
 		if (pRspInfo && pRspInfo->ErrorID == 0)
 		{
-			printf("OnRspUserLogin Success!\n");
+			m_logger->warn("Q, [OnRspUserLogin], Success!");
 			
 			char* Securities[1];
 			Securities[0] = (char*) "300377";
@@ -147,24 +142,31 @@ public:
 
 		else
 		{
-			printf("OnRspUserLogin fail!\n");
+			m_logger->warn("Q, [OnRspUserLogin], Fail!");
 		}
 	};
 
     // Subscribe 
 	virtual void Subscribe( char* ppSecurityID[], int nCount, TTORATstpExchangeIDType ExchageID)
 	{
+		//convert  array of char array into string
+		std::string securities;
+		for (int i = 0; i < nCount; ++i) {
+			if (i > 0) securities += ", "; // Add a separator between IDs
+			securities += ppSecurityID[i]; // Append the security ID to the string
+		}
+
 		if (ExchageID == TORALEV2API::TORA_TSTP_EXD_SSE) 
 		{
 			//Subscribe NGTS (orderdetial and trasaction together)
 			int ret_nt = m_api->SubscribeNGTSTick(ppSecurityID, sizeof(ppSecurityID) / sizeof(char*), ExchageID);
 			if (ret_nt == 0)
 			{
-				printf("SubscribeNGTSTick:::Success,ret=%d\n", ret_nt);
+				m_logger->warn("Q, [SubscribeNGTSTick] , Success, stock:{}", securities);
 			}
 			else
 			{
-				printf("SubscribeNGTSTick:::Failed, ret=%d)\n", ret_nt);
+				m_logger->warn("Q, [SubscribeNGTSTick] , Fail,stock:{}", securities);
 			}
 		}
 		
@@ -173,56 +175,62 @@ public:
 		int ret_od = m_api->SubscribeOrderDetail(ppSecurityID, sizeof(ppSecurityID) / sizeof(char*), ExchageID);
 		if (ret_od == 0)
 		{
-			printf("SubscribeOrderDetail:::Success,ret=%d\n", ret_od);
+			m_logger->warn("Q, [SubscribeOrderDetail] , Success,stock:{}", securities);
 		}
 		else
 		{
-			printf("SubscribeOrderDetail:::Failed, ret=%d)\n", ret_od);
+			m_logger->warn("Q, [SubscribeOrderDetail] , Fail,stock:{}", securities);
 		}
 
 		//Subscribe old trasaction 
 		int ret_t = m_api->SubscribeTransaction(ppSecurityID, sizeof(ppSecurityID) / sizeof(char*), ExchageID);
 		if (ret_t == 0)
 		{
-			printf("SubscribeTransaction:::Success,ret=%d\n", ret_t);
-			printf("SubscribeTransaction:::Success,eid=%d\n", ExchageID);
 			int xtsmd_size = sizeof(ppSecurityID) / sizeof(char*);
 			for (int i = 0; i < xtsmd_size; i++)
 			{
-				printf("SubscribeTransaction::Securities[%d]::%s\n", i, ppSecurityID[i]);
+				m_logger->warn("Q, [SubscribeTransaction] , Success,stock:{}", ppSecurityID[i]);
+				//printf("SubscribeTransaction::Securities[%d]::%s\n", i, ppSecurityID[i]);
 			}
 		}
 		else
 		{
-			printf("SubscribeTransaction:::Failed,ret=%d)\n", ret_t);
+			m_logger->warn("Q, [SubscribeTransaction] , Failed");
 		}
 
 		//Subscribe to market data
 		int ret_md = m_api->SubscribeMarketData(ppSecurityID, sizeof(ppSecurityID) / sizeof(char*), ExchageID);
 		if (ret_md == 0)
 		{
-			printf("SubscribeMarketData:::Success,ret=%d\n", ret_md);
+			m_logger->warn("Q, [SubscribeMarketData] , Success,stock:{}", securities);
 		}
 		else
 		{
-			printf("SubscribeMarketData:::Failed, ret=%d)\n", ret_md);
+			m_logger->warn("Q, [SubscribeMarketData] , Failed,stock:{}", securities);
 		}
 	}
 
     //UnSubscribe
 	virtual void UnSubscribe(char* ppSecurityID[], int nCount, TTORATstpExchangeIDType ExchageID)
 	{
+		//convert  array of char array into string
+		std::string securities;
+		for (int i = 0; i < nCount; ++i) {
+			if (i > 0) securities += ", "; // Add a separator between IDs
+			securities += ppSecurityID[i]; // Append the security ID to the string
+		}
+
 		if (ExchageID == TORALEV2API::TORA_TSTP_EXD_SSE) 
 		{
 			//Subscribe NGTS (orderdetial and trasaction together)
 			int ret_nt = m_api->UnSubscribeNGTSTick(ppSecurityID, sizeof(ppSecurityID) / sizeof(char*), ExchageID);
 			if (ret_nt == 0)
 			{
-				printf("UnSubscribeNGTSTick:::Success,ret=%d\n", ret_nt);
+				m_logger->warn("Q, [UnSubscribeNGTSTick] , Success,stock:{}", securities);
 			}
 			else
 			{
-				printf("UnSubscribeNGTSTick:::Failed, ret=%d)\n", ret_nt);
+				m_logger->warn("Q, [UnSubscribeNGTSTick] , Failed,stock:{}", securities);
 			}
 		}
 		
@@ -231,39 +239,40 @@ public:
 		int ret_od = m_api->UnSubscribeOrderDetail(ppSecurityID, sizeof(ppSecurityID) / sizeof(char*), ExchageID);
 		if (ret_od == 0)
 		{
-			printf("UnSubscribeOrderDetail:::Success,ret=%d\n", ret_od);
+			m_logger->warn("Q, [UnSubscribeOrderDetail] , Success,stock:{}", securities);
 		}
 		else
 		{
-			printf("UnSubscribeOrderDetail:::Failed, ret=%d)\n", ret_od);
+			m_logger->warn("Q, [UnSubscribeOrderDetail] , Failed,stock:{}", securities);
 		}
 
 		//Subscribe old trasaction 
 		int ret_t = m_api->UnSubscribeTransaction(ppSecurityID, sizeof(ppSecurityID) / sizeof(char*), ExchageID);
 		if (ret_t == 0)
 		{
-			printf("UnSubscribeTransaction:::Success,ret=%d\n", ret_t);
-			printf("UnSubscribeTransaction:::Success,eid=%d\n", ExchageID);
+			//printf("UnSubscribeTransaction:::Success,ret=%d\n", ret_t);
+			//printf("UnSubscribeTransaction:::Success,eid=%d\n", ExchageID);
 			int xtsmd_size = sizeof(ppSecurityID) / sizeof(char*);
 			for (int i = 0; i < xtsmd_size; i++)
 			{
-				printf("UnSubscribeTransaction::Securities[%d]::%s\n", i, ppSecurityID[i]);
+				m_logger->warn("Q, [UnSubscribeTransaction] , Success,stock:{}", ppSecurityID[i]);
+				//printf("UnSubscribeTransaction::Securities[%d]::%s\n", i, ppSecurityID[i]);
 			}
 		}
 		else
 		{
-			printf("UnSubscribeTransaction:::Failed,ret=%d)\n", ret_t);
+			m_logger->warn("Q, [UnSubscribeTransaction] , Failed,stock:{}", securities);
 		}
 
 		//Subscribe to market data
 		int ret_md = m_api->UnSubscribeMarketData(ppSecurityID, sizeof(ppSecurityID) / sizeof(char*), ExchageID);
 		if (ret_md == 0)
 		{
-			printf("UnSubscribeMarketData:::Success,ret=%d\n", ret_md);
+			m_logger->warn("Q, [UnSubscribeMarketData] , Success,stock:{}", securities);
 		}
 		else
 		{
-			printf("UnSubscribeMarketData:::Failed, ret=%d)\n", ret_md);
+			m_logger->warn("Q, [UnSubscribeMarketData] , Failed,stock:{}", securities);
 		}
 	}
 
@@ -332,29 +341,27 @@ public:
 	/// OnRtnMarketData
 	virtual void OnRtnMarketData(CTORATstpLev2MarketDataField* pDepthMarketData, const int FirstLevelBuyNum, const int FirstLevelBuyOrderVolumes[], const int FirstLevelSellNum, const int FirstLevelSellOrderVolumes[])
 	{
-		/*printf("OnRtnMarketData TimeStamp[%d]  SecurityID[%s] ExchangeID[%c]  PreClosePrice[%f] LowestPrice[%f] HighestPrice[%f] OpenPrice[%f] LastPrice[%f]"
-			"BidPrice{[%f] [%f] [%f] [%f] [%f] [%f] [%f] [%f] [%f] [%f]}"
-			"AskPrice{[%f] [%f] [%f] [%f] [%f] [%f] [%f] [%f] [%f] [%f]}"
-			"BidVolume{[%lld] [%lld] [%lld] [%lld] [%lld] [%lld] [%lld] [%lld] [%lld] [%lld]}"
-			"AskVolume{[%lld] [%lld] [%lld] [%lld] [%lld] [%lld] [%lld] [%lld] [%lld] [%lld]}",
-			pDepthMarketData->DataTimeStamp,
-			pDepthMarketData->SecurityID,
-			pDepthMarketData->ExchangeID, pDepthMarketData->PreClosePrice, pDepthMarketData->LowestPrice,
-			pDepthMarketData->HighestPrice, pDepthMarketData->OpenPrice,
-			pDepthMarketData->LastPrice,
-			pDepthMarketData->BidPrice1, pDepthMarketData->BidPrice2, pDepthMarketData->BidPrice3,
-			pDepthMarketData->BidPrice4, pDepthMarketData->BidPrice5, pDepthMarketData->BidPrice6,
-			pDepthMarketData->BidPrice7, pDepthMarketData->BidPrice8, pDepthMarketData->BidPrice9, pDepthMarketData->BidPrice10,
-			pDepthMarketData->AskPrice1, pDepthMarketData->AskPrice2, pDepthMarketData->AskPrice3,
-			pDepthMarketData->AskPrice4, pDepthMarketData->AskPrice5, pDepthMarketData->AskPrice6,
-			pDepthMarketData->AskPrice7, pDepthMarketData->AskPrice8, pDepthMarketData->AskPrice9, pDepthMarketData->AskPrice10,
-			pDepthMarketData->BidVolume1, pDepthMarketData->BidVolume2, pDepthMarketData->BidVolume3,
-			pDepthMarketData->BidVolume4, pDepthMarketData->BidVolume5, pDepthMarketData->BidVolume6,
-			pDepthMarketData->BidVolume7, pDepthMarketData->BidVolume8, pDepthMarketData->BidVolume9, pDepthMarketData->BidVolume10,
-			pDepthMarketData->AskVolume1, pDepthMarketData->AskVolume2, pDepthMarketData->AskVolume3,
-			pDepthMarketData->AskVolume4, pDepthMarketData->AskVolume5, pDepthMarketData->AskVolume6,
-			pDepthMarketData->AskVolume7, pDepthMarketData->AskVolume8, pDepthMarketData->AskVolume9, pDepthMarketData->AskVolume10
-		);*/
+		m_logger->info("Q, [OnRtnMarketData] ,{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}",
+						pDepthMarketData->DataTimeStamp,
+						pDepthMarketData->SecurityID,
+						pDepthMarketData->ExchangeID,
+						pDepthMarketData->PreClosePrice,
+						pDepthMarketData->LowestPrice,
+						pDepthMarketData->HighestPrice,
+						pDepthMarketData->OpenPrice,
+						pDepthMarketData->LastPrice,
+						pDepthMarketData->BidPrice1, pDepthMarketData->BidPrice2, pDepthMarketData->BidPrice3,
+						pDepthMarketData->BidPrice4, pDepthMarketData->BidPrice5, pDepthMarketData->BidPrice6,
+						pDepthMarketData->BidPrice7, pDepthMarketData->BidPrice8, pDepthMarketData->BidPrice9, pDepthMarketData->BidPrice10,
+						pDepthMarketData->AskPrice1, pDepthMarketData->AskPrice2, pDepthMarketData->AskPrice3,
+						pDepthMarketData->AskPrice4, pDepthMarketData->AskPrice5, pDepthMarketData->AskPrice6,
+						pDepthMarketData->AskPrice7, pDepthMarketData->AskPrice8, pDepthMarketData->AskPrice9, pDepthMarketData->AskPrice10,
+						pDepthMarketData->BidVolume1, pDepthMarketData->BidVolume2, pDepthMarketData->BidVolume3,
+						pDepthMarketData->BidVolume4, pDepthMarketData->BidVolume5, pDepthMarketData->BidVolume6,
+						pDepthMarketData->BidVolume7, pDepthMarketData->BidVolume8, pDepthMarketData->BidVolume9, pDepthMarketData->BidVolume10,
+						pDepthMarketData->AskVolume1, pDepthMarketData->AskVolume2, pDepthMarketData->AskVolume3,
+						pDepthMarketData->AskVolume4, pDepthMarketData->AskVolume5, pDepthMarketData->AskVolume6,
+						pDepthMarketData->AskVolume7, pDepthMarketData->AskVolume8, pDepthMarketData->AskVolume9, pDepthMarketData->AskVolume10);
 
 		
 
@@ -367,13 +374,9 @@ public:
 		temp_event.e_type = Eventtype::L2TICK;
 		temp_event.event = marketTick;
 
-		//std::shared_ptr<SE_Lev2MarketDataField> temp = std::static_pointer_cast<SE_Lev2MarketDataField>(temp_event.event);
-		//std::cout<<temp->SecurityID<<" "<<temp->ClosePrice<<std::endl;
 		m_Event_Q_ptr->enqueue(std::move(temp_event));
 		auto stop = std::chrono::high_resolution_clock::now();
 		auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
-		//std::cout << "[OnRtnMarketData]: "<< duration.count() << " nanoseconds" << std::endl;
-
 	
 		/*
 		for (int index = 0; index < FirstLevelBuyNum; index++)
@@ -395,7 +398,25 @@ public:
 	//NGT ֪ͨ
 	virtual void OnRtnNGTSTick(CTORATstpLev2NGTSTickField* pTick)
 	{
-		
+		m_logger->info("Q, [OnRtnNGTSTick] ,{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}",
+						pTick->ExchangeID,
+						pTick->SecurityID,
+						pTick->MainSeq,
+						pTick->SubSeq,
+						pTick->TickTime,
+						pTick->TickType,
+						pTick->BuyNo,
+						pTick->SellNo,
+						pTick->Price,
+						pTick->Volume,
+						pTick->TradeMoney,
+						pTick->Side,
+						pTick->TradeBSFlag,
+						pTick->MDSecurityStat,
+						pTick->Info1,
+						pTick->Info2,
+						pTick->Info3);
+
 		static_assert(sizeof(CTORATstpLev2NGTSTickField) == sizeof(SE_Lev2NGTSTickField), "Size mismatch");
 		std::shared_ptr<SE_Lev2NGTSTickField> NGTSTick = SEObject::Create<SE_Lev2NGTSTickField>();
 		memcpy(NGTSTick.get(),pTick,sizeof(SE_Lev2NGTSTickField));
@@ -406,31 +427,29 @@ public:
 		m_Event_Q_ptr->enqueue(std::move(temp_event));
 
 
-		printf("OnRtnNGTSTick SecurityID[%s] \n", pTick->SecurityID);
-		printf("ExchangeID[%d] \n", pTick->ExchangeID);
-		printf("Ticktime[%d] \n", pTick->TickTime);
-		printf(" MainSeq[%d] \n", pTick->MainSeq);
-		printf("SubSeq[%d] \n", pTick->SubSeq);
-		printf("TickType[%c] \n", pTick->TickType);
-
-		printf("BuyNo [%d] \n", pTick->BuyNo);
-		printf("SellNo[%d] \n", pTick->SellNo);
-		printf("Price[%.4f] \n", pTick->Price);
-		printf(" Volume [%lld] \n", pTick->Volume);
-		printf("TradeMoney[%.4f] \n", pTick->TradeMoney);
-		printf("Side[%c] \n", pTick->Side);
-
-		printf("TradeBSFlag [%c] \n", pTick->TradeBSFlag);
-		printf("MDSecurityStat[%c] \n", pTick->MDSecurityStat);
-		printf("Info1[%d] \n", pTick->Info1);
-		printf(" Info2 [%d] \n", pTick->Info2);
-
 	}
 
 
 	/// OnRtnTransaction
 	virtual void OnRtnTransaction(CTORATstpLev2TransactionField* pTransaction)
 	{
+		m_logger->info("Q, [OnRtnTransaction] ,{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}",
+						pTransaction->ExchangeID,
+						pTransaction->SecurityID,
+						pTransaction->TradeTime,
+						pTransaction->TradePrice,
+						pTransaction->TradeVolume,
+						pTransaction->ExecType,
+						pTransaction->MainSeq,
+						pTransaction->SubSeq,
+						pTransaction->BuyNo,
+						pTransaction->SellNo,
+						pTransaction->Info1,
+						pTransaction->Info2,
+						pTransaction->Info3,
+						pTransaction->TradeBSFlag,
+						pTransaction->BizIndex);
+
 		static_assert(sizeof(CTORATstpLev2TransactionField) == sizeof(SE_Lev2TransactionStruct), "Size mismatch");
 		auto start = std::chrono::high_resolution_clock::now();
 		std::shared_ptr<SE_Lev2TransactionStruct> transstuct = SEObject::Create<SE_Lev2TransactionStruct>();
@@ -443,32 +462,30 @@ public:
 		m_Event_Q_ptr->enqueue(std::move(temp_event));
 		auto stop = std::chrono::high_resolution_clock::now();
 		auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
-		//std::cout << "[OnRtnTransaction]: "<< duration.count() << " nanoseconds" << std::endl;
-		//m_logger->info("{}, {}, {}, {}",pTransaction->SecurityID,pTransaction->TradeTime,pTransaction->TradePrice,pTransaction->TradeVolume);
-		//printf("OnRtnTransaction SecurityID[%s] ", pTransaction->SecurityID);
-		//printf("ExchangeID[%c] ", pTransaction->ExchangeID);
-		//������ʳɽ���TradeTime�ĸ�ʽΪ��ʱ������롿��������??100221530����ʾ10:02:21.530;
-		//�Ϻ���ʳɽ���TradeTime�ĸ�ʽΪ��ʱ����ٷ�֮�롿����??10022153����ʾ10:02:21.53;
-		//printf("TradeTime[%d] ", pTransaction->TradeTime);
-		/*
-		printf("TradePrice[%.4f] ", pTransaction->TradePrice);
-		printf("TradeVolume[%lld] ", pTransaction->TradeVolume);
-		printf("ExecType[%c] ", pTransaction->ExecType);//�Ϻ���ʳɽ�û������ֶΣ�ֻ�������С�ֵ2��ʾ�����ɽ���BuyNo��SellNoֻ��һ���Ƿ�0ֵ���Ը÷�0���ȥ���ҵ������ί�м�Ϊ��������ί�С�
-		printf("MainSeq[%d] ", pTransaction->MainSeq);
-		printf("SubSeq[%lld] ", pTransaction->SubSeq);
-		printf("BuyNo[%lld] ", pTransaction->BuyNo);
-		printf("SellNo[%lld] ", pTransaction->SellNo);
-		printf("TradeBSFlag[%c] ", pTransaction->TradeBSFlag);
-		printf("Info1[%d] ", pTransaction->Info1);
-		printf("Info2[%d] ", pTransaction->Info2);
-		printf("Info3[%d] \n", pTransaction->Info3);
-		*/
+		
 	};
 
 
 	/// OnRtnOrderDetail
 	virtual void OnRtnOrderDetail(CTORATstpLev2OrderDetailField* pOrderDetail)
 	{
+		m_logger->info("Q, [OnRtnOrderDetail] ,{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}",
+						pOrderDetail->ExchangeID,
+						pOrderDetail->SecurityID,
+						pOrderDetail->OrderTime,
+						pOrderDetail->Price,
+						pOrderDetail->Volume,
+						pOrderDetail->Side,
+						pOrderDetail->OrderType,
+						pOrderDetail->MainSeq,
+						pOrderDetail->SubSeq,
+						pOrderDetail->Info1,
+						pOrderDetail->Info2,
+						pOrderDetail->Info3,
+						pOrderDetail->OrderNO,
+						pOrderDetail->OrderStatus,
+						pOrderDetail->BizIndex);
+
 		static_assert(sizeof(CTORATstpLev2OrderDetailField) == sizeof(SE_Lev2OrderDetailField), "Size mismatch");
 		auto start = std::chrono::high_resolution_clock::now();
 		std::shared_ptr<SE_Lev2OrderDetailField> orderDetial = SEObject::Create<SE_Lev2OrderDetailField>();
@@ -480,25 +497,6 @@ public:
 		m_Event_Q_ptr->enqueue(std::move(temp_event));
 		auto stop = std::chrono::high_resolution_clock::now();
 		auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
-		//std::cout << "[OnRtnOrderDetail]: "<< duration.count() << " nanoseconds" << std::endl;
-		
-		//printf("OnRtnOrderDetail SecurityID[%s] \n", pOrderDetail->SecurityID);
-		//printf("ExchangeID[%c] \n", pOrderDetail->ExchangeID);
-		//printf("OrderTime[%d] \n", pOrderDetail->OrderTime);
-		//printf("\n");
-
-		//printf("Price[%.4f] \n", pOrderDetail->Price);
-		//printf("Volume[%lld] \n", pOrderDetail->Volume);
-		//printf("OrderType[%c] \n", pOrderDetail->OrderType);
-		//printf("MainSeq[%d] \n", pOrderDetail->MainSeq);
-		//printf("SubSeq[%d] \n", pOrderDetail->SubSeq);
-		//printf("OrderNO[%lld] \n", pOrderDetail->OrderNO);
-		//printf("OrderStatus[%c] \n", pOrderDetail->OrderStatus);
-		//printf("Side[%c] \n", pOrderDetail->Side);
-		//printf("Info1[%d] \n ", pOrderDetail->Info1);
-		//printf("Info2[%d] \n", pOrderDetail->Info2);
-		//printf("Info3[%d] \n", pOrderDetail->Info3);
-
 	};
 
 private:

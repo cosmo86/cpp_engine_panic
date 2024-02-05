@@ -131,47 +131,42 @@ public:
 
 		m_api->RegisterSpi(this);
 		m_api->RegisterFront(m_address);
-		std::cout<<"[TradeSpi] RegisterFront"<< std::endl;
-		std::cout<<"[TradeSpi] RegisterSpi"<< std::endl;
+		m_logger->warn("T, [connect] , RegisterSpi and RegisterFront DONE");
 		m_api->SubscribePrivateTopic(TORA_TERT_QUICK);
 		m_api->SubscribePublicTopic(TORA_TERT_QUICK);
-		std::cout<<"[TradeSpi] Register private topic"<< std::endl;
+		m_logger->warn("T, [connect] , Register private and public topic DONE");
 		m_api->Init();
-		std::cout<<"[TradeSpi] Init"<< std::endl;
+		m_logger->warn("T, [connect] , Trader inited");
 	}
 
 private:
 	virtual void OnFrontConnected()
 	{
-		std::cout<<"[TradeSpi]  OnFrontConnected"<< std::endl;
-
+		m_logger->warn("T, [OnFrontConnected] , Trader OnFrontConnected");
 		// 获取终端信息
 		int ret = m_api->ReqGetConnectionInfo(m_req_id++);
 		if (ret != 0)
 		{
-			printf("[TradeSpi] ReqGetConnectionInfo fail, ret[%d]\n", ret);
+			m_logger->warn("T, [OnFrontConnected] , Trader connect failed!! ret: {}",ret);
 		}
 	}
 
 	virtual void OnFrontDisconnected(int nReason)
 	{
-		printf("TradeApi OnFrontDisconnected: [%d]\n", nReason);
+		m_logger->warn("T, [OnFrontDisconnected] , Trader disconnected reason:{}",nReason);
+		//printf("TradeApi OnFrontDisconnected: [%d]\n", nReason);
 	}
 
 	virtual void OnRspGetConnectionInfo(CTORATstpConnectionInfoField* pConnectionInfoField, TORASTOCKAPI::CTORATstpRspInfoField* pRspInfo, int nRequestID)
 	{
 		if (pRspInfo->ErrorID == 0)
 		{
-			printf("[TradeSpi]  inner_ip_address[%s]\n"
-				"[TradeSpi]  inner_port[%d]\n"
-				"[TradeSpi]  outer_ip_address[%s]\n"
-				"[TradeSpi] outer_port[%d]\n"
-				"[TradeSpi] mac_address[%s]\n",
-				pConnectionInfoField->InnerIPAddress,
-				pConnectionInfoField->InnerPort,
-				pConnectionInfoField->OuterIPAddress,
-				pConnectionInfoField->OuterPort,
-				pConnectionInfoField->MacAddress);
+			m_logger->warn("T, [OnRspGetConnectionInfo] , inner_ip_address[{}], inner_port[{}], outer_ip_address[{}], outer_port[{}], mac_address[{}]",
+							pConnectionInfoField->InnerIPAddress,
+							pConnectionInfoField->InnerPort,
+							pConnectionInfoField->OuterIPAddress,
+							pConnectionInfoField->OuterPort,
+							pConnectionInfoField->MacAddress);
 
 
 			TORASTOCKAPI::CTORATstpReqUserLoginField field;
@@ -217,12 +212,14 @@ private:
 			int ret = m_api->ReqUserLogin(&field, m_req_id++);
 			if (ret != 0)
 			{
-				printf("[TradeSpi] TradeApi ReqUserLogin fail, ret[%d]\n", ret);
+				m_logger->warn("T, [ReqUserLogin] , ReqUserLogin fail ret:{}",ret);
 			}
 		}
 		else
 		{
-			printf("[TradeSpi] get connection info fail! error_id[%d] error_msg[%s]\n", pRspInfo->ErrorID, pRspInfo->ErrorMsg);
+			m_logger->warn("T, [OnRspGetConnectionInfo] , get connection info fail! error_id: {}, error_msg: {}", 
+							pRspInfo->ErrorID, pRspInfo->ErrorMsg);
+			//printf("[TradeSpi] get connection info fail! error_id[%d] error_msg[%s]\n", pRspInfo->ErrorID, pRspInfo->ErrorMsg);
 		}
 	}
 
@@ -230,7 +227,8 @@ private:
 	{
 		if (pRspInfo->ErrorID == 0)
 		{
-			printf("[TradeSpi] TradeApi OnRspUserLogin: OK! [%d]\n", nRequestID);
+			m_logger->warn("T, [OnRspUserLogin] , OnRspUserLogin: OK! nRequestID:{}",nRequestID);
+			//printf("[TradeSpi] TradeApi OnRspUserLogin: OK! [%d]\n", nRequestID);
 
 			// Set cpu affinity if mode is server
 			if (strcmp(m_mode,"test") ==0)
@@ -260,7 +258,8 @@ private:
 			int ret = m_api->ReqQrySecurity(&field_Security, m_req_id++);
 			if (ret != 0)
 			{
-				printf("[TradeSpi] ReqQrySecurity fail, ret[%d]\n", ret);
+				m_logger->warn("T, [OnRspUserLogin] , ReqQrySecurity fail, ret:{}",ret);
+				//printf("[TradeSpi] ReqQrySecurity fail, ret[%d]\n", ret);
 			}
 
 
@@ -274,7 +273,8 @@ private:
 			int ret_2 = m_api->ReqQryInvestor(&field_Incestor, m_req_id++);
 			if (ret_2 != 0)
 			{
-				printf("[TradeSpi]  ReqQryInvestor fail, ret[%d]\n", ret);
+				m_logger->warn("T, [OnRspUserLogin] , ReqQryInvestor fail, ret:{}",ret);
+				//printf("[TradeSpi]  ReqQryInvestor fail, ret[%d]\n", ret);
 			}
 
 			// 查询股东账户
@@ -287,7 +287,8 @@ private:
 			int ret_sa = m_api->ReqQryShareholderAccount(&field_sa, m_req_id++);
 			if (ret_sa != 0)
 			{
-				printf("[TradeSpi]  ReqQryShareholderAccount fail, ret[%d]\n", ret_sa);
+				m_logger->warn("T, [OnRspUserLogin] , ReqQryShareholderAccount fail, ret:{}",ret);
+				//printf("[TradeSpi]  ReqQryShareholderAccount fail, ret[%d]\n", ret_sa);
 			}
 		}
 	}
@@ -309,9 +310,30 @@ private:
 
 	virtual void OnErrRtnOrderInsert(CTORATstpInputOrderField *pInputOrderField, TORASTOCKAPI::CTORATstpRspInfoField *pRspInfoField, int nRequestID)
 	{
+		m_logger->info("T, [OnErrRtnOrderInsert] ,{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}",
+						pInputOrderField->UserRequestID,
+						pInputOrderField->ExchangeID,
+						pInputOrderField->InvestorID,
+						pInputOrderField->SecurityID,
+						pInputOrderField->Direction,
+						pInputOrderField->LimitPrice,
+						pInputOrderField->VolumeTotalOriginal,
+						pInputOrderField->OrderPriceType,
+						pInputOrderField->TimeCondition,
+						pInputOrderField->VolumeCondition,
+						pInputOrderField->Operway,
+						pInputOrderField->OrderRef,
+						pInputOrderField->LotType,
+						pInputOrderField->OrderSysID,
+						pInputOrderField->CondCheck,
+						pInputOrderField->SInfo,
+						pInputOrderField->IInfo);
+		
 		if(pInputOrderField->SInfo[0] == '\0'){
-			std::cout<<"[Trader:OnErrRtnOrderInsert] SInfo is empty, please check order source "<< std::endl;
-			std::cout<<pInputOrderField->SecurityID<<" "<< pInputOrderField->Direction<<" OrdersysID: "<<pInputOrderField->OrderSysID<<std::endl;
+			m_logger->info("T, [OnErrRtnOrderInsert] SInfo is empty, please check order source,{},{},{}",
+							pInputOrderField->SecurityID,
+							pInputOrderField->Direction,
+							pInputOrderField->OrderSysID);
 			return;
 		}
 
@@ -327,8 +349,25 @@ private:
 
 	virtual void OnRspOrderAction(CTORATstpInputOrderActionField* pInputOrderActionField, TORASTOCKAPI::CTORATstpRspInfoField* pRspInfo, int nRequestID)
 	{
-		printf("[TRADER OnRspOrderAction]  [%d] [%d] [%s] \n", nRequestID, pInputOrderActionField->OrderActionRef, pInputOrderActionField->CancelOrderSysID);
+		m_logger->info("T, [OnRspOrderAction] ,{},{},{},{},{},{},{},{},{},{},{},{}",
+						pInputOrderActionField->UserRequestID,
+						pInputOrderActionField->ExchangeID,
+						pInputOrderActionField->FrontID,
+						pInputOrderActionField->SessionID,
+						pInputOrderActionField->OrderRef,
+						pInputOrderActionField->OrderSysID,
+						pInputOrderActionField->ActionFlag,
+						pInputOrderActionField->OrderActionRef,
+						pInputOrderActionField->CancelOrderSysID,
+						pInputOrderActionField->Operway,
+						pInputOrderActionField->SInfo,
+						pInputOrderActionField->IInfo);
+
 		if(pInputOrderActionField->SInfo[0] == '\0'){
+			m_logger->info("T, [OnRspOrderAction] SInfo is empty, please check order source,{},{},{}",
+							pInputOrderActionField->OrderActionRef,
+							pInputOrderActionField->CancelOrderSysID,
+							pInputOrderActionField->OrderSysID);
 			//std::cout<<"[Trader:OnRspOrderAction] SInfo is empty, please check order source "<< std::endl;
 			//printf("[%d] [%d] [%s] \n", nRequestID, pInputOrderActionField->OrderActionRef, pInputOrderActionField->CancelOrderSysID);
 			return;
@@ -358,51 +397,38 @@ private:
 
 	virtual void OnRtnOrder(CTORATstpOrderField* pOrder)
 	{
-		m_logger->warn("T,{}, [OnRtnOrder] ,{},{},{},{}",
-		pOrder->SInfo,
-		pOrder->SecurityID,
-		pOrder->OrderSysID,
-		pOrder->OrderStatus, 
-		pOrder->OrderSubmitStatus);
-		printf(
-			"[TRADER OnRtnOrder]:::\n"
-			"---RequestID[%d] SecurityID[%s] OrderRef[%d] OrderLocalID[%s] OrderSysID[%s]\n"
-			"---OrderType[%c] LimitPrice[%.2f]\n"
-			"---OrderStatus[%c] StatusMsg[%s] OrderSubmitStatus[%c]\n"
-			"---VolumeTotalOriginal[%d] VolumeTraded[%d] VolumeCanceled[%d]\n"
-			"---InsertUser[%s] InsertDate[%s] InsertTime[%s] AcceptTime[%s]\n"
-			"---CancelUser[%s] CancelTime[%s]"
-			"---PbuID[%s]"
-			"\n"
-			, pOrder->RequestID, pOrder->SecurityID, pOrder->OrderRef, pOrder->OrderLocalID, pOrder->OrderSysID
-			, pOrder->OrderType, pOrder->LimitPrice
-			, pOrder->OrderStatus, pOrder->StatusMsg, pOrder->OrderSubmitStatus
-			, pOrder->VolumeTotalOriginal, pOrder->VolumeTraded, pOrder->VolumeCanceled
-			, pOrder->InsertUser, pOrder->InsertDate, pOrder->InsertTime, pOrder->AcceptTime
-			, pOrder->CancelUser, pOrder->CancelTime
-			, pOrder->PbuID
-		    );
+		m_logger->info("T, [OnRtnOrder] ,{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}",
+               pOrder->RequestID,
+               pOrder->SecurityID,
+               pOrder->OrderRef,
+               pOrder->OrderLocalID,
+               pOrder->OrderSysID,
+               pOrder->OrderType,
+               pOrder->LimitPrice,
+               pOrder->OrderStatus,
+               pOrder->StatusMsg,
+               pOrder->OrderSubmitStatus,
+               pOrder->VolumeTotalOriginal,
+               pOrder->VolumeTraded,
+               pOrder->VolumeCanceled,
+               pOrder->InsertUser,
+               pOrder->InsertDate,
+               pOrder->InsertTime,
+               pOrder->AcceptTime);
 
 		if(pOrder->SInfo[0] == '\0'){
-			std::cout<<"[Trader:OnRtnOrder] SInfo is empty, please check order source "<< std::endl;
-			printf(
-			"OnRtnOrder:::\n"
-			"---RequestID[%d] SecurityID[%s] OrderRef[%d] OrderLocalID[%s] OrderSysID[%s]\n"
-			"---OrderType[%c] LimitPrice[%.2f]\n"
-			"---OrderStatus[%c] StatusMsg[%s] OrderSubmitStatus[%c]\n"
-			"---VolumeTotalOriginal[%d] VolumeTraded[%d] VolumeCanceled[%d]\n"
-			"---InsertUser[%s] InsertDate[%s] InsertTime[%s] AcceptTime[%s]\n"
-			"---CancelUser[%s] CancelTime[%s]"
-			"---PbuID[%s]"
-			"\n"
-			, pOrder->RequestID, pOrder->SecurityID, pOrder->OrderRef, pOrder->OrderLocalID, pOrder->OrderSysID
-			, pOrder->OrderType, pOrder->LimitPrice
-			, pOrder->OrderStatus, pOrder->StatusMsg, pOrder->OrderSubmitStatus
-			, pOrder->VolumeTotalOriginal, pOrder->VolumeTraded, pOrder->VolumeCanceled
-			, pOrder->InsertUser, pOrder->InsertDate, pOrder->InsertTime, pOrder->AcceptTime
-			, pOrder->CancelUser, pOrder->CancelTime
-			, pOrder->PbuID
-		    );
+			
+			m_logger->info("T, [OnRtnOrder] ,SInfo is empty, please check order source,{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}",
+               pOrder->RequestID,
+               pOrder->SecurityID,
+               pOrder->OrderRef,
+               pOrder->OrderLocalID,
+               pOrder->OrderSysID,
+               pOrder->OrderType,
+               pOrder->LimitPrice,
+               pOrder->OrderStatus,
+               pOrder->StatusMsg,
+               pOrder->OrderSubmitStatus);
 			return;
 		}
 
@@ -445,9 +471,26 @@ private:
 
 	virtual void OnRtnTrade(CTORATstpTradeField* pTrade)
 	{
-		printf("[TRADER OnRtnTrade]: TradeID[%s] InvestorID[%s] SecurityID[%s] OrderRef[%d] OrderLocalID[%s] Price[%.2f] Volume[%d]\n",
-			pTrade->TradeID, pTrade->InvestorID, pTrade->SecurityID, pTrade->OrderRef, pTrade->OrderLocalID, pTrade->Price, pTrade->Volume);
-
+		m_logger->info("{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}",
+					pTrade->ExchangeID,
+					pTrade->DepartmentID,
+					pTrade->InvestorID,
+					pTrade->BusinessUnitID,
+					pTrade->ShareholderID,
+					pTrade->SecurityID,
+					pTrade->TradeID,
+					pTrade->Direction,
+					pTrade->OrderSysID,
+					pTrade->OrderLocalID,
+					pTrade->Price,
+					pTrade->Volume,
+					pTrade->TradeDate,
+					pTrade->TradeTime,
+					pTrade->TradingDay,
+					pTrade->PbuID,
+					pTrade->OrderRef,
+					pTrade->AccountID,
+					pTrade->CurrencyID);
 
 		auto temp_map_ptr = OrderSysid_Sinfo_map.find(std::string(pTrade->OrderSysID));
 		// If ordersysid not in the map, then the order to this trade was not sent by this program, probably done other platform manuelly

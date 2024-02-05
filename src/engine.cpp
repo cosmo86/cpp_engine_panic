@@ -83,10 +83,18 @@ void Engine::add_strategy(const nlohmann::json& j)
     std::string SecurityID = j["SecurityID"].get<std::string>();
     char strate_exchangeID = j["ExchangeID"].get<std::string>()[0];
     int idInt = std::atoi(idStr.c_str());
-
-    std::shared_ptr<HitBanStrategy> temp_strategy = std::make_shared<HitBanStrategy>(j, &dispatcher,m_logger);
-
-    dispatcher.add_strategy(idInt,SecurityID, strate_exchangeID , temp_strategy);
+    try
+    {
+        std::shared_ptr<HitBanStrategy> temp_strategy = std::make_shared<HitBanStrategy>(j, &dispatcher,m_logger);
+        dispatcher.add_strategy(idInt,SecurityID, strate_exchangeID , temp_strategy);
+    }
+    catch (const std::invalid_argument& e) {
+        // Handle the exception
+        std::cerr << "[Engine]: stock not found, stock:  "<<SecurityID<<" ," << e.what() << std::endl;
+    } catch (...) {
+        // Catch any other types of exceptions
+        std::cerr << "Caught an unexpected exception." << std::endl;
+    }
 
 }
 
