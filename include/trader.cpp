@@ -536,8 +536,8 @@ private:
 		}
 		if (bIsLast)
 		{
-			std::cout<<"[TraderSpi] size of limup map is  "<<limup_table.size()<<std::endl;
-			std::cout<<"[TraderSpi] 600519 name is "<<secID_name_table["600519"]<<std::endl;
+			m_logger->warn("T, [OnRspQrySecurity] ,size of limup map is:{}",limup_table.size());
+			m_logger->warn("T, [OnRspQrySecurity] ,600519 name is:{}",secID_name_table["600519"]);
 		}
 	}
 
@@ -546,12 +546,21 @@ private:
 		if (pInvestor)
 		{
 			strcpy(m_InvestorID , pInvestor->InvestorID);
-			printf("[TraderSpi] OnRspQryInvestor[%d]: InvestorID[%s] InvestorName[%s] Operways[%s]\n", nRequestID, pInvestor->InvestorID, pInvestor->InvestorName, pInvestor->Operways);
+			m_logger->warn("T, [OnRspQryInvestor] ,OnRspQryInvestor:{} , InvestorID:{} ,InvestorName:{}, Operways:{}",
+							nRequestID,
+							pInvestor->InvestorID, 
+							pInvestor->InvestorName,
+							 pInvestor->Operways);
+			//printf("[TraderSpi] OnRspQryInvestor[%d]: InvestorID[%s] InvestorName[%s] Operways[%s]\n", nRequestID, pInvestor->InvestorID, pInvestor->InvestorName, pInvestor->Operways);
 		}
 
 		if (bIsLast)
 		{
-			printf("[TraderSpi] 查询投资者结束[%d] ErrorID[%d] ErrorMsg[%s]\n", nRequestID, pRspInfo->ErrorID, pRspInfo->ErrorMsg);
+			m_logger->warn("T, [OnRspQrySecurity] ,查询投资者结束 : {}, ErrorID:{},ErrorMsg:{} ",
+							nRequestID,
+							pRspInfo->ErrorID, 
+							pRspInfo->ErrorMsg);
+			//printf("[TraderSpi] 查询投资者结束[%d] ErrorID[%d] ErrorMsg[%s]\n", nRequestID, pRspInfo->ErrorID, pRspInfo->ErrorMsg);
 		}
 	}
 
@@ -560,16 +569,20 @@ private:
 		if (pShareholderAccount)
 		{
 			shareHolder_table.emplace(pShareholderAccount->ExchangeID,std::string(pShareholderAccount->ShareholderID));
-			printf("[TraderSpi] OnRspQryShareholderAccount[%d]: InvestorID[%s] ExchangeID[%c] ShareholderID[%s]\n",
-				nRequestID,
-				pShareholderAccount->InvestorID,
-				pShareholderAccount->ExchangeID,
-				pShareholderAccount->ShareholderID);
+			m_logger->warn("T, [OnRspQryShareholderAccount] ,OnRspQryShareholderAccount:{}, InvestorID:{}, ExchangeID:{}, ShareholderID:{}",
+							nRequestID,
+							pShareholderAccount->InvestorID,
+							pShareholderAccount->ExchangeID,
+							pShareholderAccount->ShareholderID);
 		}
 
 		if (bIsLast)
 		{
-			printf("[TraderSpi] 查询股东账户结束[%d] ErrorID[%d] ErrorMsg[%s]\n", nRequestID, pRspInfo->ErrorID, pRspInfo->ErrorMsg);
+			m_logger->warn("T, [OnRspQryShareholderAccount] , 查询股东账户结束:{} , ErrorID:{}, ErrorMsg:{}",
+							 nRequestID,
+							 pRspInfo->ErrorID, 
+							 pRspInfo->ErrorMsg);
+			//printf("[TraderSpi] 查询股东账户结束[%d] ErrorID[%d] ErrorMsg[%s]\n", nRequestID, pRspInfo->ErrorID, pRspInfo->ErrorMsg);
 		}
 	}
 
@@ -577,14 +590,23 @@ private:
 	{
 		if (pTradingAccount)
 		{
-			printf("[TraderSpi] OnRspQryTradingAccount[%d]: DepartmentID[%s] InvestorID[%s] AccountID[%s] CurrencyID[%c] UsefulMoney[%.2f] FetchLimit[%.2f]\n", nRequestID,
-				pTradingAccount->DepartmentID, pTradingAccount->InvestorID, pTradingAccount->AccountID, pTradingAccount->CurrencyID,
-				pTradingAccount->UsefulMoney, pTradingAccount->FetchLimit);
+			m_logger->warn("T, [OnRspQryTradingAccount] ,nRequestID: {}: DepartmentID {} InvestorID {} AccountID {} CurrencyID {} UsefulMoney {} FetchLimit {}",
+							nRequestID,
+							pTradingAccount->DepartmentID,
+							pTradingAccount->InvestorID,
+							pTradingAccount->AccountID,
+							pTradingAccount->CurrencyID,
+							pTradingAccount->UsefulMoney,
+							pTradingAccount->FetchLimit);
 		}
 
 		if (bIsLast)
 		{
-			printf("[TraderSpi] 查询资金账户结束[%d] ErrorID[%d] ErrorMsg[%s]\n", nRequestID, pRspInfo->ErrorID, pRspInfo->ErrorMsg);
+			m_logger->warn("T, [OnRspQryTradingAccount] ,查询资金账户结束:{}, ErrorID:{}, ErrorMsg:{}",
+							nRequestID, 
+							pRspInfo->ErrorID,  
+							pRspInfo->ErrorMsg);
+			//printf("[TraderSpi] 查询资金账户结束[%d] ErrorID[%d] ErrorMsg[%s]\n", nRequestID, pRspInfo->ErrorID, pRspInfo->ErrorMsg);
 		}
 	}
 
@@ -592,7 +614,7 @@ private:
 	{
 		if (pOrder)
 		{
-			printf(" [TraderSpi] OnRspQryOrder[%d]:SecurityID[%s] OrderLocalID[%s] OrderRef[%d] OrderSysID[%s] VolumeTraded[%d] OrderStatus[%c] OrderSubmitStatus[%c] StatusMsg[%s]\n",
+			printf("T, [OnRspQryOrder] ,OnRspQryOrder:{}, SecurityID:{}, OrderLocalID:{}, OrderRef:{}, OrderSysID:{}, VolumeTraded:{}, OrderStatus:{}, OrderSubmitStatus:{}, StatusMsg:{}",
 				nRequestID,
 				pOrder->SecurityID,
 				pOrder->OrderLocalID, pOrder->OrderRef, pOrder->OrderSysID, pOrder->VolumeTraded,
@@ -601,7 +623,11 @@ private:
 
 		if (bIsLast)
 		{
-			printf("[TraderSpi] 查询报单结束[%d] ErrorID[%d] ErrorMsg[%s]\n", nRequestID, pRspInfo->ErrorID, pRspInfo->ErrorMsg);
+			m_logger->warn("T, [OnRspQryOrder] ,查询报单结束:{}, ErrorID:{}, ErrorMsg:{}",
+							 nRequestID, 
+							 pRspInfo->ErrorID, 
+							 pRspInfo->ErrorMsg);
+			//printf("[TraderSpi] 查询报单结束[%d] ErrorID[%d] ErrorMsg[%s]\n", nRequestID, pRspInfo->ErrorID, pRspInfo->ErrorMsg);
 		}
 	}
 
@@ -609,12 +635,25 @@ private:
 	{
 		if (pPosition)
 		{
-			printf("[TraderSpi] OnRspQryPosition[%d]: InvestorID[%s] SecurityID[%s] HistoryPos[%d] TodayBSPos[%d] TodayPRPos[%d] AvailablePosition[%d] CurrentPosition[%d]\n", nRequestID, pPosition->InvestorID, pPosition->SecurityID, pPosition->HistoryPos, pPosition->TodayBSPos, pPosition->TodayPRPos, pPosition->AvailablePosition, pPosition->CurrentPosition);
+			m_logger->warn("T, [OnRspQryPosition] , nRequestID:{}, InvestorID:{}, SecurityID:{}, HistoryPos:{}, TodayBSPos:{}, TodayPRPos:{}, AvailablePosition:{}, CurrentPosition:{}",
+							nRequestID,
+							pPosition->InvestorID,
+							pPosition->SecurityID,
+							pPosition->HistoryPos,
+							pPosition->TodayBSPos,
+							pPosition->TodayPRPos,
+							pPosition->AvailablePosition,
+							pPosition->CurrentPosition);
+			//printf("[TraderSpi] OnRspQryPosition[%d]: InvestorID[%s] SecurityID[%s] HistoryPos[%d] TodayBSPos[%d] TodayPRPos[%d] AvailablePosition[%d] CurrentPosition[%d]\n", nRequestID, pPosition->InvestorID, pPosition->SecurityID, pPosition->HistoryPos, pPosition->TodayBSPos, pPosition->TodayPRPos, pPosition->AvailablePosition, pPosition->CurrentPosition);
 		}
 
 		if (bIsLast)
 		{
-			printf("[TraderSpi] 查询持仓结束[%d] ErrorID[%d] ErrorMsg[%s]\n", nRequestID, pRspInfo->ErrorID, pRspInfo->ErrorMsg);
+			m_logger->warn("T, [OnRspQryPosition] ,查询持仓结束:{}, ErrorID:{}, ErrorMsg:{}",
+							 nRequestID, 
+							 pRspInfo->ErrorID, 
+							 pRspInfo->ErrorMsg);
+			//printf("[TraderSpi] 查询持仓结束[%d] ErrorID[%d] ErrorMsg[%s]\n", nRequestID, pRspInfo->ErrorID, pRspInfo->ErrorMsg);
 		}
 	}
 	
@@ -637,7 +676,22 @@ public:
 		int ret_oi = m_api->ReqOrderInsert(&input_order_field, m_req_id++);
 		if (ret_oi != 0)
 		{
-			printf("ReqOrderInsert fail, ret[%d]\n", ret_oi);
+			m_logger->warn("T, [Send_Order_LimitPrice] ,ReqOrderInsert fail, ret:{}", ret_oi);
+			//printf("ReqOrderInsert fail, ret[%d]\n", ret_oi);
+		}
+		else
+		{
+			m_logger->info("T, [Send_Order_LimitPrice] ,ReqOrderInsert Suc,{},{},{},{},{},{},{},{},{},{}",
+							input_order_field.ExchangeID,
+							input_order_field.ShareholderID,
+							input_order_field.SecurityID,
+							input_order_field.Direction,
+							input_order_field.VolumeTotalOriginal,
+							input_order_field.LimitPrice,
+							input_order_field.OrderPriceType,
+							input_order_field.TimeCondition,
+							input_order_field.VolumeCondition,
+							input_order_field.SInfo);
 		}
 	}
 
@@ -654,7 +708,16 @@ public:
 		int ret = m_api->ReqOrderAction(&input_order_action_field, m_req_id++);
 		if (ret != 0)
 		{
-			printf("ReqOrderAction fail, ret[%d]\n", ret);
+			m_logger->warn("T, [Send_Cancle_Order] ReqOrderAction fail, ret:{}", ret);
+			//printf("ReqOrderAction fail, ret[%d]\n", ret);
+		}
+		else
+		{
+			m_logger->warn("T, [Send_Cancle_Order] ,ReqOrderAction Suc,{},{},{},{}",
+               input_order_action_field.ExchangeID,
+               input_order_action_field.ActionFlag,
+               input_order_action_field.OrderSysID,
+               input_order_action_field.SInfo);
 		}
 	}
 
