@@ -12,7 +12,7 @@
 #include "log_handle.h"
 #include "dispatcher.h"
 #include "HitBanStrategy.cpp"
-
+#include "DolphinDB.h"
 
 class Engine
 {
