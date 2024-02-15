@@ -34,6 +34,8 @@ if "removed_strategy" not in st.session_state:
     st.session_state.removed_strategy = read_cached_data()
 if "strategy_container" not in st.session_state:
     st.session_state.strategy_container = True
+if "display_group_add" not in st.session_state:
+    st.session_state.display_group_add = False
 
 
 # Page Title
@@ -150,6 +152,40 @@ with st.sidebar:
 container = st.container()
 container.header('策略管理')
 container.markdown("###### 运行策略")
+
+uploaded_group = st.file_uploader("上传策略组", type="csv")
+if uploaded_group is not None:
+    # Convert the uploaded file to a pandas DataFrame
+    uploaded_group_strategy = pd.read_csv(uploaded_group)
+    st.session_state.display_group_add = True
+
+if st.session_state.display_group_add:
+    uploaded_group_strategy['Status'] = uploaded_group_strategy['Status'].apply(status_mapping)
+    uploaded_group_strategy['ExchangeID'] = uploaded_group_strategy['ExchangeID'].apply(exchange_mapping)
+    container.dataframe(
+        uploaded_group_strategy,
+        column_config={
+            'SecurtiyID': '证券代码',
+            'ExchangeID': '交易所',
+            'BuyTriggerVolume': '封单额',
+            'CancelVolume': '撤单额',
+            'TargetPosition': '目标仓位（股）',
+            'CurrPosition': '已买仓位（股）',
+            'Count': '撤单次数',
+            'ID': '策略编号',
+            "Status": "策略状态",
+            "OrderID": "策略委托",
+            "DelayTime" : "延迟触发",
+            "SecurityName" : "股票名称"
+        },
+            
+        column_order=('ID', 'SecurityID','SecurityName','ExchangeID', 'BuyTriggerVolume', 'CancelVolume', 'TargetPosition', 'CurrPosition', 'DelayTime' ,'Count','Status','OrderID'),
+        hide_index=True,
+        use_container_width=True
+    )
+    #st.write(uploaded_group_strategy)
+
+
 if st.session_state.strategy_container:
     #running_df = pd.DataFrame.from_dict(data=st.session_state.running_strategy)
     print("running_df",st.session_state.running_strategy)

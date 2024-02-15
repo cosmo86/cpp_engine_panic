@@ -9,8 +9,8 @@ class UserStrategyModel(BaseModel):
     ExchangeID: str = ""
     BuyTriggerVolume: int = 0
     CancelVolume: int = 0
-    Position: int = 0
-    TargetPosition: int = 0
+    Position: int = 0 # In money
+    TargetPosition: int = 0 # In volume
     CurrPosition : int = 0
     DelayTime: int = 500
     MaxTriggerTimes: int = 0 
