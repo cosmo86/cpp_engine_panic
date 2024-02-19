@@ -36,7 +36,7 @@ LoggerPtr GetLogger()
         // Create a basic file sink (multi-threaded)
         auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(filename, true);
         file_sink->set_level(spdlog::level::trace);
-        file_sink->set_pattern("%v");
+        file_sink->set_pattern("%H%M%S%f,%v");
 
         std::vector<spdlog::sink_ptr> sinks{ console_sink, file_sink };
         logger = std::make_shared<spdlog::async_logger>("async_logger", sinks.begin(), sinks.end(), spdlog::thread_pool(), spdlog::async_overflow_policy::block);
