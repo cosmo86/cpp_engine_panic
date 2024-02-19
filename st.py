@@ -52,11 +52,14 @@ st.sidebar.header("策略编辑")
 
 
 def add_strategy(user_input: UserStrategyModel):
+    print("[add_strategy]",user_input,"type is ", type(user_input))
     res = requests.post(url="http://127.0.0.1:9001/add_strategy", data=user_input.model_dump_json())
     if res.status_code == 200:
         check_strategy()
+        return 0
     else:
         st.error('策略提交异常', icon='🚨')
+        return 1
 
 def remove_strategy(user_input: UserStrategyModel):
     res = requests.post(url="http://127.0.0.1:9001/remove_strategy", data=user_input.model_dump_json())
@@ -153,44 +156,11 @@ container = st.container()
 container.header('策略管理')
 container.markdown("###### 运行策略")
 
-uploaded_group = st.file_uploader("上传策略组", type="csv")
-if uploaded_group is not None:
-    # Convert the uploaded file to a pandas DataFrame
-    uploaded_group_strategy = pd.read_csv(uploaded_group)
-    st.session_state.display_group_add = True
-
-if st.session_state.display_group_add:
-    uploaded_group_strategy['Status'] = uploaded_group_strategy['Status'].apply(status_mapping)
-    uploaded_group_strategy['ExchangeID'] = uploaded_group_strategy['ExchangeID'].apply(exchange_mapping)
-    container.dataframe(
-        uploaded_group_strategy,
-        column_config={
-            'SecurtiyID': '证券代码',
-            'ExchangeID': '交易所',
-            'BuyTriggerVolume': '封单额',
-            'CancelVolume': '撤单额',
-            'TargetPosition': '目标仓位（股）',
-            'CurrPosition': '已买仓位（股）',
-            'Count': '撤单次数',
-            'ID': '策略编号',
-            "Status": "策略状态",
-            "OrderID": "策略委托",
-            "DelayTime" : "延迟触发",
-            "SecurityName" : "股票名称"
-        },
-            
-        column_order=('ID', 'SecurityID','SecurityName','ExchangeID', 'BuyTriggerVolume', 'CancelVolume', 'TargetPosition', 'CurrPosition', 'DelayTime' ,'Count','Status','OrderID'),
-        hide_index=True,
-        use_container_width=True
-    )
-    #st.write(uploaded_group_strategy)
-
-
 if st.session_state.strategy_container:
     #running_df = pd.DataFrame.from_dict(data=st.session_state.running_strategy)
-    print("running_df",st.session_state.running_strategy)
+    #print("running_df",st.session_state.running_strategy)
     running_df = pd.DataFrame(st.session_state.running_strategy)
-    #print(f"running_df {running_df}")
+    print(f"running_df {running_df}")
     running_df['Status'] = running_df['Status'].apply(status_mapping)
     running_df['ExchangeID'] = running_df['ExchangeID'].apply(exchange_mapping)
     container.dataframe(
@@ -245,3 +215,83 @@ if st.session_state.strategy_container:
 
 else:
     st.write(":u7121: 无策略运行")
+
+
+
+########### Add Group Strategy ###########
+
+def add_group_strategy(model_instances):
+    fail_to_add_models = []
+    print(model_instances)
+    for i,model in enumerate(model_instances):
+        model.Position = 1000
+        print("[add_group_strategy]",model, "type is ",type(model))
+        res_code = add_strategy(model)
+        if res_code ==0:
+            pass
+        else:
+            fail_to_add_models.append(model.SecurityID)
+        AddGroup_progressBar.progress( i/len(model_instances) )
+    AddGroup_progressBar.empty()
+    st.error(f"以下股票添加失败， 代码{fail_to_add_models}")
+
+def row_to_model(row):
+    return UserStrategyModel(**row.to_dict())
+
+# ---- Add group container ----
+AddGroup_container = st.container()
+AddGroup_container.header('添加策略组')
+
+uploaded_group = st.file_uploader("上传策略组", type="csv")
+if uploaded_group is not None:
+    column_types = {'SecurityID':str,
+                'ExchangeID': str,
+                'BuyTriggerVolume': int,
+                'CancelVolume': int,
+                'Position': int,
+                'TargetPosition': int,
+                'CurrPosition': int,
+                'DelayTime': int,
+                'MaxTriggerTimes':int,
+                'ID':str,
+                'Status':int,
+                'OrderID':str,
+                'SecurityName':str
+               }
+    # Convert the uploaded file to a pandas DataFrame
+    uploaded_group_strategy = pd.read_csv(uploaded_group,dtype = column_types, na_filter=False)
+    model_instances = uploaded_group_strategy.apply(row_to_model, axis=1)
+    model_instances_for_display = pd.DataFrame([i.model_dump() for i in model_instances.to_list()])
+    #print(uploaded_group_strategy)
+    st.session_state.display_group_add = True
+
+
+if st.session_state.display_group_add:
+    model_instances_for_display['Status'] = model_instances_for_display['Status'].apply(status_mapping)
+    model_instances_for_display['ExchangeID'] = model_instances_for_display['ExchangeID'].apply(exchange_mapping)
+    AddGroup_container.dataframe(
+        model_instances_for_display,
+        column_config={
+            'SecurtiyID': '证券代码',
+            'ExchangeID': '交易所',
+            'BuyTriggerVolume': '封单额',
+            'CancelVolume': '撤单额',
+            'TargetPosition': '目标仓位（股）',
+            'CurrPosition': '已买仓位（股）',
+            'Count': '撤单次数',
+            'ID': '策略编号',
+            "Status": "策略状态",
+            "OrderID": "策略委托",
+            "DelayTime" : "延迟触发",
+            "SecurityName" : "股票名称"
+        },
+            
+        column_order=('ID', 'SecurityID','SecurityName','ExchangeID', 'BuyTriggerVolume', 'CancelVolume', 'TargetPosition', 'CurrPosition', 'DelayTime' ,'Count','Status','OrderID'),
+        hide_index=True,
+        use_container_width=True
+    )
+    print("model_instances",model_instances)
+    AddGroup_container.button('批量添加', on_click=add_group_strategy, args =(model_instances,))
+
+    progress_text = "批量策略添加进度"
+    AddGroup_progressBar = AddGroup_container.progress(0, text=progress_text)
