@@ -21,6 +21,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/model
     ${PROJECT_SOURCE_DIR}/spdlog
     ${PROJECT_SOURCE_DIR}/src
+    ${PROJECT_SOURCE_DIR}/include_dolphin
     ${JEMALLOC_INCLUDE_DIR}
 )
 
