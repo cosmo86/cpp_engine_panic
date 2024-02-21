@@ -549,7 +549,7 @@ private:
 			m_logger->warn("T, [OnRspQryInvestor] ,OnRspQryInvestor:{} , InvestorID:{} ,InvestorName:{}, Operways:{}",
 							nRequestID,
 							pInvestor->InvestorID, 
-							pInvestor->InvestorName,
+							convertEncoding(pInvestor->InvestorName, "GBK", "UTF-8"),
 							 pInvestor->Operways);
 			//printf("[TraderSpi] OnRspQryInvestor[%d]: InvestorID[%s] InvestorName[%s] Operways[%s]\n", nRequestID, pInvestor->InvestorID, pInvestor->InvestorName, pInvestor->Operways);
 		}
@@ -559,7 +559,8 @@ private:
 			m_logger->warn("T, [OnRspQrySecurity] ,查询投资者结束 : {}, ErrorID:{},ErrorMsg:{} ",
 							nRequestID,
 							pRspInfo->ErrorID, 
-							pRspInfo->ErrorMsg);
+							convertEncoding(pRspInfo->ErrorMsg, "GBK", "UTF-8") 
+							);
 			//printf("[TraderSpi] 查询投资者结束[%d] ErrorID[%d] ErrorMsg[%s]\n", nRequestID, pRspInfo->ErrorID, pRspInfo->ErrorMsg);
 		}
 	}
@@ -580,8 +581,9 @@ private:
 		{
 			m_logger->warn("T, [OnRspQryShareholderAccount] , 查询股东账户结束:{} , ErrorID:{}, ErrorMsg:{}",
 							 nRequestID,
-							 pRspInfo->ErrorID, 
-							 pRspInfo->ErrorMsg);
+							 pRspInfo->ErrorID,
+							 convertEncoding(pRspInfo->ErrorMsg, "GBK", "UTF-8") 
+							 );
 			//printf("[TraderSpi] 查询股东账户结束[%d] ErrorID[%d] ErrorMsg[%s]\n", nRequestID, pRspInfo->ErrorID, pRspInfo->ErrorMsg);
 		}
 	}
