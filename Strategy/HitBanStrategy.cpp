@@ -288,7 +288,10 @@ public:
 			m_logger->info("S,{}, [ON_TRANSAC] SZSE cancel, tradetime {}, price {}, volume {}, BuyNo {}. SellNo {}", 
 			this->strate_SInfo,
 			temp_transac->TradeTime,
-			temp_transac->TradePrice,temp_transac->TradeVolume,temp_transac->BuyNo,temp_transac->SellNo);
+			temp_transac->TradePrice,
+			temp_transac->TradeVolume,
+			temp_transac->BuyNo,
+			temp_transac->SellNo);
 		}		
 		m_logger->info("S,{}, [ON_TRANSAC] ,SZSE transaction, tradetime {}, trade_price {}, volume {}, Exectype {}, curr_FengBan_volume {}", 
 					this->strate_SInfo,
