@@ -1,3 +1,5 @@
 Engine_log/
 program_cache/
 build/
+py_processed_log/
+py_log_handler/records/

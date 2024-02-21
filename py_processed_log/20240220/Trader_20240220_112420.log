@@ -1,0 +1,15 @@
+112420714810,T, [connect] , RegisterSpi and RegisterFront DONE
+112420714812,T, [connect] , Register private and public topic DONE
+112420799292,T, [OnFrontConnected] , Trader OnFrontConnected
+112420801853,T, [connect] , Trader inited
+112420901698,T, [OnRspGetConnectionInfo] , inner_ip_address[45.141.139.195], inner_port[55594], outer_ip_address[45.141.139.195], outer_port[55594], mac_address[C2-61-4D-B7-95-5C]
+112421645820,T, [OnRspUserLogin] , OnRspUserLogin: OK! nRequestID:2
+112421646055,T,-1, [OnRspUserLogin] ,setaffinity DONE, 49
+112448418570,T, [OnRspQrySecurity] ,size of limup map is:7434
+112448418584,T, [OnRspQrySecurity] ,600519 name is:贵州茅台
+112448418590,T, [OnRspQryInvestor] ,OnRspQryInvestor:4 , InvestorID:00032129 ,InvestorName:刘心, Operways:
+112448418596,T, [OnRspQrySecurity] ,查询投资者结束 : 4, ErrorID:0,ErrorMsg:正确
+112448418604,T, [OnRspQryShareholderAccount] ,OnRspQryShareholderAccount:5, InvestorID:00032129, ExchangeID:1, ShareholderID:A00032129
+112448418621,T, [OnRspQryShareholderAccount] ,OnRspQryShareholderAccount:5, InvestorID:00032129, ExchangeID:2, ShareholderID:700032129
+112448418628,T, [OnRspQryShareholderAccount] ,OnRspQryShareholderAccount:5, InvestorID:00032129, ExchangeID:4, ShareholderID:B00032129
+112448418631,T, [OnRspQryShareholderAccount] , 查询股东账户结束:5 , ErrorID:0, ErrorMsg:正确

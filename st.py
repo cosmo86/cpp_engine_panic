@@ -230,9 +230,10 @@ def add_group_strategy(model_instances):
         if res_code ==0:
             pass
         else:
-            fail_to_add_models.append(model.SecurityName)
+            fail_to_add_models.append(model.SecurityID)
         AddGroup_progressBar.progress( i/len(model_instances) )
     AddGroup_progressBar.empty()
+    st.error(f"以下股票添加失败， 代码{fail_to_add_models}")
 
 def row_to_model(row):
     return UserStrategyModel(**row.to_dict())
