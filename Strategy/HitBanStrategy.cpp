@@ -267,11 +267,10 @@ public:
 				else{
 				// If false, set tp true to enable send order
 					this->can_resend_order = true;
-					m_logger->warn("S,{}, [on_transac] , limup price is {},Trade price is {}, Bitsetting can_resend_order  to true. strate_limup_price and this->strate_limup_price {},{} ",
+					m_logger->warn("S,{}, [ON_TRANSAC] , limup price is {},Trade price is {}, Bitsetting can_resend_order  to true. strate_limup_price and this->strate_limup_price {} ",
 									this->strate_SInfo,
 									this->strate_limup_price,
 									temp_transac->TradePrice,
-									strate_limup_price,
 									this->strate_limup_price);
 					return;
 				}
@@ -285,7 +284,10 @@ public:
 			m_logger->info("S,{}, [ON_TRANSAC] SZSE cancel, tradetime {}, price {}, volume {}, BuyNo {}. SellNo {}", 
 			this->strate_SInfo,
 			temp_transac->TradeTime,
-			temp_transac->TradePrice,temp_transac->TradeVolume,temp_transac->BuyNo,temp_transac->SellNo);
+			temp_transac->TradePrice,
+			temp_transac->TradeVolume,
+			temp_transac->BuyNo,
+			temp_transac->SellNo);
 		}		
 		m_logger->info("S,{}, [ON_TRANSAC] ,SZSE transaction, tradetime {}, trade_price {}, volume {}, Exectype {}, curr_FengBan_volume {}", 
 					this->strate_SInfo,
