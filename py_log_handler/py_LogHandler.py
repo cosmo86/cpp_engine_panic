@@ -14,11 +14,10 @@ print('Run this moduel in folder /py_log_handler')
 print('Do Not terminate this program, leave it running')
 print('#########################################')
 
-
 ######################
 current_date = datetime.now()
 current_date_str = current_date.strftime("%Y%m%d")
-logTransformer_record_path = f"logTransformer_record_{current_date_str}.json"
+logTransformer_record_path = os.path.join("records", f"logTransformer_record_{current_date_str}.json")
 last_position = 0
 
 ################################################
@@ -35,7 +34,8 @@ def perform_cleanup():
     if os.path.exists(logTransformer_record_path):
         with open(logTransformer_record_path, 'r') as json_file:  # Open file in read mode
             my_dict = json.load(json_file)
-    
+    else:
+        os.mkdir("records")
     my_dict['termination_points'].append(last_position)
     
     with open(logTransformer_record_path, 'w') as json_file:  # Open file in write mode
