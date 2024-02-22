@@ -315,7 +315,7 @@ public:
 			if (temp_orderdetial->Price == this->strate_limup_price && temp_orderdetial->Side == '1' && temp_orderdetial->OrderStatus != 'D')
 			{
 				curr_FengBan_volume += temp_orderdetial->Volume;
-				time_volume_tracker.insertPair( TimeVolumePair{this->temp_curr_time,temp_orderdetial->Volume} )
+				time_volume_tracker.insertPair( this->temp_curr_time,temp_orderdetial->Volume );
 				action();
 				m_logger->info("S,{}, [ON_ORDERDETIAL] , code: {} limup: {} curr price: {}, curr_volume: {}, trigger_volume:{},cancle_volume: {} ",
 						 this->strate_SInfo,
@@ -332,7 +332,7 @@ public:
 				temp_orderdetial->Side == '1' && temp_orderdetial->OrderStatus == 'D')
 			{
 				curr_FengBan_volume -= temp_orderdetial->Volume;
-				time_volume_tracker.insertPair( TimeVolumePair{this->temp_curr_time,temp_orderdetial->Volume} )
+				time_volume_tracker.insertPair( this->temp_curr_time,temp_orderdetial->Volume );
 				action();
 				m_logger->info("S,{}, [ON_ORDERDETIAL] , code: {} limup: {} curr price: {}, curr_volume: {}, trigger_volume:{},cancle_volume: {} ",
 				         this->strate_SInfo,
@@ -361,11 +361,11 @@ public:
 
 			this->temp_curr_time = std::chrono::steady_clock::now();
 
-			if (temp_transac->TradePrice < strate_limup_price)
+			if (temp_transac->TradePrice < this->strate_limup_price)
 			{
 				// If true remain true to enable send order
 				if (this->can_resend_order){return;}
-				else{
+				else if(temp_transac->ExecType == '1'){
 				// If false, set tp true to enable send order
 					this->can_resend_order = true;
 					m_logger->warn("S,{}, [ON_TRANSAC] , limup price is {},Trade price is {}, Bitsetting can_resend_order  to true. strate_limup_price and this->strate_limup_price {} ",
@@ -376,9 +376,12 @@ public:
 					return;
 				}
 			}
-			this->curr_FengBan_volume -= temp_transac->TradeVolume;
-			time_volume_tracker.insertPair( TimeVolumePair{this->temp_curr_time,temp_transac->TradeVolume} )
-			this->action();
+			else
+			{
+				this->curr_FengBan_volume -= temp_transac->TradeVolume;
+				time_volume_tracker.insertPair( this->temp_curr_time,temp_transac->TradeVolume );
+				this->action();
+			}
 		}
 		// ExchangeID == '2' SZSE , ExecType == '2' cancel order  
 		if (temp_transac->ExchangeID == '2' and temp_transac->ExecType == '2')
