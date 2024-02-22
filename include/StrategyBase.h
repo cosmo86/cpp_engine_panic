@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <shared_mutex>
 #include <thread>
+#include <vector>
 #include <chrono>
 #include <cstring>
 #include <iostream>

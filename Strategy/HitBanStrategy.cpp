@@ -18,6 +18,50 @@ enum StrategyStatus
     REJECTED = -1
 };
 
+// For Condition 2 
+class TimeVolumePair {
+public:
+    std::chrono::steady_clock::time_point time;
+    int volume;
+    TimeVolumePair(std::chrono::steady_clock::time_point t, int v) : time(t), volume(v) {}
+};
+
+class TimeVolumeTracker {
+private:
+    std::vector<TimeVolumePair> pair_vec;
+    long long durationNanoseconds;
+    int totalVolume;
+public:
+    TimeVolumeTracker(long long duration) : durationNanoseconds(duration), totalVolume(0) {}
+
+    void insertPair(std::chrono::steady_clock::time_point time, int volume) {
+        auto it = pair_vec.begin();
+        while (it != pair_vec.end()) {
+            auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(time - it->time).count();
+            if (duration > durationNanoseconds) {
+                totalVolume -= it->volume;
+                it = pair_vec.erase(it); // Efficient for vectors if erasing from the beginning
+            } else {
+                ++it;
+            }
+        }
+        pair_vec.push_back(TimeVolumePair(time, volume));
+        totalVolume += volume;
+    }
+
+    int getTotalVolume() const {
+        return totalVolume;
+    }
+
+    void printPairs() const {
+        for (const auto& pair : pair_vec) {
+            std::cout << "Time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(pair.time.time_since_epoch()).count()
+                      << ", Volume: " << pair.volume << std::endl;
+        }
+    }
+};
+
+
 
 class HitBanStrategy : public StrategyBase 
 {
@@ -106,16 +150,39 @@ public:
 	bool if_cancel_sent = false;
 	int delay_duration = 500; // in milliseconds
 
-	bool order_accepted = false;
+	bool formal_order_accepted = false;
 	char strate_OrderSysID[21];
+
+	// Timed logic vars
+	
+	std::chrono::steady_clock::time_point formal_order_acpt_time;//this defaults to epoch start
+	long long duration_from_formal_order_acpt = 0;
+	std::chrono::steady_clock::time_point temp_curr_time;
+	long long lower_time_limit = 2000000000;
+
+	// condition 2
+	float condition_2_percentage = -0.35;
+	long long condition_2_higher_time = 180000000000;
+	long long condition_2_track_duration = 3000000000;
+	TimeVolumeTracker time_volume_tracker{condition_2_track_duration};
+
+	// condition 4
+	int cancel_trigger_volume_large = 0;
+	long long condition_4_low_time = 4000000000;
+	long long condition_4_high_time = 600000000000;
+
+
+
+
 
 public:
 
 	void action()
 	{
 		// No locks here because the context where action() is called should be already locked
+
+		//Send order
 		bool __condition_buy = curr_FengBan_volume * strate_limup_price >= buy_trigger_volume;
-        bool __condition_cancel = curr_FengBan_volume * strate_limup_price <= cancel_trigger_volume;
 
 		if(if_order_sent == false && __condition_buy && this->can_resend_order )
 		{
@@ -133,23 +200,47 @@ public:
 							this->curr_FengBan_volume,
 							this->buy_trigger_volume
 							);
-			std::this_thread::sleep_for(std::chrono::milliseconds(delay_duration));
 			return;
 		}
 
-		if (this->order_accepted == true && this->if_cancel_sent == false && __condition_cancel)
+		//Cancel order
+
+		if (this->formal_order_accepted == true && this->if_cancel_sent == false && this->duration_from_formal_order_acpt >= this->lower_time_limit)
 		{
-			m_dispatcher_ptr->trader_ptr->Send_Cancle_Order(this->strate_exchangeID, 
-															this->strate_OrderSysID,
-															this->strate_SInfo);
-			this->if_cancel_sent = true;
-			m_logger->info("S,{}, [ACTION] , code: {}, cancle sent, curr_volume: {}, cancle_volume: {}", 
-							this->strate_SInfo,
-							this->strate_stock_code,
-							this->curr_FengBan_volume,
-							this->cancel_trigger_volume
-							);
-			return;
+			bool __cancel_cond_1 = false;
+			bool __cancel_cond_2 = false;
+			bool __cancel_cond_3 = false;
+			bool __cancel_cond_4 = false;
+			bool __cancel_cond_5 = false;
+
+			this->duration_from_formal_order_acpt = std::chrono::duration_cast<std::chrono::nanoseconds(this->temp_curr_time - this->formal_order_acpt_time).count();
+
+			if ( this->duration_from_formal_order_acpt <= this->condition_2_higher_time )
+			{
+				if( static_cast<double>(time_volume_tracker.getTotalVolume()) / this->curr_FengBan_volume <= this->condition_2_percentage ){ 
+					__cancel_cond_2= true}
+			}
+
+			__cancel_cond_3 = this->curr_FengBan_volume * this->strate_limup_price <= this->cancel_trigger_volume;
+
+			if (this->duration_from_formal_order_acpt >= this->condition_4_low_time && this->duration_from_formal_order_acpt <= this->condition_4_high_time){
+				__cancel_cond_4 = this->curr_FengBan_volume * this->strate_limup_price <= this->cancel_trigger_volume_large;
+			}
+
+			if ( __cancel_cond_1 || __cancel_cond_2 || __cancel_cond_3 || __cancel_cond_4 || __cancel_cond_5)
+			{
+				m_dispatcher_ptr->trader_ptr->Send_Cancle_Order(this->strate_exchangeID, 
+																this->strate_OrderSysID,
+																this->strate_SInfo);
+				this->if_cancel_sent = true;
+				m_logger->info("S,{}, [ACTION] , code: {}, cancle sent, curr_volume: {}, cancle_volume: {}", 
+								this->strate_SInfo,
+								this->strate_stock_code,
+								this->curr_FengBan_volume,
+								this->cancel_trigger_volume
+								);
+				return;
+			}
 		}
 
 	}                                                                         
@@ -168,6 +259,9 @@ public:
 		// unique_lock scope
 		{
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
+
+			this->temp_curr_time = std::chrono::steady_clock::now();
+
 			if(temp_tick->LastPrice < this->strate_limup_price)
 			{
 				// If true remain true to enable send order
@@ -198,7 +292,7 @@ public:
 
 	void on_orderDetial(std::shared_ptr<SEObject> e) override
 	{
-
+		
 		std::shared_ptr<SE_Lev2OrderDetailField> temp_orderdetial = std::static_pointer_cast<SE_Lev2OrderDetailField>(e);
 
 		if (strcmp(temp_orderdetial->SecurityID, strate_stock_code) != 0){
@@ -208,6 +302,9 @@ public:
 		//unique share-lock
 		{
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
+
+			this->temp_curr_time = std::chrono::steady_clock::now();
+
 			if (temp_orderdetial->Price < this->strate_limup_price)
 			{
 				// Not updating can_resend_order because order price can be lower than limup while still limup
@@ -218,6 +315,7 @@ public:
 			if (temp_orderdetial->Price == this->strate_limup_price && temp_orderdetial->Side == '1' && temp_orderdetial->OrderStatus != 'D')
 			{
 				curr_FengBan_volume += temp_orderdetial->Volume;
+				time_volume_tracker.insertPair( TimeVolumePair{this->temp_curr_time,temp_orderdetial->Volume} )
 				action();
 				m_logger->info("S,{}, [ON_ORDERDETIAL] , code: {} limup: {} curr price: {}, curr_volume: {}, trigger_volume:{},cancle_volume: {} ",
 						 this->strate_SInfo,
@@ -234,6 +332,7 @@ public:
 				temp_orderdetial->Side == '1' && temp_orderdetial->OrderStatus == 'D')
 			{
 				curr_FengBan_volume -= temp_orderdetial->Volume;
+				time_volume_tracker.insertPair( TimeVolumePair{this->temp_curr_time,temp_orderdetial->Volume} )
 				action();
 				m_logger->info("S,{}, [ON_ORDERDETIAL] , code: {} limup: {} curr price: {}, curr_volume: {}, trigger_volume:{},cancle_volume: {} ",
 				         this->strate_SInfo,
@@ -260,6 +359,8 @@ public:
 		{
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
 
+			this->temp_curr_time = std::chrono::steady_clock::now();
+
 			if (temp_transac->TradePrice < strate_limup_price)
 			{
 				// If true remain true to enable send order
@@ -276,6 +377,7 @@ public:
 				}
 			}
 			this->curr_FengBan_volume -= temp_transac->TradeVolume;
+			time_volume_tracker.insertPair( TimeVolumePair{this->temp_curr_time,temp_transac->TradeVolume} )
 			this->action();
 		}
 		// ExchangeID == '2' SZSE , ExecType == '2' cancel order  
@@ -315,7 +417,7 @@ public:
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
 			this->running_status.store(StrategyStatus::ORDER_SENT);
 			strcpy(this->strate_OrderSysID,temp_orderField->OrderSysID);
-			this->order_accepted = true;
+			this->formal_order_accepted = true;
 			this->if_cancel_sent = false;
 			m_logger->info("S,{}, [ORDER_SUCCESS] , securityID:{}, SInfo:{}, OrderSysID: {}",
 							this->strate_SInfo, 
