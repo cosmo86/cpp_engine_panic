@@ -260,24 +260,27 @@ public:
 		{
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
 
-			if (temp_transac->TradePrice < strate_limup_price)
+			if (temp_transac->TradePrice < this->strate_limup_price)
 			{
 				// If true remain true to enable send order
 				if (this->can_resend_order){return;}
-				else{
+				else if(temp_transac->ExecType == '1')// 1 means traded, 2 is cancel
+				{
 				// If false, set tp true to enable send order
 					this->can_resend_order = true;
-					m_logger->warn("S,{}, [on_transac] , limup price is {},Trade price is {}, Bitsetting can_resend_order  to true. strate_limup_price and this->strate_limup_price {},{} ",
+					m_logger->warn("S,{}, [ON_TRANSAC] , limup price is {},Trade price is {}, Bitsetting can_resend_order  to true. strate_limup_price and this->strate_limup_price {} ",
 									this->strate_SInfo,
 									this->strate_limup_price,
 									temp_transac->TradePrice,
-									strate_limup_price,
 									this->strate_limup_price);
 					return;
 				}
 			}
-			this->curr_FengBan_volume -= temp_transac->TradeVolume;
-			this->action();
+			else // Limup, subtract traded/SZ cancel from fengban_volume
+			{
+				this->curr_FengBan_volume -= temp_transac->TradeVolume;
+				this->action();
+			}
 		}
 		// ExchangeID == '2' SZSE , ExecType == '2' cancel order  
 		if (temp_transac->ExchangeID == '2' and temp_transac->ExecType == '2')
