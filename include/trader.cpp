@@ -660,7 +660,7 @@ private:
 	}
 	
 public:
-	void Send_Order_LimitPrice( const char exchange_id, const int volume, const double price, TTORATstpSecurityIDType stock_id , const char* req_sinfo)
+	void Send_Order_LimitPrice( const char exchange_id, const int volume, const double price, TTORATstpSecurityIDType stock_id , const char* req_sinfo, const int req_iinfo = 0)
 	{
 		// 请求报单
 		CTORATstpInputOrderField input_order_field;
@@ -675,6 +675,7 @@ public:
 		input_order_field.TimeCondition = TORA_TSTP_TC_GFD;
 		input_order_field.VolumeCondition = TORA_TSTP_VC_AV;
 		strcpy(input_order_field.SInfo, req_sinfo );
+		input_order_field.IInfo = req_iinfo; // iinfo here is for scout_order
 		int ret_oi = m_api->ReqOrderInsert(&input_order_field, m_req_id++);
 		if (ret_oi != 0)
 		{
@@ -697,7 +698,7 @@ public:
 		}
 	}
 
-	void Send_Cancle_Order( const char exchange_id, TTORATstpOrderSysIDType order_sys_id ,const char* req_sinfo )
+	void Send_Cancle_Order( const char exchange_id, TTORATstpOrderSysIDType order_sys_id ,const char* req_sinfo, const int req_iinfo = 0 )
 	{
 		// 请求撤单
 		CTORATstpInputOrderActionField input_order_action_field;
@@ -706,6 +707,7 @@ public:
 		input_order_action_field.ActionFlag = TORA_TSTP_AF_Delete;
 		strcpy(input_order_action_field.OrderSysID, order_sys_id);
 		strcpy(input_order_action_field.SInfo , req_sinfo);
+		input_order_action_field.IInfo = req_iinfo;
 
 		int ret = m_api->ReqOrderAction(&input_order_action_field, m_req_id++);
 		if (ret != 0)
