@@ -183,7 +183,7 @@ void Dispatcher::add_strategy(int s_id, std::string SecurityID, const char& eid,
 	_sID_strategyPtr_map.emplace(s_id , s);
 }
 
-void Dispatcher::remove_strategy(int s_id,std::string SecurityID, const char& eid)
+void Dispatcher::remove_strategy(int s_id, std::string SecurityID, const char& eid)
 {
 	std::unique_lock<std::shared_mutex> lock(_strategy_mutex);
 	auto S_toRemove = _sID_strategyPtr_map.find(s_id);
@@ -199,6 +199,12 @@ void Dispatcher::remove_strategy(int s_id,std::string SecurityID, const char& ei
 			char* Securities[1];
 			Securities[0] = nonconst_SecurityID;
 			L2_quoter_ptr->UnSubscribe(Securities,1,eid);// 1 means only subscribe one stock
+			// check if actually removed
+			auto num_erased = stock_to_strategy_map.erase(SecurityID);
+			m_logger_ptr->warn("[Dispatcher], [remove_strategy] ,strategy {} was removed, stock {}, num_erased {}, this should be 1  " ,
+								s_id, 
+								SecurityID,
+								num_erased);
 		}
 		// _sID_strategyPtr_map essentially keeps track of running stategies,
 		// _sID_strategyPtr_map.extract removes a strategy from the map
