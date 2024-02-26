@@ -199,6 +199,12 @@ void Dispatcher::remove_strategy(int s_id,std::string SecurityID, const char& ei
 			char* Securities[1];
 			Securities[0] = nonconst_SecurityID;
 			L2_quoter_ptr->UnSubscribe(Securities,1,eid);// 1 means only subscribe one stock
+			// check if actually removed
+			auto num_erased = stock_to_strategy_map.erase(key_to_remove);
+			m_logger_ptr->warn("[Dispatcher], [remove_strategy] ,strategy {} was removed, stock {}, num_erased {}, this should be 1  " ,
+								s_id, 
+								SecurityID,
+								num_erased);
 		}
 		// _sID_strategyPtr_map essentially keeps track of running stategies,
 		// _sID_strategyPtr_map.extract removes a strategy from the map
