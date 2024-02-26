@@ -187,7 +187,7 @@ public:
 	{
 		this->scout_order_acpt = false;
 		this->scout_order_traded = false;
-		this->scout_OrderSysID = '\0';
+		this->scout_OrderSysID[0] = '\0';
 	}
 
 	void check_scout_order()
@@ -661,8 +661,8 @@ public:
 		{
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
 			this->check_scout_order();
+			return;
 		}
-
 
 		{
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
