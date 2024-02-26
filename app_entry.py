@@ -1,5 +1,6 @@
 import ctypes
 import os
+import signal
 import yaml
 from datetime import datetime
 from fastapi_model.dataModels import UserStrategyModel,UserStrategyGroupModel
@@ -158,5 +159,27 @@ def get_event_q_size():
     res = mylib.GetEventQSize()
     print("event q size ", res)
 
+
+
+
+################################################
+shutdown_requested = False
+def termination_handler(signum, frame):
+    global shutdown_requested
+    print("Shutdown signal received...")
+    shutdown_requested = True
+
+def perform_cleanup():
+    global yaml_file_path, programCache_data
+    print("Performing cleanup...")
+    with open(yaml_file_path, "w") as file:
+        yaml.dump(programCache_data, file)
+
+################################################
+
+
 if __name__ == "__main__":
+    signal.signal(signal.SIGINT, termination_handler)  # Handle Ctrl+C
+    signal.signal(signal.SIGTERM, termination_handler)  # Handle kill command
+
     uvicorn.run(app,port = 9001)
