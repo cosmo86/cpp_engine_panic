@@ -397,7 +397,7 @@ private:
 
 	virtual void OnRtnOrder(CTORATstpOrderField* pOrder)
 	{
-		m_logger->info("T, [OnRtnOrder] ,{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}",
+		m_logger->info("T, [OnRtnOrder] ,{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}",
                pOrder->RequestID,
                pOrder->SecurityID,
                pOrder->OrderRef,
@@ -418,7 +418,7 @@ private:
 
 		if(pOrder->SInfo[0] == '\0'){
 			
-			m_logger->info("T, [OnRtnOrder] ,SInfo is empty, please check order source,{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}",
+			m_logger->info("T, [OnRtnOrder] ,SInfo is empty, please check order source,{},{},{},{},{},{},{},{},{},{}",
                pOrder->RequestID,
                pOrder->SecurityID,
                pOrder->OrderRef,

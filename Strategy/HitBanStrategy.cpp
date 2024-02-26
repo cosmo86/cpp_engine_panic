@@ -195,7 +195,7 @@ public:
 		// !!! This functoin is under the condition scout is traded
 		// !!!
 		// No locks here because the context where check_scout_order() is called should be already locked
-		long long duration_from_scout_order_acpt =  std::chrono::duration_cast<std::chrono::nanoseconds(this->temp_curr_time - this->scout_order_acpt_time).count();
+		long long duration_from_scout_order_acpt =  std::chrono::duration_cast<std::chrono::nanoseconds>(this->temp_curr_time - this->scout_order_acpt_time).count();
 		if(duration_from_scout_order_acpt <= this->scout_monitor_duration)
 		{
 			if(this->if_formal_order_sent == false)// scout traded before formal order sent
@@ -246,8 +246,8 @@ public:
 		// No locks here because the context where action() is called should be already locked
 
 		// Scout order
-
-		if(this->scout_order_sent == false)
+		// only place order when scout is not sent and formal order is not acpted
+		if(this->scout_order_sent == false && this->formal_order_accepted == false)
 		{
 			if(curr_FengBan_volume * strate_limup_price >= scout_buy_trigger_cash_lim)
 			{
@@ -299,13 +299,15 @@ public:
 			bool __cancel_cond_4 = false;
 			bool __cancel_cond_5 = false;
 
-			this->duration_from_formal_order_acpt = std::chrono::duration_cast<std::chrono::nanoseconds(this->temp_curr_time - this->formal_order_acpt_time).count();
+			this->duration_from_formal_order_acpt = std::chrono::duration_cast<std::chrono::nanoseconds>(this->temp_curr_time - this->formal_order_acpt_time).count();
 
 			// cond 2
 			if ( this->duration_from_formal_order_acpt <= this->condition_2_higher_time )
 			{
-				if( static_cast<double>(time_volume_tracker.getTotalVolume()) / this->curr_FengBan_volume <= this->condition_2_percentage ){ 
-					__cancel_cond_2= true}
+				if( static_cast<double>(time_volume_tracker.getTotalVolume()) / this->curr_FengBan_volume <= this->condition_2_percentage )
+				{ 
+					__cancel_cond_2= true;
+				}
 			}
 
 			// cond 3
@@ -601,8 +603,8 @@ public:
 			this->reset_scout();
 			m_logger->info("S,{}, [CANCEL SUCCESS] ,scout order canceled, securityID:{}, SInfo:{}, IInfo: {}, OrderSysID: {}",
 							this->strate_SInfo, 
-							temp_orderActionField->SecurityID,
-							temp_orderActionField->SInfo, temp_orderActionField->SInfo , temp_orderActionField->OrderSysID);
+							this->strate_stock_code,
+							temp_orderActionField->SInfo, temp_orderActionField->IInfo , temp_orderActionField->OrderSysID);
 			return;
 		}
 
@@ -634,7 +636,7 @@ public:
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
 			m_logger->info("S,{}, [CANCEL ERROR] ,scout order NOT canceled, securityID:{}, SInfo:{}, IInfo: {}, OrderSysID: {}",
 							this->strate_SInfo, 
-							temp_orderActionField->SecurityID,
+							this->strate_stock_code,
 							temp_orderActionField->SInfo, temp_orderActionField->SInfo , temp_orderActionField->OrderSysID);
 			return;
 		}
@@ -660,6 +662,7 @@ public:
 		if (strcmp(temp_TradeField->OrderSysID , this->scout_OrderSysID) == 0 )
 		{
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
+			this->scout_order_traded = true;
 			this->check_scout_order();
 			return;
 		}
