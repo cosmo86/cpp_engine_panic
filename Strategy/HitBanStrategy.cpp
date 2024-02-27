@@ -406,18 +406,19 @@ public:
 
 		{
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
-			if (temp_TradeField->Volume == this->target_position)
+			this->current_position.fetch_add(temp_TradeField->Volume);
+			if (this->current_position.load() == this->target_position)
 			{
-				this->current_position.fetch_add(temp_TradeField->Volume);
 				this->running_status.store(StrategyStatus::FULLY_TRADED);
+				m_logger->info("S,{}, [ON_TRADE] ,fully traded, security {}, trade_volume: {}, curr_pos {}",
+				this->strate_SInfo,temp_TradeField->SecurityID, temp_TradeField->Volume, this->current_position.load());
 				this->stop_strategy();
-				m_logger->info("S,{}, [ON_TRADE] ,fully traded, security {}, trade_volume: {}",this->strate_SInfo,temp_TradeField->SecurityID, temp_TradeField->Volume);
 				return;
 			}
 			else
 			{
-				m_logger->info("S,{}, [ON_TRADE] ,Part traded, security {}, trade_volume: {}",this->strate_SInfo,temp_TradeField->SecurityID, temp_TradeField->Volume);
-				this->current_position.fetch_add(temp_TradeField->Volume);
+				m_logger->info("S,{}, [ON_TRADE] ,Part traded, security {}, trade_volume: {}, curr_pos {}",
+				this->strate_SInfo,temp_TradeField->SecurityID, temp_TradeField->Volume, this->current_position.load());
 				this->running_status.store(StrategyStatus::PART_TRADED);
 				return;
 			}
