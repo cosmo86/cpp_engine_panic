@@ -49,6 +49,14 @@ public:
         totalVolume += volume;
     }
 
+	void updateDurationNanoseconds(long long newDuration) 
+	{
+        this->durationNanoseconds = newDuration;
+		/// !! idealy , reevaluate pair_vec and totalVolume to reflect the new duration
+        // This could involve removing pairs that no longer fit within the updated duration
+		// However, this could cause potential issues.
+    }
+
     int getTotalVolume() const {
         return totalVolume;
     }
@@ -76,8 +84,18 @@ public:
 		this->cancel_trigger_volume = j["CancelVolume"].get<int>();
 		this->max_trigger_times = j["MaxTriggerTimes"].get<int>();
 		this->position = j["Position"].get<int>();
-		this->delay_duration = j["DelayTime"].get<int>();
-		
+		//Timed logic vars
+		this->lower_time_limit = j["LowerTimeLimit"].get<int>();
+		this->scout_buy_trigger_cash_lim = j["ScoutBuyTriggerCashLim"].get<int>();
+		this->scout_monitor_duration = j["ScoutMonitorDuration"].get<int>();
+		this->condition_2_percentage = j["Cond2Percent"].get<int>();
+		this->condition_2_higher_time = j["Cond2HighTime"].get<int>();
+		this->condition_2_track_duration = j["Cond2TrackDuration"].get<int>();
+		time_volume_tracker.updateDurationNanoseconds(this->condition_2_track_duration);
+		this->cancel_trigger_volume_large = j["CancelTriggerVolumeLarge"].get<int>();
+		this->condition_4_low_time = j["Cond4LowTime"].get<int>();
+		this->condition_4_high_time = j["Cond4HighTime"].get<int>();
+		//
 
 		std::string tempStr_securityID = j["SecurityID"].get<std::string>();
 		std::strcpy(this->strate_stock_code, tempStr_securityID.c_str());
@@ -106,7 +124,6 @@ public:
 		std::cout<<"strate_stock_name"<<strate_stock_name<<std::endl;
 		std::cout<<"strate_exchangeID"<<strate_exchangeID<<std::endl;
 		std::cout<<"target_position"<<target_position<<std::endl;
-		std::cout<<"delay_duration"<<delay_duration<<std::endl;
 		std::cout<<"strate_limup_price"<<strate_limup_price<<std::endl;
 		std::cout<<"strate_stock_name"<<strate_stock_name<<std::endl;
 	}
@@ -135,6 +152,11 @@ public:
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// Please refer to dispatcher.check_running_strategy() 
 	// to understand why those two values must be atomic<int>
+	// They are atomic to avoid a dead-lock in this case:
+	// 1. check_running_strategy is called first, dispatcher shared_mutex is locked, trying to get strategy's mutex
+	// 2. Strategy may have traded and strategy's lock is accquired, Strategy calls dispatcher -remove_strategy 
+	//    trying to get dispatcher mutex
+	// Do you see the dead-lock? Thus we cannot try to get the strategy's mutex during check_running_strategy.
 	std::atomic<int> current_position;
 	std::atomic<int> running_status;
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -148,7 +170,6 @@ public:
 
 	bool if_formal_order_sent = false;
 	bool if_cancel_sent = false;
-	int delay_duration = 500; // in milliseconds
 
 	bool formal_order_accepted = false;
 	char strate_OrderSysID[21];
@@ -161,10 +182,12 @@ public:
 	long long lower_time_limit = 2000000000;
 
 	// condition 1 scout order
-	int scout_buy_trigger_cash_lim;
+	int scout_buy_trigger_cash_lim = 0;
 	bool scout_order_sent = false;
 	bool scout_order_acpt = false;
 	bool scout_order_traded = false;
+	//Scout_protection is atomic for the same reason as running_status, bool scout_protection = false;
+	std::atomic<bool> scout_protection{false};
 	std::chrono::steady_clock::time_point scout_order_acpt_time;
 	long long scout_monitor_duration = 600000000000;
 	char scout_OrderSysID[21];
@@ -182,6 +205,36 @@ public:
 
 
 public:
+
+	nlohmann::json get_strategy_params()
+	{
+		nlohmann::json temp_json;
+
+		temp_json["ID"] = this->strate_SInfo;
+		temp_json["SecurityID"] = this->strate_stock_code;
+		temp_json["ExchangeID"] = std::string(1, this->strate_exchangeID);
+		temp_json["BuyTriggerVolume"] = this->buy_trigger_volume;
+		temp_json["CancelVolume"] = this->cancel_trigger_volume;
+		temp_json["TargetPosition"] = this->target_position;
+		temp_json["CurrPosition"] = this->current_position.load();
+		temp_json["Status"] = this->running_status.load();
+		temp_json["MaxTriggerTimes"] = this->current_trigger_times;
+		temp_json["OrderID"] = this->strate_OrderSysID;
+		temp_json["SecurityName"] = this->strate_stock_name;
+		// time logic vars
+		temp_json["LowerTimeLimit"] = this->lower_time_limit;
+		temp_json["ScoutBuyTriggerCashLim"] = this->scout_buy_trigger_cash_lim;
+		temp_json["ScoutMonitorDuration"] = this->scout_monitor_duration;
+		temp_json["ScoutProtection"] = this->scout_protection.load();
+		temp_json["Cond2Percent"] = this->condition_2_percentage;
+		temp_json["Cond2HighTime"] = this->condition_2_higher_time;
+		temp_json["Cond2TrackDuration"] = this->condition_2_track_duration;
+		temp_json["CancelTriggerVolumeLarge"] = this->cancel_trigger_volume_large;
+		temp_json["Cond4LowTime"] = this->condition_4_low_time;
+		temp_json["Cond4HighTime"] = this->condition_4_high_time;
+		return temp_json;
+		
+	}
 
 	void reset_scout()
 	{
@@ -304,7 +357,7 @@ public:
 			// cond 2
 			if ( this->duration_from_formal_order_acpt <= this->condition_2_higher_time )
 			{
-				if( static_cast<double>(time_volume_tracker.getTotalVolume()) / this->curr_FengBan_volume <= this->condition_2_percentage )
+				if( static_cast<double>(time_volume_tracker.getTotalVolume()) / this->curr_FengBan_volume >= this->condition_2_percentage )
 				{ 
 					__cancel_cond_2= true;
 				}

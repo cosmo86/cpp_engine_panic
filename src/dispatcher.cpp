@@ -252,24 +252,12 @@ nlohmann::json Dispatcher::check_running_strategy()
 	{
 		for (const auto& pair : _sID_strategyPtr_map) 
 		{
-			nlohmann::json temp_json;
+			//nlohmann::json temp_json;
 			//std::shared_ptr<StrategyBase> temp_base_ptr = pair.second;
 			//std::cout<<temp_base_ptr->test_var<<std::endl;
 			std::shared_ptr<HitBanStrategy> temp_strategy = std::static_pointer_cast<HitBanStrategy>(pair.second);
 
-			temp_json["ID"] = temp_strategy->strate_SInfo;
-			temp_json["SecurityID"] = temp_strategy->strate_stock_code;
-			temp_json["ExchangeID"] = std::string(1, temp_strategy->strate_exchangeID);
-			temp_json["BuyTriggerVolume"] = temp_strategy->buy_trigger_volume;
-			temp_json["CancelVolume"] = temp_strategy->cancel_trigger_volume;
-			temp_json["TargetPosition"] = temp_strategy->target_position;
-			temp_json["CurrPosition"] = temp_strategy->current_position.load();
-			temp_json["Status"] = temp_strategy->running_status.load();
-			temp_json["MaxTriggerTimes"] = temp_strategy->current_trigger_times;
-			temp_json["OrderID"] = temp_strategy->strate_OrderSysID;
-			temp_json["SecurityName"] = temp_strategy->strate_stock_name;
-			temp_json["DelayTime"] = temp_strategy->delay_duration;
-			combinedJson.push_back(temp_json);
+			combinedJson.push_back(temp_strategy->get_strategy_params());
 
 			std::cout<<"[Dispatcher check running] "<<combinedJson<<std::endl;
 		}
@@ -285,24 +273,11 @@ nlohmann::json Dispatcher::check_removed_strategy()
 	{
 		for (const auto& pair : _removed_sID_strategyPtr_map) 
 		{
-			nlohmann::json temp_json;
+			//nlohmann::json temp_json;
 			//std::shared_ptr<StrategyBase> temp_base_ptr = pair.second;
 			//std::cout<<temp_base_ptr->test_var<<std::endl;
 			std::shared_ptr<HitBanStrategy> temp_strategy = std::static_pointer_cast<HitBanStrategy>(pair.second);
-
-			temp_json["ID"] = temp_strategy->strate_SInfo;
-			temp_json["SecurityID"] = temp_strategy->strate_stock_code;
-			temp_json["ExchangeID"] =  std::string(1, temp_strategy->strate_exchangeID);
-			temp_json["BuyTriggerVolume"] = temp_strategy->buy_trigger_volume;
-			temp_json["CancelVolume"] = temp_strategy->cancel_trigger_volume;
-			temp_json["TargetPosition"] = temp_strategy->target_position;
-			temp_json["CurrPosition"] = temp_strategy->current_position.load();
-			temp_json["Status"] = temp_strategy->running_status.load();
-			temp_json["MaxTriggerTimes"] = temp_strategy->current_trigger_times;
-			temp_json["OrderID"] = temp_strategy->strate_OrderSysID;
-			temp_json["SecurityName"] = temp_strategy->strate_stock_name;
-			temp_json["DelayTime"] = temp_strategy->delay_duration;
-			combinedJson.push_back(temp_json);
+			combinedJson.push_back(temp_strategy->get_strategy_params());
 		}
 	}
     return combinedJson;
@@ -310,6 +285,8 @@ nlohmann::json Dispatcher::check_removed_strategy()
 
 void Dispatcher::update_delay_duration(int s_id, int new_delay_duration)
 {
+	std::cout<< "[Dispatcher::update_delay_duration], currently unavaliable";
+	/*
 	auto S_toUpdate_iter = _sID_strategyPtr_map.find(s_id);
 	if (S_toUpdate_iter != _sID_strategyPtr_map.end())
 	{
@@ -320,4 +297,5 @@ void Dispatcher::update_delay_duration(int s_id, int new_delay_duration)
 	{
 		m_logger_ptr->warn("[update_delay_duration] s_id not found, input s_id is {}",s_id );
 	}
+	*/
 }
