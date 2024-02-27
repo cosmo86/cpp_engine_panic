@@ -18,6 +18,20 @@ class UserStrategyModel(BaseModel):
     Status: int = 0
     OrderID: str = " "
     SecurityName : str = ""
+
+    # Timed logic vars
+    LowerTimeLimit: int = 0
+    ScoutBuyTriggerCashLim: int = 0
+    ScoutMonitorDuration: int = 0
+    Cond2Percent: float = 0.0
+    Cond2HighTime: int = 0
+    Cond2TrackDuration: int = 0
+    CancelTriggerVolumeLarge: int = 0
+    ScoutProtection: bool = False
+    Cond4LowTime: int = 0
+    Cond4HighTime: int = 0
+
+
     
     @validator('ExchangeID', always=True)
     def check_id_exchange_match(cls, v, values, **kwargs):

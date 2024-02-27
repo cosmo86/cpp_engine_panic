@@ -88,7 +88,7 @@ public:
 		this->lower_time_limit = j["LowerTimeLimit"].get<int>();
 		this->scout_buy_trigger_cash_lim = j["ScoutBuyTriggerCashLim"].get<int>();
 		this->scout_monitor_duration = j["ScoutMonitorDuration"].get<int>();
-		this->condition_2_percentage = j["Cond2Percent"].get<int>();
+		this->condition_2_percentage = j["Cond2Percent"].get<float>();
 		this->condition_2_higher_time = j["Cond2HighTime"].get<int>();
 		this->condition_2_track_duration = j["Cond2TrackDuration"].get<int>();
 		time_volume_tracker.updateDurationNanoseconds(this->condition_2_track_duration);
