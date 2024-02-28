@@ -12,7 +12,6 @@ class UserStrategyModel(BaseModel):
     Position: int = 0
     TargetPosition: int = 0
     CurrPosition : int = 0
-    DelayTime: int = 500
     MaxTriggerTimes: int = 0 
     ID: str = ""
     Status: int = 0
@@ -27,7 +26,8 @@ class UserStrategyModel(BaseModel):
     Cond2HighTime: int = 0
     Cond2TrackDuration: int = 0
     CancelTriggerVolumeLarge: int = 0
-    ScoutProtection: bool = False
+    #ScoutProtection: bool = False
+    ScoutStatus: int =0
     Cond4LowTime: int = 0
     Cond4HighTime: int = 0
 

@@ -18,6 +18,16 @@ enum StrategyStatus
     REJECTED = -1
 };
 
+enum ScoutStatus
+{
+    SCOUT_RUNNING = 0,
+    SCOUT_ORDER_SENT = 1,
+    SCOUT_ORDER_CANCELED = 2,
+	SCOUT_ORDER_CANCELED_ABNORMAL = 3,
+    SCOUT_ORDER_REJECTED = -1,
+	SCOUT_TRADED = 4
+};
+
 // For Condition 2 
 class TimeVolumePair {
 public:
@@ -85,16 +95,16 @@ public:
 		this->max_trigger_times = j["MaxTriggerTimes"].get<int>();
 		this->position = j["Position"].get<int>();
 		//Timed logic vars
-		this->lower_time_limit = j["LowerTimeLimit"].get<int>();
+		this->lower_time_limit = j["LowerTimeLimit"].get<long long>();
 		this->scout_buy_trigger_cash_lim = j["ScoutBuyTriggerCashLim"].get<int>();
-		this->scout_monitor_duration = j["ScoutMonitorDuration"].get<int>();
+		this->scout_monitor_duration = j["ScoutMonitorDuration"].get<long long>();
 		this->condition_2_percentage = j["Cond2Percent"].get<float>();
-		this->condition_2_higher_time = j["Cond2HighTime"].get<int>();
-		this->condition_2_track_duration = j["Cond2TrackDuration"].get<int>();
+		this->condition_2_higher_time = j["Cond2HighTime"].get<long long>();
+		this->condition_2_track_duration = j["Cond2TrackDuration"].get<long long>();
 		time_volume_tracker.updateDurationNanoseconds(this->condition_2_track_duration);
 		this->cancel_trigger_volume_large = j["CancelTriggerVolumeLarge"].get<int>();
-		this->condition_4_low_time = j["Cond4LowTime"].get<int>();
-		this->condition_4_high_time = j["Cond4HighTime"].get<int>();
+		this->condition_4_low_time = j["Cond4LowTime"].get<long long>();
+		this->condition_4_high_time = j["Cond4HighTime"].get<long long>();
 		//
 
 		std::string tempStr_securityID = j["SecurityID"].get<std::string>();
@@ -114,6 +124,14 @@ public:
 		// this sets the securityName
 		get_security_name();
 		this->target_position = (static_cast<int>(this->position / this->strate_limup_price) / 100) * 100;
+
+		nlohmann::json jsonObj = this->get_strategy_params();
+		for (auto& [key, value] : jsonObj.items()) 
+		{
+			std::cout << "Key: " << key << ", Value: ";
+			if (value.is_primitive()) {
+				std::cout << value << std::endl;}
+		}
 
 		std::cout<<"strate_stock_code"<<strate_stock_code<<std::endl;
 		std::cout<<"buy_trigger_volume"<<buy_trigger_volume<<std::endl;
@@ -186,8 +204,8 @@ public:
 	bool scout_order_sent = false;
 	bool scout_order_acpt = false;
 	bool scout_order_traded = false;
-	//Scout_protection is atomic for the same reason as running_status, bool scout_protection = false;
-	std::atomic<bool> scout_protection{false};
+	//Scout_status is atomic for the same reason as running_status
+	std::atomic<int> scout_status{0};
 	std::chrono::steady_clock::time_point scout_order_acpt_time;
 	long long scout_monitor_duration = 600000000000;
 	char scout_OrderSysID[21];
@@ -225,7 +243,7 @@ public:
 		temp_json["LowerTimeLimit"] = this->lower_time_limit;
 		temp_json["ScoutBuyTriggerCashLim"] = this->scout_buy_trigger_cash_lim;
 		temp_json["ScoutMonitorDuration"] = this->scout_monitor_duration;
-		temp_json["ScoutProtection"] = this->scout_protection.load();
+		temp_json["ScoutStatus"] = this->scout_status.load();
 		temp_json["Cond2Percent"] = this->condition_2_percentage;
 		temp_json["Cond2HighTime"] = this->condition_2_higher_time;
 		temp_json["Cond2TrackDuration"] = this->condition_2_track_duration;
@@ -575,6 +593,7 @@ public:
 			strcpy(this->scout_OrderSysID,temp_orderField->OrderSysID);
 			this->scout_order_acpt_time = std::chrono::steady_clock::now();
 			this->scout_order_acpt = true;
+			this->scout_status.store(ScoutStatus::SCOUT_ORDER_SENT);
 			m_logger->info("S,{}, [ORDER_SUCCESS] ,scout order acpt, securityID:{}, SInfo:{}, IInfo: {}, OrderSysID: {}",
 							this->strate_SInfo, 
 							temp_orderField->SecurityID, temp_orderField->SInfo, temp_orderField->SInfo , temp_orderField->OrderSysID);
@@ -611,6 +630,7 @@ public:
 		{
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
 			this->scout_order_sent  = false;
+			this->scout_status.store(ScoutStatus::SCOUT_ORDER_REJECTED);
 			m_logger->info("S,{}, [ORDER_ERROR] ,scout order NOT acpt, securityID:{}, SInfo:{}, IInfo: {}, OrderSysID: {}",
 							this->strate_SInfo, 
 							temp_orderField->SecurityID, temp_orderField->SInfo, temp_orderField->SInfo , temp_orderField->OrderSysID);
@@ -654,6 +674,7 @@ public:
 		{
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
 			this->reset_scout();
+			this->scout_status.store(ScoutStatus::SCOUT_ORDER_CANCELED);
 			m_logger->info("S,{}, [CANCEL SUCCESS] ,scout order canceled, securityID:{}, SInfo:{}, IInfo: {}, OrderSysID: {}",
 							this->strate_SInfo, 
 							this->strate_stock_code,
@@ -687,6 +708,7 @@ public:
 		if (temp_orderActionField->IInfo == 2)
 		{
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
+			this->scout_status.store(ScoutStatus::SCOUT_ORDER_CANCELED_ABNORMAL);
 			m_logger->info("S,{}, [CANCEL ERROR] ,scout order NOT canceled, securityID:{}, SInfo:{}, IInfo: {}, OrderSysID: {}",
 							this->strate_SInfo, 
 							this->strate_stock_code,
@@ -717,6 +739,7 @@ public:
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
 			this->scout_order_traded = true;
 			this->check_scout_order();
+			this->scout_status.store(ScoutStatus::SCOUT_TRADED);
 			return;
 		}
 

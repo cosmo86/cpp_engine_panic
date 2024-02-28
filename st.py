@@ -4,13 +4,15 @@ import requests
 from pydantic import  ValidationError
 
 from fastapi_model.dataModels import UserStrategyModel,UserStrategyGroupModel
-from fastapi_model.st_mappings import ORDER_STATUS_TORA2ST, EXCHANGE_MAPPING_TORA2ST
+from fastapi_model.st_mappings import ORDER_STATUS_TORA2ST, EXCHANGE_MAPPING_TORA2ST, SCOUT_STATUS_TORA2ST
 
 #Helper function
 def status_mapping(row):
     return ORDER_STATUS_TORA2ST[row]
 def exchange_mapping(row):
     return EXCHANGE_MAPPING_TORA2ST[row]
+def scout_status_mapping(row):
+    return  SCOUT_STATUS_TORA2ST[row]
 
 # Read cache data must be define before initing session states
 def read_cached_data():
@@ -174,6 +176,7 @@ if st.session_state.strategy_container:
     running_df = pd.DataFrame(st.session_state.running_strategy)
     print(f"running_df {running_df}")
     running_df['Status'] = running_df['Status'].apply(status_mapping)
+    running_df['ScoutStatus'] = running_df['ScoutStatus'].apply(scout_status_mapping)
     running_df['ExchangeID'] = running_df['ExchangeID'].apply(exchange_mapping)
     container.dataframe(
         running_df,
@@ -191,7 +194,7 @@ if st.session_state.strategy_container:
             "LowerTimeLimit" : "延迟触发",
             "SecurityName" : "股票名称",
             # Timed logic 
-            "ScoutProtection": "保护单状态",
+            "ScoutStatus": "保护单状态",
             "ScoutBuyTriggerCashLim": "保护单触发金额",
             "ScoutMonitorDuration" : "保护单监控区间",
             "Cond2Percent" : "撤单动量比例",
@@ -203,7 +206,7 @@ if st.session_state.strategy_container:
         },
             
         column_order=('ID', 'SecurityID','SecurityName','ExchangeID', 'BuyTriggerVolume', 'CancelVolume', 'TargetPosition', 'CurrPosition', 
-                      'LowerTimeLimit' ,'Count','Status','OrderID','ScoutProtection','ScoutBuyTriggerCashLim','ScoutMonitorDuration',
+                      'LowerTimeLimit' ,'Count','Status','OrderID','ScoutStatus','ScoutBuyTriggerCashLim','ScoutMonitorDuration',
                       'Cond2Percent','Cond2HighTime','Cond2TrackDuration','CancelTriggerVolumeLarge','Cond4LowTime','Cond4HighTime'),
         hide_index=True,
         use_container_width=True
@@ -214,6 +217,7 @@ if st.session_state.strategy_container:
     removed_df = pd.DataFrame(st.session_state.removed_strategy)
     #print(f"removed_df {removed_df}")
     removed_df['Status'] = removed_df['Status'].apply(status_mapping)
+    removed_df['ScoutStatus'] = removed_df['ScoutStatus'].apply(scout_status_mapping)
     removed_df['ExchangeID'] = removed_df['ExchangeID'].apply(exchange_mapping)
     container.dataframe(
         removed_df,
@@ -231,7 +235,7 @@ if st.session_state.strategy_container:
             "LowerTimeLimit" : "延迟触发",
             "SecurityName" : "股票名称",
             # Timed logic 
-            "ScoutProtection": "保护单状态",
+            "ScoutStatus": "保护单状态",
             "ScoutBuyTriggerCashLim": "保护单触发金额",
             "ScoutMonitorDuration" : "保护单监控区间",
             "Cond2Percent" : "撤单动量比例",
@@ -243,7 +247,7 @@ if st.session_state.strategy_container:
         },
             
         column_order=('ID', 'SecurityID','SecurityName','ExchangeID', 'BuyTriggerVolume', 'CancelVolume', 'TargetPosition', 'CurrPosition', 
-                      'LowerTimeLimit' ,'Count','Status','OrderID','ScoutProtection','ScoutBuyTriggerCashLim','ScoutMonitorDuration',
+                      'LowerTimeLimit' ,'Count','Status','OrderID','ScoutStatus','ScoutBuyTriggerCashLim','ScoutMonitorDuration',
                       'Cond2Percent','Cond2HighTime','Cond2TrackDuration','CancelTriggerVolumeLarge','Cond4LowTime','Cond4HighTime'),
         hide_index=True,
         use_container_width=True
@@ -304,6 +308,7 @@ if uploaded_group is not None:
 
 if st.session_state.display_group_add:
     model_instances_for_display['Status'] = model_instances_for_display['Status'].apply(status_mapping)
+    model_instances_for_display['ScoutStatus'] = model_instances_for_display['ScoutStatus'].apply(scout_status_mapping)
     model_instances_for_display['ExchangeID'] = model_instances_for_display['ExchangeID'].apply(exchange_mapping)
     AddGroup_container.dataframe(
         model_instances_for_display,
@@ -321,7 +326,7 @@ if st.session_state.display_group_add:
             "LowerTimeLimit" : "延迟触发",
             "SecurityName" : "股票名称",
             # Timed logic 
-            "ScoutProtection": "保护单状态",
+            "ScoutStatus": "保护单状态",
             "ScoutBuyTriggerCashLim": "保护单触发金额",
             "ScoutMonitorDuration" : "保护单监控区间",
             "Cond2Percent" : "撤单动量比例",
@@ -333,7 +338,7 @@ if st.session_state.display_group_add:
         },
             
         column_order=('ID', 'SecurityID','SecurityName','ExchangeID', 'BuyTriggerVolume', 'CancelVolume', 'TargetPosition', 'CurrPosition', 
-                      'LowerTimeLimit' ,'Count','Status','OrderID','ScoutProtection','ScoutBuyTriggerCashLim','ScoutMonitorDuration',
+                      'LowerTimeLimit' ,'Count','Status','OrderID','ScoutStatus','ScoutBuyTriggerCashLim','ScoutMonitorDuration',
                       'Cond2Percent','Cond2HighTime','Cond2TrackDuration','CancelTriggerVolumeLarge','Cond4LowTime','Cond4HighTime'),
         hide_index=True,
         use_container_width=True

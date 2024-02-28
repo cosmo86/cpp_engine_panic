@@ -93,7 +93,7 @@ def add_strategy(user_input: UserStrategyModel):
     user_input.ID = str(programCache_data["LastCreated_SID"])
     json_str = user_input.model_dump_json()
     mylib.AddStrategy(json_str.encode('utf-8'))
-    print(f"type of user_input is {type(user_input)}")
+    print(f"[App_entry] Params parsed to cpp is {json_str}, type of user_input is {type(user_input)}")
     programCache_data["PreviousRemoved_Strategy_Group"][int(user_input.ID)] = user_input.model_dump()
     programCache_data["RunningGroup"][int(user_input.ID)] = user_input.model_dump()
 
