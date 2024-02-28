@@ -375,7 +375,8 @@ public:
 			// cond 2
 			if ( this->duration_from_formal_order_acpt <= this->condition_2_higher_time )
 			{
-				if( static_cast<double>(time_volume_tracker.getTotalVolume()) / this->curr_FengBan_volume >= this->condition_2_percentage )
+				// <= condition_2_percentage because cancel_order is negative
+				if( static_cast<double>(time_volume_tracker.getTotalVolume()) / this->curr_FengBan_volume <= this->condition_2_percentage )
 				{ 
 					__cancel_cond_2= true;
 				}
@@ -508,7 +509,7 @@ public:
 				temp_orderdetial->Side == '1' && temp_orderdetial->OrderStatus == 'D')
 			{
 				curr_FengBan_volume -= temp_orderdetial->Volume;
-				time_volume_tracker.insertPair( this->temp_curr_time,temp_orderdetial->Volume );
+				time_volume_tracker.insertPair( this->temp_curr_time, -temp_orderdetial->Volume );
 				action();
 				m_logger->info("S,{}, [ON_ORDERDETIAL] , code: {} limup: {} curr price: {}, curr_volume: {}, trigger_volume:{},cancle_volume: {} ",
 				         this->strate_SInfo,
@@ -556,7 +557,7 @@ public:
 			else
 			{
 				this->curr_FengBan_volume -= temp_transac->TradeVolume;
-				time_volume_tracker.insertPair( this->temp_curr_time,temp_transac->TradeVolume );
+				time_volume_tracker.insertPair( this->temp_curr_time, -temp_transac->TradeVolume );
 				this->action();
 			}
 		}
