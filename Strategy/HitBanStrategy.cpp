@@ -162,6 +162,10 @@ public:
 		//std::cout<<"on_orderDetial, security id "<< temp_tick->SecurityID<<std::endl;
 
 		if (strcmp(temp_tick->SecurityID, strate_stock_code) != 0){
+			m_logger->warn("S,{}, [ON_TICK] , SecurityID mismatach, source: {}, Strategy: {}",
+							this->strate_SInfo,
+							temp_tick->SecurityID,
+							strate_stock_code);
 			return;
 		}
 
@@ -201,7 +205,12 @@ public:
 
 		std::shared_ptr<SE_Lev2OrderDetailField> temp_orderdetial = std::static_pointer_cast<SE_Lev2OrderDetailField>(e);
 
-		if (strcmp(temp_orderdetial->SecurityID, strate_stock_code) != 0){
+		if (strcmp(temp_orderdetial->SecurityID, strate_stock_code) != 0)
+		{
+			m_logger->warn("S,{}, [on_orderDetial] , SecurityID mismatach, source: {}, Strategy: {}",
+							this->strate_SInfo,
+							temp_orderdetial->SecurityID,
+							strate_stock_code);
 			return;
 		}
 
@@ -252,7 +261,12 @@ public:
 	{
 		std::shared_ptr<SE_Lev2TransactionStruct> temp_transac = std::static_pointer_cast<SE_Lev2TransactionStruct>(e);
 
-		if (strcmp(temp_transac->SecurityID, strate_stock_code) != 0){
+		if (strcmp(temp_transac->SecurityID, strate_stock_code) != 0)
+		{
+			m_logger->warn("S,{}, [on_transac] , SecurityID mismatach, source: {}, Strategy: {}",
+							this->strate_SInfo,
+							temp_transac->SecurityID,
+							strate_stock_code);
 			return;
 		}
 

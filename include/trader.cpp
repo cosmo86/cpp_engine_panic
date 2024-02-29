@@ -455,7 +455,7 @@ private:
 			// Log the OrderSysid_Sinfo_map content
 			for (auto it = OrderSysid_Sinfo_map.begin(); it != OrderSysid_Sinfo_map.end(); ++it) 
 			{
-				m_logger->info("T, [OnRtnTrade] ,OrderSysid_Sinfo_map content: key: {}, value:{}",it->first,it->second);
+				m_logger->info("T, [OnRtnOrder] ,OrderSysid_Sinfo_map content: key: {}, value:{}",it->first,it->second);
 			}
 
 			printf(
