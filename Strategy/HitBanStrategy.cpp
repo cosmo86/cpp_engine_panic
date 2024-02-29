@@ -162,10 +162,10 @@ public:
 		//std::cout<<"on_orderDetial, security id "<< temp_tick->SecurityID<<std::endl;
 
 		if (strcmp(temp_tick->SecurityID, strate_stock_code) != 0){
-			m_logger->warn("S,{}, [ON_TICK] , SecurityID mismatach, source: {}, Strategy: {}",
-							this->strate_SInfo,
-							temp_tick->SecurityID,
-							strate_stock_code);
+			//m_logger->warn("S,{}, [ON_TICK] , SecurityID mismatach, source: {}, Strategy: {}",
+			//				this->strate_SInfo,
+			//				temp_tick->SecurityID,
+			//				strate_stock_code);
 			return;
 		}
 
@@ -207,10 +207,10 @@ public:
 
 		if (strcmp(temp_orderdetial->SecurityID, strate_stock_code) != 0)
 		{
-			m_logger->warn("S,{}, [on_orderDetial] , SecurityID mismatach, source: {}, Strategy: {}",
-							this->strate_SInfo,
-							temp_orderdetial->SecurityID,
-							strate_stock_code);
+			//m_logger->warn("S,{}, [on_orderDetial] , SecurityID mismatach, source: {}, Strategy: {}",
+			//				this->strate_SInfo,
+			//				temp_orderdetial->SecurityID,
+			//				strate_stock_code);
 			return;
 		}
 
@@ -263,10 +263,10 @@ public:
 
 		if (strcmp(temp_transac->SecurityID, strate_stock_code) != 0)
 		{
-			m_logger->warn("S,{}, [on_transac] , SecurityID mismatach, source: {}, Strategy: {}",
-							this->strate_SInfo,
-							temp_transac->SecurityID,
-							strate_stock_code);
+			//m_logger->warn("S,{}, [on_transac] , SecurityID mismatach, source: {}, Strategy: {}",
+			//				this->strate_SInfo,
+			//				temp_transac->SecurityID,
+			//				strate_stock_code);
 			return;
 		}
 
