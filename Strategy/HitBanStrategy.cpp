@@ -158,10 +158,20 @@ public:
 	{
 		std::shared_ptr<SE_Lev2MarketDataField> temp_tick = std::static_pointer_cast<SE_Lev2MarketDataField>(e);
 
-		
+		if (strcmp(temp_tick->SecurityID, strate_stock_code) == 0)
+		{
+			m_logger->debug("S,{}, [ON_TICK] , SecurityID , source: {}, Strategy: {}",
+							this->strate_SInfo,
+							temp_tick->SecurityID,
+							strate_stock_code);
+		}
 		//std::cout<<"on_orderDetial, security id "<< temp_tick->SecurityID<<std::endl;
 
 		if (strcmp(temp_tick->SecurityID, strate_stock_code) != 0){
+			//m_logger->warn("S,{}, [ON_TICK] , SecurityID mismatach, source: {}, Strategy: {}",
+			//				this->strate_SInfo,
+			//				temp_tick->SecurityID,
+			//				strate_stock_code);
 			return;
 		}
 
@@ -201,7 +211,20 @@ public:
 
 		std::shared_ptr<SE_Lev2OrderDetailField> temp_orderdetial = std::static_pointer_cast<SE_Lev2OrderDetailField>(e);
 
-		if (strcmp(temp_orderdetial->SecurityID, strate_stock_code) != 0){
+		if (strcmp(temp_orderdetial->SecurityID, strate_stock_code) != 0)
+		{
+			m_logger->debug("S,{}, [on_orderDetial] , SecurityID , source: {}, Strategy: {}",
+							this->strate_SInfo,
+							temp_orderdetial->SecurityID,
+							strate_stock_code);
+		}
+
+		if (strcmp(temp_orderdetial->SecurityID, strate_stock_code) != 0)
+		{
+			//m_logger->warn("S,{}, [on_orderDetial] , SecurityID mismatach, source: {}, Strategy: {}",
+			//				this->strate_SInfo,
+			//				temp_orderdetial->SecurityID,
+			//				strate_stock_code);
 			return;
 		}
 
@@ -252,7 +275,20 @@ public:
 	{
 		std::shared_ptr<SE_Lev2TransactionStruct> temp_transac = std::static_pointer_cast<SE_Lev2TransactionStruct>(e);
 
-		if (strcmp(temp_transac->SecurityID, strate_stock_code) != 0){
+		if (strcmp(temp_transac->SecurityID, strate_stock_code) != 0)
+		{
+			m_logger->warn("S,{}, [on_transac] , SecurityID , source: {}, Strategy: {}",
+							this->strate_SInfo,
+							temp_transac->SecurityID,
+							strate_stock_code);
+		}
+
+		if (strcmp(temp_transac->SecurityID, strate_stock_code) != 0)
+		{
+			//m_logger->warn("S,{}, [on_transac] , SecurityID mismatach, source: {}, Strategy: {}",
+			//				this->strate_SInfo,
+			//				temp_transac->SecurityID,
+			//				strate_stock_code);
 			return;
 		}
 
@@ -406,18 +442,19 @@ public:
 
 		{
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
-			if (temp_TradeField->Volume == this->target_position)
+			this->current_position.fetch_add(temp_TradeField->Volume);
+			if (this->current_position.load() == this->target_position)
 			{
-				this->current_position.fetch_add(temp_TradeField->Volume);
 				this->running_status.store(StrategyStatus::FULLY_TRADED);
+				m_logger->info("S,{}, [ON_TRADE] ,fully traded, security {}, trade_volume: {}, curr_pos {}",
+				this->strate_SInfo,temp_TradeField->SecurityID, temp_TradeField->Volume, this->current_position.load());
 				this->stop_strategy();
-				m_logger->info("S,{}, [ON_TRADE] ,fully traded, security {}, trade_volume: {}",this->strate_SInfo,temp_TradeField->SecurityID, temp_TradeField->Volume);
 				return;
 			}
 			else
 			{
-				m_logger->info("S,{}, [ON_TRADE] ,Part traded, security {}, trade_volume: {}",this->strate_SInfo,temp_TradeField->SecurityID, temp_TradeField->Volume);
-				this->current_position.fetch_add(temp_TradeField->Volume);
+				m_logger->info("S,{}, [ON_TRADE] ,Part traded, security {}, trade_volume: {}, curr_pos {}",
+				this->strate_SInfo,temp_TradeField->SecurityID, temp_TradeField->Volume, this->current_position.load());
 				this->running_status.store(StrategyStatus::PART_TRADED);
 				return;
 			}

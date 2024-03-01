@@ -108,8 +108,15 @@ void Dispatcher::dispatch()
 						std::shared_lock<std::shared_mutex> lock(_strategy_mutex);
 						temp_strategy_iter = _sID_strategyPtr_map.find(std::stoi(temp_event.S_id));
 						// SInfo is not empty but strategy not found, stategy could be removed
-						if (temp_strategy_iter == _sID_strategyPtr_map.end()) {
-							std::cout<<"Strategy might be removed s_id: "<< temp_event.S_id << temp_event.e_type <<std::endl;}
+						if (temp_strategy_iter == _sID_strategyPtr_map.end()) 
+						{
+							this->m_logger_ptr->warn("[Dispatcher::dispatch], Strategy might be removed s_id:{} ,e_type:{} ",
+													temp_event.S_id,
+													temp_event.e_type);
+							std::cout<<"Strategy might be removed s_id: "<< temp_event.S_id<<" e_type " << temp_event.e_type <<std::endl;
+							return;
+						}
+
 					}
 					SETask task( temp_event.event, func_to_call->second,  temp_strategy_iter->second );
 					_task_q.enqueue(std::move(task));
@@ -121,6 +128,7 @@ void Dispatcher::dispatch()
 				std::shared_lock<std::shared_mutex> lock(_strategy_mutex);
 				for (const auto& pair : _sID_strategyPtr_map) 
 				{
+					m_logger_ptr->info("[Dispatcher::dispatch], dispatching s_id:{}" , pair.first);
 					SETask task( temp_event.event, func_to_call->second,  pair.second );
 					_task_q.enqueue(std::move(task));
 				}
