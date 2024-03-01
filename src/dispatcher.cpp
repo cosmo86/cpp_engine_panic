@@ -128,6 +128,7 @@ void Dispatcher::dispatch()
 				std::shared_lock<std::shared_mutex> lock(_strategy_mutex);
 				for (const auto& pair : _sID_strategyPtr_map) 
 				{
+					m_logger_ptr->info("[Dispatcher::dispatch], dispatching s_id:{}" , pair.first);
 					SETask task( temp_event.event, func_to_call->second,  pair.second );
 					_task_q.enqueue(std::move(task));
 				}

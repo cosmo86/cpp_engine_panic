@@ -158,7 +158,13 @@ public:
 	{
 		std::shared_ptr<SE_Lev2MarketDataField> temp_tick = std::static_pointer_cast<SE_Lev2MarketDataField>(e);
 
-		
+		if (strcmp(temp_tick->SecurityID, strate_stock_code) == 0)
+		{
+			m_logger->debug("S,{}, [ON_TICK] , SecurityID , source: {}, Strategy: {}",
+							this->strate_SInfo,
+							temp_tick->SecurityID,
+							strate_stock_code);
+		}
 		//std::cout<<"on_orderDetial, security id "<< temp_tick->SecurityID<<std::endl;
 
 		if (strcmp(temp_tick->SecurityID, strate_stock_code) != 0){
@@ -204,6 +210,14 @@ public:
 	{
 
 		std::shared_ptr<SE_Lev2OrderDetailField> temp_orderdetial = std::static_pointer_cast<SE_Lev2OrderDetailField>(e);
+
+		if (strcmp(temp_orderdetial->SecurityID, strate_stock_code) != 0)
+		{
+			m_logger->debug("S,{}, [on_orderDetial] , SecurityID , source: {}, Strategy: {}",
+							this->strate_SInfo,
+							temp_orderdetial->SecurityID,
+							strate_stock_code);
+		}
 
 		if (strcmp(temp_orderdetial->SecurityID, strate_stock_code) != 0)
 		{
@@ -260,6 +274,14 @@ public:
 	void on_transac(std::shared_ptr<SEObject> e) override
 	{
 		std::shared_ptr<SE_Lev2TransactionStruct> temp_transac = std::static_pointer_cast<SE_Lev2TransactionStruct>(e);
+
+		if (strcmp(temp_transac->SecurityID, strate_stock_code) != 0)
+		{
+			m_logger->warn("S,{}, [on_transac] , SecurityID , source: {}, Strategy: {}",
+							this->strate_SInfo,
+							temp_transac->SecurityID,
+							strate_stock_code);
+		}
 
 		if (strcmp(temp_transac->SecurityID, strate_stock_code) != 0)
 		{
