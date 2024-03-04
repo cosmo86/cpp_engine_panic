@@ -82,6 +82,7 @@ void Dispatcher::dispatch()
 		SEEvent temp_event; // SSEvent is small e_type(4 bytes) + shared_prt (16 bytes)
 		if (_event_q.try_dequeue(temp_event)) 
 		{
+			this->m_logger_ptr->info("[Dispatcher::dispatch], dispatching working");
 			auto func_to_call = _cb_mapping.find(temp_event.e_type);
 			if (func_to_call == _cb_mapping.end()) 
 			{
@@ -225,7 +226,7 @@ void Dispatcher::remove_strategy(int s_id, std::string SecurityID, const char& e
 	}
 	else {
 		// Handle the case where there is no callback for this event type
-		std::cout << "No Strategy found for this event type, Your Strategy is: " << s_id << std::endl;
+		std::cout << "No Strategy found , Your Strategy is: " << s_id << std::endl;
 	}
 }
 
