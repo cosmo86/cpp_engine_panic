@@ -88,7 +88,7 @@ void Dispatcher::dispatch()
 			{
 				// Handle the case where there is no callback for this event type
 				std::cout << "No callback found for this event type, Your etype is : " << temp_event.e_type << std::endl;
-				return;
+				continue;
 			}
 
 			// Those events should only be dispatched to matching Strategies, thus the 'if' check
@@ -101,7 +101,7 @@ void Dispatcher::dispatch()
 					if (temp_event.S_id[0] == '\0') // S_id is SInfo, if its empty, then the order could be placed by another system or manuelly
 					{
 						std::cout<<"Sinfo is empty "<<temp_event.e_type<<temp_event.event<<std::endl;
-						return;
+						continue;
 					}
 
 					std::map<int, std::shared_ptr<StrategyBase>>::iterator temp_strategy_iter;
@@ -115,7 +115,7 @@ void Dispatcher::dispatch()
 													temp_event.S_id,
 													temp_event.e_type);
 							std::cout<<"Strategy might be removed s_id: "<< temp_event.S_id<<" e_type " << temp_event.e_type <<std::endl;
-							return;
+							continue;
 						}
 
 					}
