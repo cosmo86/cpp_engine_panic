@@ -80,6 +80,7 @@ public:
 	char strate_stock_name[81];
 	char strate_exchangeID;
 	double strate_limup_price;
+	double strate_curr_trade_price = 0; // 
 	int buy_trigger_volume;
 	int cancel_trigger_volume;
 	int max_trigger_times;
@@ -212,6 +213,8 @@ public:
 						 this->curr_FengBan_volume,
 						 this->buy_trigger_volume,
 						 this->cancel_trigger_volume );
+
+			//this->strate_curr_trade_price = temp_tick->LastPrice;
 		}
 	}
 
@@ -258,10 +261,15 @@ public:
 			}
 
 			//buy order not cancled, add buy volume to fengban_volume
-			if (temp_orderdetial->Price == this->strate_limup_price && temp_orderdetial->Side == '1' && temp_orderdetial->OrderStatus != 'D')
+			if (temp_orderdetial->Price == this->strate_limup_price && 
+				temp_orderdetial->Side == '1' && 
+				temp_orderdetial->OrderStatus != 'D')
 			{
 				curr_FengBan_volume += temp_orderdetial->Volume;
-				action();
+				if (this->strate_curr_trade_price >= this->strate_limup_price )
+				{
+					action();
+				}
 				m_logger->info("S,{}, [ON_ORDERDETIAL] , code: {} limup: {} curr price: {}, curr_volume: {}, trigger_volume:{},cancle_volume: {} ",
 						 this->strate_SInfo,
 						 temp_orderdetial->SecurityID, 
@@ -346,6 +354,7 @@ public:
 			{
 				this->curr_FengBan_volume -= temp_transac->TradeVolume;
 				this->action();
+				this->strate_curr_trade_price = temp_transac->TradePrice;
 			}
 		}
 		// ExchangeID == '2' SZSE , ExecType == '2' cancel order  
