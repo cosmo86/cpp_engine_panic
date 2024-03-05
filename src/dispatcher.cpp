@@ -82,12 +82,13 @@ void Dispatcher::dispatch()
 		SEEvent temp_event; // SSEvent is small e_type(4 bytes) + shared_prt (16 bytes)
 		if (_event_q.try_dequeue(temp_event)) 
 		{
+			this->m_logger_ptr->info("[Dispatcher::dispatch], dispatching working");
 			auto func_to_call = _cb_mapping.find(temp_event.e_type);
 			if (func_to_call == _cb_mapping.end()) 
 			{
 				// Handle the case where there is no callback for this event type
 				std::cout << "No callback found for this event type, Your etype is : " << temp_event.e_type << std::endl;
-				return;
+				continue;
 			}
 
 			// Those events should only be dispatched to matching Strategies, thus the 'if' check
@@ -100,7 +101,7 @@ void Dispatcher::dispatch()
 					if (temp_event.S_id[0] == '\0') // S_id is SInfo, if its empty, then the order could be placed by another system or manuelly
 					{
 						std::cout<<"Sinfo is empty "<<temp_event.e_type<<temp_event.event<<std::endl;
-						return;
+						continue;
 					}
 
 					std::map<int, std::shared_ptr<StrategyBase>>::iterator temp_strategy_iter;
@@ -108,8 +109,15 @@ void Dispatcher::dispatch()
 						std::shared_lock<std::shared_mutex> lock(_strategy_mutex);
 						temp_strategy_iter = _sID_strategyPtr_map.find(std::stoi(temp_event.S_id));
 						// SInfo is not empty but strategy not found, stategy could be removed
-						if (temp_strategy_iter == _sID_strategyPtr_map.end()) {
-							std::cout<<"Strategy might be removed s_id: "<< temp_event.S_id << temp_event.e_type <<std::endl;}
+						if (temp_strategy_iter == _sID_strategyPtr_map.end()) 
+						{
+							this->m_logger_ptr->warn("[Dispatcher::dispatch], Strategy might be removed s_id:{} ,e_type:{} ",
+													temp_event.S_id,
+													temp_event.e_type);
+							std::cout<<"Strategy might be removed s_id: "<< temp_event.S_id<<" e_type " << temp_event.e_type <<std::endl;
+							continue;
+						}
+
 					}
 					SETask task( temp_event.event, func_to_call->second,  temp_strategy_iter->second );
 					_task_q.enqueue(std::move(task));
@@ -121,6 +129,7 @@ void Dispatcher::dispatch()
 				std::shared_lock<std::shared_mutex> lock(_strategy_mutex);
 				for (const auto& pair : _sID_strategyPtr_map) 
 				{
+					m_logger_ptr->info("[Dispatcher::dispatch], dispatching s_id:{}" , pair.first);
 					SETask task( temp_event.event, func_to_call->second,  pair.second );
 					_task_q.enqueue(std::move(task));
 				}
@@ -217,7 +226,7 @@ void Dispatcher::remove_strategy(int s_id, std::string SecurityID, const char& e
 	}
 	else {
 		// Handle the case where there is no callback for this event type
-		std::cout << "No Strategy found for this event type, Your Strategy is: " << s_id << std::endl;
+		std::cout << "No Strategy found , Your Strategy is: " << s_id << std::endl;
 	}
 }
 
@@ -261,6 +270,7 @@ nlohmann::json Dispatcher::check_running_strategy()
 
 			std::cout<<"[Dispatcher check running] "<<combinedJson<<std::endl;
 		}
+		std::cout<<"[Dispatcher check running] "<<combinedJson<<std::endl;
 	}
     return combinedJson;
 }

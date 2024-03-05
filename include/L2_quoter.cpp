@@ -134,10 +134,10 @@ public:
 		{
 			m_logger->warn("Q, [OnRspUserLogin], Success!");
 			
-			char* Securities[1];
-			Securities[0] = (char*) "300377";
-			int eid =  TORALEV2API::TORA_TSTP_EXD_SZSE;
-			Subscribe(Securities,1,eid);
+			//char* Securities[1];
+			//Securities[0] = (char*) "300377";
+			//int eid =  TORALEV2API::TORA_TSTP_EXD_SZSE;
+			//Subscribe(Securities,1,eid);
 		}
 
 		else

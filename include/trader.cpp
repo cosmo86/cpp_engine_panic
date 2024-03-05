@@ -451,6 +451,12 @@ private:
 			//std::cout<<temp->SecurityID<<" "<<temp->ClosePrice<<std::endl;
 			m_Event_Q_ptr->enqueue(std::move(temp_event));
 			OrderSysid_Sinfo_map[std::string(pOrder->OrderSysID)] = std::string(pOrder->SInfo);
+			
+			// Log the OrderSysid_Sinfo_map content
+			for (auto it = OrderSysid_Sinfo_map.begin(); it != OrderSysid_Sinfo_map.end(); ++it) 
+			{
+				m_logger->info("T, [OnRtnOrder] ,OrderSysid_Sinfo_map content: key: {}, value:{}",it->first,it->second);
+			}
 
 			printf(
 				"OnRtnOrder:::\n"
@@ -475,7 +481,7 @@ private:
 
 	virtual void OnRtnTrade(CTORATstpTradeField* pTrade)
 	{
-		m_logger->info("{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}",
+		m_logger->info("T, [OnRtnTrade] ,{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}",
 					pTrade->ExchangeID,
 					pTrade->DepartmentID,
 					pTrade->InvestorID,
@@ -503,6 +509,12 @@ private:
 			printf("OnRtnTrade: TradeID[%s] InvestorID[%s] SecurityID[%s] OrderRef[%d] OrderLocalID[%s] Price[%.2f] Volume[%d]\n",
 			pTrade->TradeID, pTrade->InvestorID, pTrade->SecurityID, pTrade->OrderRef, pTrade->OrderLocalID, pTrade->Price, pTrade->Volume);
 			return;
+		}
+
+		// Log the OrderSysid_Sinfo_map content
+		for (auto it = OrderSysid_Sinfo_map.begin(); it != OrderSysid_Sinfo_map.end(); ++it) 
+		{
+			m_logger->info("T, [OnRtnTrade] ,OrderSysid_Sinfo_map content: key: {}, value:{}",it->first,it->second);
 		}
 
 		SEEvent temp_event;
