@@ -118,7 +118,7 @@ with st.sidebar:
     lower_time_limit = submit_container.number_input('大单延时(秒)：', min_value=0.0, step=0.01, value= 2.0)
     scout_buy_trigger_cash_lim = submit_container.number_input('保护单封单金额(万)：', min_value=100, step=100, value = 500)
     scout_monitor_duration = submit_container.number_input('小单监控时间(分钟)：', min_value=0.0, step=0.1, value = 10.0)
-    condition_2_percentage = submit_container.number_input('撤单动量比例', min_value=0.0, step=0.01, value = 0.35)
+    condition_2_percentage = submit_container.number_input('撤单动量比例',  step=0.01, value = 0.35)
     condition_2_higher_time = submit_container.number_input('撤单动量监控时间(分钟)：', min_value=0.0, step=0.1, value = 3.0)
     condition_2_track_duration = submit_container.number_input('撤单动量时间区间(秒)：', min_value=0.0, step=0.01, value= 3.0)
     cancel_trigger_volume_large = submit_container.number_input('大单大封单金额(万)：', min_value=100, step=100, value = 40000)
