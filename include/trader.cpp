@@ -10,6 +10,7 @@
 #include <string.h>
 #include <string>
 #include <map>
+#include <atomic>
 
 #include "iconv.h"
 #include "concurrentqueue.h"
@@ -81,6 +82,9 @@ private:
 	char m_mode[21];
 
 	char m_InvestorID[16];
+
+	
+
 	
 	moodycamel::ConcurrentQueue<SEEvent>* m_Event_Q_ptr = nullptr;
 	LoggerPtr m_logger=nullptr;
@@ -90,6 +94,10 @@ private:
 	std::unordered_map<TTORATstpExchangeIDType, std::string> shareHolder_table; // <exchangeid , shareholderid>
 	//std::unordered_map<std::string, char[33]> OrderSysid_Sinfo_map; //<OrderSysid , Sinfo>
 	std::unordered_map<std::string, std::string> OrderSysid_Sinfo_map;
+
+public:
+	std::atomic<int> m_OrderRef{1};
+	std::atomic<int> m_OrderActionRef{2};
 
 public:
 	TradeSpi()
@@ -344,6 +352,16 @@ private:
 		temp_event.event = temp_InputOrderField;
 		strcpy(temp_event.S_id, pInputOrderField->SInfo);
 		m_Event_Q_ptr->enqueue(std::move(temp_event));
+		if (pInputOrderField->OrderRef > this->m_OrderRef.load() )
+		{
+			m_logger->warn("T, [OnErrRtnOrderInsert] , code:{}, ordersysID:{}, source order ref:{} , trader: {} , source is bigger than trader, there could be maunel order",
+							pInputOrderField->SecurityID,
+							pInputOrderField->OrderSysID,
+							pInputOrderField->OrderRef,
+							this->m_OrderRef.load());
+			this->m_OrderRef.store(pInputOrderField->OrderRef + 1);
+			return;
+		}
 
 	}
 
@@ -452,6 +470,17 @@ private:
 			m_Event_Q_ptr->enqueue(std::move(temp_event));
 			OrderSysid_Sinfo_map[std::string(pOrder->OrderSysID)] = std::string(pOrder->SInfo);
 			
+			if (pOrder->OrderRef > this->m_OrderRef.load() )
+			{
+				m_logger->warn("T, [OnRtnOrder] , code:{}, ordersysID:{}, source order ref:{} , trader: {} , source is bigger than trader, there could be maunel order",
+								pOrder->SecurityID,
+								pOrder->OrderSysID,
+								pOrder->OrderRef,
+								this->m_OrderRef.load());
+				this->m_OrderRef.store(pOrder->OrderRef + 1);
+				return;
+			}
+
 			// Log the OrderSysid_Sinfo_map content
 			for (auto it = OrderSysid_Sinfo_map.begin(); it != OrderSysid_Sinfo_map.end(); ++it) 
 			{
@@ -676,7 +705,8 @@ private:
 	}
 	
 public:
-	void Send_Order_LimitPrice( const char exchange_id, const int volume, const double price, TTORATstpSecurityIDType stock_id , const char* req_sinfo, const int req_iinfo = 0)
+	void Send_Order_LimitPrice( const char exchange_id, const int volume, const double price, TTORATstpSecurityIDType stock_id , 
+								const char* req_sinfo, const int order_ref, const int req_iinfo = 0)
 	{
 		// 请求报单
 		CTORATstpInputOrderField input_order_field;
@@ -690,6 +720,7 @@ public:
 		input_order_field.OrderPriceType = TORA_TSTP_OPT_LimitPrice;
 		input_order_field.TimeCondition = TORA_TSTP_TC_GFD;
 		input_order_field.VolumeCondition = TORA_TSTP_VC_AV;
+		input_order_field.OrderRef = order_ref;
 		strcpy(input_order_field.SInfo, req_sinfo );
 		input_order_field.IInfo = req_iinfo; // iinfo here is for scout_order
 		int ret_oi = m_api->ReqOrderInsert(&input_order_field, m_req_id++);
@@ -711,6 +742,38 @@ public:
 							input_order_field.TimeCondition,
 							input_order_field.VolumeCondition,
 							input_order_field.SInfo);
+		}
+	}
+
+	void Send_Cancle_Order_OrderActionRef( const char exchange_id ,const char* req_sinfo, const int order_action_ref , const int req_iinfo = 0 )
+	{
+		// 请求撤单
+		CTORATstpInputOrderActionField input_order_action_field;
+		memset(&input_order_action_field, 0, sizeof(input_order_action_field));
+		input_order_action_field.ExchangeID = exchange_id;
+		input_order_action_field.ActionFlag = TORA_TSTP_AF_Delete;
+
+		input_order_action_field.SessionID =this->m_session_id;
+		input_order_action_field.FrontID =this->m_front_id;
+		input_order_action_field.OrderActionRef = order_action_ref;
+
+
+		strcpy(input_order_action_field.SInfo , req_sinfo);
+		input_order_action_field.IInfo = req_iinfo;
+
+		int ret = m_api->ReqOrderAction(&input_order_action_field, m_req_id++);
+		if (ret != 0)
+		{
+			m_logger->warn("T, [Send_Cancle_Order] ReqOrderAction fail, ret:{}", ret);
+			//printf("ReqOrderAction fail, ret[%d]\n", ret);
+		}
+		else
+		{
+			m_logger->warn("T, [Send_Cancle_Order] ,ReqOrderAction Suc,{},{},{},{}",
+               input_order_action_field.ExchangeID,
+               input_order_action_field.ActionFlag,
+               input_order_action_field.OrderSysID,
+               input_order_action_field.SInfo);
 		}
 	}
 

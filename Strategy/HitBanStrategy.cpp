@@ -192,7 +192,8 @@ public:
 
 	bool formal_order_accepted = false;
 	char strate_OrderSysID[21];
-
+	int strate_OrderRef = -1;
+	int strate_OrderActionRef = -1;
 	// Timed logic vars
 	
 	std::chrono::steady_clock::time_point formal_order_acpt_time;//this defaults to epoch start
@@ -210,6 +211,8 @@ public:
 	std::chrono::steady_clock::time_point scout_order_acpt_time;
 	long long scout_monitor_duration = 600000000000;
 	char scout_OrderSysID[21];
+	int scout_OrderRef = -1;
+	int scout_OrderActionRef = -1;
 
 	// condition 2
 	float condition_2_percentage = -0.35;
@@ -270,6 +273,13 @@ public:
 		long long duration_from_scout_order_acpt =  std::chrono::duration_cast<std::chrono::nanoseconds>(this->temp_curr_time - this->scout_order_acpt_time).count();
 		if(duration_from_scout_order_acpt <= this->scout_monitor_duration)
 		{
+			m_logger->warn("S,{}, [CHECK SCOUT] , code: {}, scout traded within {} s formal order not placed, scout ordersysID: {}, ",
+							this->strate_SInfo,
+							this->strate_stock_code,
+							duration_from_scout_order_acpt/1000000000.0,
+							this->scout_OrderSysID
+							);
+
 			if(this->if_formal_order_sent == false)// scout traded before formal order sent
 			{
 				this->can_resend_order = false;
@@ -284,9 +294,11 @@ public:
 			// cancel formal order
 			if(this->formal_order_accepted == true && this->if_cancel_sent == false)
 			{
-				m_dispatcher_ptr->trader_ptr->Send_Cancle_Order(this->strate_exchangeID, 
-																this->strate_OrderSysID,
-																this->strate_SInfo);
+				this->strate_OrderActionRef = m_dispatcher_ptr->trader_ptr->m_OrderActionRef.fetch_add(1);
+				m_dispatcher_ptr->trader_ptr->Send_Cancle_Order_OrderActionRef(this->strate_exchangeID,
+																			this->strate_SInfo,
+																			this->strate_OrderActionRef
+																			);
 				this->if_cancel_sent = true;
 				m_logger->warn("S,{}, [CHECK SCOUT] , code: {}, scout traded within {} s cancel formal order {}, scout ordersysID: {}, ",
 							this->strate_SInfo,
@@ -323,20 +335,25 @@ public:
 		{
 			if(curr_FengBan_volume * strate_limup_price >= scout_buy_trigger_cash_lim)
 			{
+				this->scout_OrderRef = m_dispatcher_ptr->trader_ptr->m_OrderRef.fetch_add(1);
 				m_dispatcher_ptr->trader_ptr->Send_Order_LimitPrice(this->strate_exchangeID, 
 																100, 
 																this->strate_limup_price,
 																this->strate_stock_code, 
 																this->strate_SInfo,
-																1 );
+																this->scout_OrderRef,
+																1
+																 );
+				this->scout_order_sent = true;
+				m_logger->warn("S,{}, [ACTION] , code: {}, scout order sent, curr_volume: {},trigger_volume: {} , scout orderRef:{}",
+								this->strate_SInfo,
+								this->strate_stock_code,
+								this->curr_FengBan_volume,
+								this->buy_trigger_volume,
+								this->scout_OrderRef
+								);
 			}
-			this->scout_order_sent = true;
-			m_logger->warn("S,{}, [ACTION] , code: {}, scout order sent, curr_volume: {},trigger_volume: {}",
-							this->strate_SInfo,
-							this->strate_stock_code,
-							this->curr_FengBan_volume,
-							this->buy_trigger_volume
-							);
+			
 		}
 
 		//Send order
@@ -344,19 +361,23 @@ public:
 
 		if(if_formal_order_sent == false && __condition_buy && this->can_resend_order )
 		{
+			this->strate_OrderRef = m_dispatcher_ptr->trader_ptr->m_OrderRef.fetch_add(1);
 			m_dispatcher_ptr->trader_ptr->Send_Order_LimitPrice(this->strate_exchangeID, 
 																this->target_position, 
 																this->strate_limup_price,
-																this->strate_stock_code, 
-																this->strate_SInfo );
+																this->strate_stock_code,
+																this->strate_SInfo,
+																this->strate_OrderRef
+																 );
 			this->if_formal_order_sent = true;
 			// Set to false to avoid resend while limup and above trigger_volume
 			this->can_resend_order = false;
-			m_logger->info("S,{}, [ACTION] , code: {}, order sent, curr_volume: {},trigger_volume: {}", 
+			m_logger->info("S,{}, [ACTION] , code: {}, order sent, curr_volume: {},trigger_volume: {}, formal order ref: {}", 
 							this->strate_SInfo,
 							this->strate_stock_code,
 							this->curr_FengBan_volume,
-							this->buy_trigger_volume
+							this->buy_trigger_volume,
+							this->strate_OrderRef
 							);
 			return;
 		}
@@ -394,14 +415,16 @@ public:
 
 			if ( __cancel_cond_1 || __cancel_cond_2 || __cancel_cond_3 || __cancel_cond_4 || __cancel_cond_5)
 			{
-				m_dispatcher_ptr->trader_ptr->Send_Cancle_Order(this->strate_exchangeID, 
-																this->strate_OrderSysID,
-																this->strate_SInfo);
+				this->strate_OrderActionRef = m_dispatcher_ptr->trader_ptr->m_OrderActionRef.fetch_add(1);
+				m_dispatcher_ptr->trader_ptr->Send_Cancle_Order_OrderActionRef(this->strate_exchangeID,
+																this->strate_SInfo,
+																this->strate_OrderActionRef);
 				this->if_cancel_sent = true;
 
-				m_dispatcher_ptr->trader_ptr->Send_Cancle_Order(this->strate_exchangeID, 
-																this->scout_OrderSysID,
+				this->scout_OrderActionRef = m_dispatcher_ptr->trader_ptr->m_OrderActionRef.fetch_add(1);
+				m_dispatcher_ptr->trader_ptr->Send_Cancle_Order_OrderActionRef(this->strate_exchangeID, 
 																this->strate_SInfo,
+																this->scout_OrderActionRef,
 																2);
 				
 				m_logger->info("S,{}, [ACTION] , code: {}, cancle sent, curr_volume: {}, cancle_volume: {}", 
@@ -803,10 +826,6 @@ public:
 	void on_trade(std::shared_ptr<SEObject> e) override //SE_TradeField
 	{
 		std::shared_ptr<SE_TradeField> temp_TradeField = std::static_pointer_cast<SE_TradeField>(e);
-		if (strcmp(temp_TradeField->OrderSysID , strate_OrderSysID) != 0 ){
-		m_logger->info("S,{}, [ON_TRADE] ,OrderSysID dont match OrderSysID:{},  strate_OrderSysID{}",this->strate_SInfo,temp_TradeField->OrderSysID, this->strate_OrderSysID);
-		return;
-		}
 
 		// scout order traded
 		if (strcmp(temp_TradeField->OrderSysID , this->scout_OrderSysID) == 0 )
@@ -815,6 +834,15 @@ public:
 			this->scout_order_traded = true;
 			this->check_scout_order();
 			this->scout_status.store(ScoutStatus::SCOUT_TRADED);
+			return;
+		}
+
+		if (strcmp(temp_TradeField->OrderSysID , strate_OrderSysID) != 0 )
+		{
+			m_logger->info("S,{}, [ON_TRADE] ,OrderSysID dont match OrderSysID:{},  strate_OrderSysID{}, scout_OrderSysID",
+							this->strate_SInfo,temp_TradeField->OrderSysID,
+							this->strate_OrderSysID,
+							this->scout_OrderSysID);
 			return;
 		}
 
