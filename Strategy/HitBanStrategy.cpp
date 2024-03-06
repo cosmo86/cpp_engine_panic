@@ -639,8 +639,16 @@ public:
 				// If true remain true to enable send order
 				if (this->can_resend_order){return;}
 				else if(temp_transac->ExecType == '1'){
-				// If false, set tp true to enable send order
+				// If false, set tp true to enable send order,ExecType == '1' is trade ,2 is cancel
 					this->can_resend_order = true;
+					if (this->scout_order_sent == true)
+					{
+						this->scout_OrderActionRef = m_dispatcher_ptr->trader_ptr->m_OrderActionRef.fetch_add(1);
+						m_dispatcher_ptr->trader_ptr->Send_Cancle_Order_OrderActionRef(this->strate_exchangeID, 
+																		this->strate_SInfo,
+																		this->scout_OrderActionRef,
+																		2);
+					}
 					this->scout_order_sent = false;
 					m_logger->warn("S,{}, [ON_TRANSAC] , limup price is {},Trade price is {}, Bitsetting can_resend_order  to true. strate_limup_price and this->strate_limup_price {} ",
 									this->strate_SInfo,
