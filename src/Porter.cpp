@@ -102,6 +102,20 @@ void FreeString(char* str)
     delete[] str;
 }
 
+
+
+
+void manual_Send_Order_LimitPrice( const char exchange_id, const int volume, const double price, const char* stock_id , 
+								const char* req_sinfo, const int order_ref,const int req_iinfo)
+{
+    getEngine().manual_Send_Order_LimitPrice(exchange_id,volume , price , stock_id, req_sinfo , order_ref);
+}
+
+void manual_Send_Cancle_Order_OrderActionRef( const char exchange_id ,const char* req_sinfo, const int order_ref ,const int order_action_ref, const int req_iinfo )
+{
+    getEngine().manual_Send_Cancle_Order_OrderActionRef(exchange_id,req_sinfo,order_ref,order_action_ref);
+}
+
 //void pauseStrategy(){}
 
 //void resumeStrategy(){}

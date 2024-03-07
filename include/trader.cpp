@@ -413,7 +413,7 @@ private:
 							pInputOrderActionField->OrderActionRef,
 							pInputOrderActionField->OrderSysID,
 							pRspInfo->ErrorID,
-							pRspInfo->ErrorMsg);
+							convertEncoding(pRspInfo->ErrorMsg,"GBK", "UTF-8" ));
 		}
 	}
 

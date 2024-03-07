@@ -45,6 +45,12 @@ extern "C"
 
     EXPORT_FLAG void UpdateDelayDuration(int s_id, int new_delay_duration);
 
+    EXPORT_FLAG void manual_Send_Order_LimitPrice( const char exchange_id, const int volume, const double price, const char* stock_id , 
+								const char* req_sinfo, const int order_ref, const int req_iinfo = 0);
+
+    EXPORT_FLAG void manual_Send_Cancle_Order_OrderActionRef( const char exchange_id ,const char* req_sinfo, const int order_ref ,const int order_action_ref , const int req_iinfo = 0 );
+    
+
 #ifdef __cplusplus
 }
 #endif

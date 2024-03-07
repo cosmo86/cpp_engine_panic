@@ -35,6 +35,10 @@ public:
     nlohmann::json check_runningStrategy();
     nlohmann::json check_removedStrategy();
     void update_delayDuration(int s_id, int new_delay_duration);
+    void manual_Send_Order_LimitPrice( const char exchange_id, const int volume, const double price, const char* stock_id , 
+								const char* req_sinfo, const int order_ref, const int req_iinfo = 0);
+    void manual_Send_Cancle_Order_OrderActionRef( const char exchange_id ,const char* req_sinfo, const int order_ref ,const int order_action_ref , const int req_iinfo = 0 );
+
 
     
 

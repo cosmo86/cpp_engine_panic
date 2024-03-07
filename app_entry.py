@@ -7,7 +7,7 @@ from fastapi_model.dataModels import UserStrategyModel,UserStrategyGroupModel
 import json
 import uvicorn
 from fastapi import FastAPI, HTTPException
-
+from pydantic import BaseModel
 
 ############### Cache Initialization Start ###############
 # Create the cache folder 
@@ -50,6 +50,23 @@ mylib.TestRtnJsonStr.argtypes = [ctypes.c_char_p]
 mylib.AddStrategy.argtypes = [ctypes.c_char_p]
 mylib.RemoveStrategy.argtypes = [ctypes.c_int, ctypes.c_char_p,ctypes.c_char]
 mylib.UpdateDelayDuration.argtypes = [ctypes.c_int, ctypes.c_int]
+
+mylib.manual_Send_Order_LimitPrice.argtypes = [
+    ctypes.c_char,       # exchange_id
+    ctypes.c_int,        # volume
+    ctypes.c_double,     # price
+    ctypes.c_char_p,     # stock_id
+    ctypes.c_char_p,     # req_sinfo
+    ctypes.c_int,        # order_ref
+    ctypes.c_int         # req_iinfo
+]
+mylib.manual_Send_Cancle_Order_OrderActionRef.argtypes = [
+    ctypes.c_char,    # exchange_id
+    ctypes.c_char_p,  # req_sinfo
+    ctypes.c_int,     # order_ref
+    ctypes.c_int,     # order_action_ref
+    ctypes.c_int      # req_iinfo
+]
 ############### Linked Library Initialization Done ###############
 
 ###############
@@ -161,6 +178,42 @@ def get_event_q_size():
 
 
 
+########################################################
+class OrderLimitPriceRequest(BaseModel):
+    exchange_id: str  # Will be converted to c_char
+    volume: int       # Matches c_int
+    price: float      # Will be converted to c_double
+    stock_id: str     # Will be converted to c_char_p
+    req_sinfo: str    # Will be converted to c_char_p
+    order_ref: int    # Matches c_int
+    req_iinfo: int    # Matches c_int
+class CancelOrderRequest(BaseModel):
+    exchange_id: str  # Ensure it's a single character string
+    req_sinfo: str
+    order_ref: int
+    order_action_ref: int
+    req_iinfo: int
+
+@app.post('/manuel_Send_Order_LimitPrice')
+def manuel_Send_Order_LimitPrice(order: OrderLimitPriceRequest):
+    exchange_id = ctypes.c_char(order.exchange_id.encode('utf-8')[0])  # Taking first char
+    volume = ctypes.c_int(order.volume)
+    price = ctypes.c_double(order.price)
+    stock_id = ctypes.c_char_p(order.stock_id.encode('utf-8'))
+    req_sinfo = ctypes.c_char_p(order.req_sinfo.encode('utf-8'))
+    order_ref = ctypes.c_int(order.order_ref)
+    req_iinfo = ctypes.c_int(order.req_iinfo)
+    mylib.manual_Send_Order_LimitPrice(exchange_id, volume , price , stock_id , req_sinfo , order_ref , req_iinfo)
+
+
+@app.post('/manuel_Send_Cancle_Order_OrderActionRef')
+def manual_Send_Cancle_Order_OrderActionRef(request: CancelOrderRequest):
+    exchange_id = ctypes.c_char(request.exchange_id.encode('utf-8')[0])
+    req_sinfo = ctypes.c_char_p(request.req_sinfo.encode('utf-8'))
+    order_ref = ctypes.c_int(request.order_ref)
+    order_action_ref = ctypes.c_int(request.order_action_ref)
+    req_iinfo = ctypes.c_int(request.req_iinfo)
+    mylib.manual_Send_Cancle_Order_OrderActionRef(exchange_id , req_sinfo , order_ref , order_action_ref , req_iinfo)
 
 ################################################
 shutdown_requested = False

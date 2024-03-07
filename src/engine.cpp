@@ -75,6 +75,32 @@ void Engine::Stop()
     m_logger->info("Engine stopped");
 }
 
+void Engine::manual_Send_Order_LimitPrice( const char exchange_id, const int volume, const double price, const char* stock_id , 
+								const char* req_sinfo, const int order_ref,const int req_iinfo)
+{
+    char temp_stock_id[31];
+    strcpy(temp_stock_id ,stock_id );
+    m_trader.Send_Order_LimitPrice(exchange_id,volume , price , temp_stock_id, req_sinfo , order_ref);
+    m_logger->warn("T, [Engine] [Send_Order_LimitPrice] ,manual_Send_Order_LimitPrice,exchange_id {}, volume {},price {},stock_id {}, req_sinfo {}  OrderRef {}, req_iinfo {}",
+                    exchange_id,
+                    volume,
+                    price,
+                    stock_id,
+                    req_sinfo,
+                    order_ref,
+                    req_iinfo);
+}
+
+void Engine::manual_Send_Cancle_Order_OrderActionRef( const char exchange_id ,const char* req_sinfo, const int order_ref ,const int order_action_ref, const int req_iinfo )
+{
+    m_trader.Send_Cancle_Order_OrderActionRef(exchange_id,req_sinfo,order_ref,order_action_ref);
+    m_logger->warn("T, [Engine] [Send_Cancle_Order] ,manual_Send_Order_LimitPrice,exchange_id {}, req_sinfo {}  OrderRef {},order_action_ref {}, req_iinfo {}",
+                    exchange_id,
+                    req_sinfo,
+                    order_ref,
+                    order_action_ref,
+                    req_iinfo);
+}
 
 void Engine::add_strategy(const nlohmann::json& j)
 {
