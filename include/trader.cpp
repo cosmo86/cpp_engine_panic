@@ -317,7 +317,7 @@ private:
 
 	virtual void OnErrRtnOrderInsert(CTORATstpInputOrderField *pInputOrderField, TORASTOCKAPI::CTORATstpRspInfoField *pRspInfoField, int nRequestID)
 	{
-		m_logger->info("T, [OnErrRtnOrderInsert] ,{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}",
+		m_logger->info("T, [OnErrRtnOrderInsert] ,{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}",
 						pInputOrderField->UserRequestID,
 						pInputOrderField->ExchangeID,
 						pInputOrderField->InvestorID,
@@ -334,7 +334,9 @@ private:
 						pInputOrderField->OrderSysID,
 						pInputOrderField->CondCheck,
 						pInputOrderField->SInfo,
-						pInputOrderField->IInfo);
+						pInputOrderField->IInfo,
+						convertEncoding(pRspInfoField->ErrorMsg,"GBK", "UTF-8" )
+						);
 		
 		if(pInputOrderField->SInfo[0] == '\0'){
 			m_logger->info("T, [OnErrRtnOrderInsert] SInfo is empty, please check order source,{},{},{}",
@@ -353,11 +355,13 @@ private:
 		m_Event_Q_ptr->enqueue(std::move(temp_event));
 		if (pInputOrderField->OrderRef > this->m_OrderRef.load() )
 		{
-			m_logger->warn("T, [OnErrRtnOrderInsert] , code:{}, ordersysID:{}, source order ref:{} , trader: {} , source is bigger than trader, there could be maunel order",
+			m_logger->warn("T, [OnErrRtnOrderInsert] , code:{}, ordersysID:{}, source order ref:{} , trader: {} , source is bigger than trader, there could be maunel order, msg {}",
 							pInputOrderField->SecurityID,
 							pInputOrderField->OrderSysID,
 							pInputOrderField->OrderRef,
-							this->m_OrderRef.load());
+							this->m_OrderRef.load(),
+							convertEncoding(pRspInfoField->ErrorMsg,"GBK", "UTF-8" )
+							);
 			this->m_OrderRef.store(pInputOrderField->OrderRef + 1);
 			return;
 		}
@@ -429,7 +433,7 @@ private:
                pOrder->OrderType,
                pOrder->LimitPrice,
                pOrder->OrderStatus,
-               pOrder->StatusMsg,
+			   convertEncoding(pOrder->StatusMsg, "GBK", "UTF-8"),
                pOrder->OrderSubmitStatus,
                pOrder->VolumeTotalOriginal,
                pOrder->VolumeTraded,
@@ -748,6 +752,8 @@ public:
 							input_order_field.VolumeCondition,
 							input_order_field.SInfo);
 		}
+		double temp_limup_price = this->get_limup_price(std::string(stock_id));
+		m_logger->warn("T, [Send_Order_LimitPrice],stock {}, limup price {}",stock_id,temp_limup_price);
 	}
 
 	void Send_Cancle_Order_OrderActionRef( const char exchange_id ,const char* req_sinfo, const int order_ref ,const int order_action_ref , const int req_iinfo = 0 )
