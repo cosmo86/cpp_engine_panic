@@ -97,7 +97,6 @@ private:
 
 public:
 	std::atomic<int> m_OrderRef{1};
-	std::atomic<int> m_OrderActionRef{2};
 
 public:
 	TradeSpi()
@@ -252,9 +251,9 @@ private:
 				m_logger->warn("T,-1, [OnRspUserLogin] ,setaffinity DONE, 49");
 			}
 			
-
-			m_front_id = pRspUserLoginField->FrontID;
-			m_session_id = pRspUserLoginField->SessionID;
+			m_logger->warn("T, [OnRspUserLogin] , SessionID {}, FrontID {},", pRspUserLoginField->SessionID , pRspUserLoginField->FrontID);
+			this->m_front_id = pRspUserLoginField->FrontID;
+			this->m_session_id = pRspUserLoginField->SessionID;
 
 			// 查询合约
 			CTORATstpQrySecurityField field_Security;
@@ -745,7 +744,7 @@ public:
 		}
 	}
 
-	void Send_Cancle_Order_OrderActionRef( const char exchange_id ,const char* req_sinfo, const int order_action_ref , const int req_iinfo = 0 )
+	void Send_Cancle_Order_OrderActionRef( const char exchange_id ,const char* req_sinfo, const int order_ref ,const int order_action_ref , const int req_iinfo = 0 )
 	{
 		// 请求撤单
 		CTORATstpInputOrderActionField input_order_action_field;
@@ -753,8 +752,9 @@ public:
 		input_order_action_field.ExchangeID = exchange_id;
 		input_order_action_field.ActionFlag = TORA_TSTP_AF_Delete;
 
-		input_order_action_field.SessionID =this->m_session_id;
-		input_order_action_field.FrontID =this->m_front_id;
+		input_order_action_field.SessionID = this->m_session_id;
+		input_order_action_field.FrontID = this->m_front_id;
+		input_order_action_field.OrderRef = order_ref;
 		input_order_action_field.OrderActionRef = order_action_ref;
 
 
@@ -769,11 +769,15 @@ public:
 		}
 		else
 		{
-			m_logger->warn("T, [Send_Cancle_Order] ,ReqOrderAction Suc,{},{},{},{}",
+			m_logger->warn("T, [Send_Cancle_Order] ,ReqOrderAction Suc,{},{},{},{}, SessionID {}, FrontID {}, OrderRef {}, OrderActionRef {}",
                input_order_action_field.ExchangeID,
                input_order_action_field.ActionFlag,
                input_order_action_field.OrderSysID,
-               input_order_action_field.SInfo);
+               input_order_action_field.SInfo,
+			   input_order_action_field.SessionID,
+			   input_order_action_field.FrontID,
+			   input_order_action_field.OrderRef,
+			   input_order_action_field.OrderActionRef);
 		}
 	}
 

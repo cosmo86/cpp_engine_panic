@@ -294,18 +294,21 @@ public:
 			// cancel formal order
 			if(this->if_formal_order_sent == true && this->if_cancel_sent == false)
 			{
-				this->strate_OrderActionRef = m_dispatcher_ptr->trader_ptr->m_OrderActionRef.fetch_add(1);
+				this->strate_OrderActionRef = this->strate_OrderRef + 1;
 				m_dispatcher_ptr->trader_ptr->Send_Cancle_Order_OrderActionRef(this->strate_exchangeID,
 																			this->strate_SInfo,
+																			this->strate_OrderRef,
 																			this->strate_OrderActionRef
 																			);
 				this->if_cancel_sent = true;
-				m_logger->warn("S,{}, [CHECK SCOUT] , code: {}, scout traded within {} s cancel formal order {}, scout ordersysID: {}, ",
+				m_logger->warn("S,{}, [CHECK SCOUT] , code: {}, scout traded within {} s cancel formal order {}, scout ordersysID: {}, strate_OrderRef {}, scout orderActionRef {}",
 							this->strate_SInfo,
 							this->strate_stock_code,
 							duration_from_scout_order_acpt/1000000000.0,
 							this->strate_OrderSysID,
-							this->scout_OrderSysID
+							this->scout_OrderSysID,
+							this->strate_OrderRef,
+							this->strate_OrderActionRef
 							);
 				return;
 			}
@@ -415,29 +418,35 @@ public:
 
 			if ( __cancel_cond_1 || __cancel_cond_2 || __cancel_cond_3 || __cancel_cond_4 || __cancel_cond_5)
 			{
-				this->strate_OrderActionRef = m_dispatcher_ptr->trader_ptr->m_OrderActionRef.fetch_add(1);
+				this->strate_OrderActionRef = this->strate_OrderRef + 1;
 				m_dispatcher_ptr->trader_ptr->Send_Cancle_Order_OrderActionRef(this->strate_exchangeID,
 																this->strate_SInfo,
+																this->strate_OrderRef,
 																this->strate_OrderActionRef);
 				this->if_cancel_sent = true;
 
-				this->scout_OrderActionRef = m_dispatcher_ptr->trader_ptr->m_OrderActionRef.fetch_add(1);
+				this->scout_OrderActionRef = this->scout_OrderRef + 1;
 				m_dispatcher_ptr->trader_ptr->Send_Cancle_Order_OrderActionRef(this->strate_exchangeID, 
 																this->strate_SInfo,
+																this->scout_OrderRef,
 																this->scout_OrderActionRef,
 																2);
 				
-				m_logger->info("S,{}, [ACTION] , code: {}, cancle sent, curr_volume: {}, cancle_volume: {}", 
+				m_logger->info("S,{}, [ACTION] , code: {}, cancle sent, curr_volume: {}, cancle_volume: {}, strate OrderRef {}, strate OrderActionRef {}", 
 								this->strate_SInfo,
 								this->strate_stock_code,
 								this->curr_FengBan_volume,
-								this->cancel_trigger_volume
+								this->cancel_trigger_volume,
+								this->strate_OrderRef,
+								this->strate_OrderActionRef
 								);
-				m_logger->info("S,{}, [ACTION] , code: {}, SCOUT cancle sent, curr_volume: {}, cancle_volume: {}", 
+				m_logger->info("S,{}, [ACTION] , code: {}, SCOUT cancle sent, curr_volume: {}, cancle_volume: {}, scout_OrderRef {}, scout OrderActionRef {}", 
 								this->strate_SInfo,
 								this->strate_stock_code,
 								this->curr_FengBan_volume,
-								this->cancel_trigger_volume
+								this->cancel_trigger_volume,
+								this->scout_OrderRef,
+								this->scout_OrderActionRef
 								);
 				return;
 			}
@@ -643,16 +652,19 @@ public:
 					this->can_resend_order = true;
 					if (this->scout_order_sent == true)
 					{
-						this->scout_OrderActionRef = m_dispatcher_ptr->trader_ptr->m_OrderActionRef.fetch_add(1);
+						this->scout_OrderActionRef = this->scout_OrderRef + 1;
 						m_dispatcher_ptr->trader_ptr->Send_Cancle_Order_OrderActionRef(this->strate_exchangeID, 
 																		this->strate_SInfo,
+																		this->scout_OrderRef,
 																		this->scout_OrderActionRef,
 																		2);
-						m_logger->warn("S,{}, [ON_TRANSAC] , Huifengzaimai canceling last scout order, limup price is {},Trade price is {},  strate_limup_price {}, ",
+						m_logger->warn("S,{}, [ON_TRANSAC] , Huifengzaimai canceling last scout order, limup price is {},Trade price is {},  strate_limup_price {}, scout_OrderRef {}, scout_OrderActionRef {} ",
 									this->strate_SInfo,
 									this->strate_limup_price,
 									temp_transac->TradePrice,
-									this->strate_limup_price);
+									this->strate_limup_price,
+									this->scout_OrderRef,
+									this->scout_OrderActionRef);
 					}
 					this->scout_order_sent = false;
 					m_logger->warn("S,{}, [ON_TRANSAC] , limup price is {},Trade price is {}, Bitsetting can_resend_order  to true. strate_limup_price and this->strate_limup_price {} ",
