@@ -191,7 +191,7 @@ public:
 	bool if_cancel_sent = false;
 
 	bool formal_order_accepted = false;
-	char strate_OrderSysID[21];
+	char strate_OrderSysID[21] = "";
 	int strate_OrderRef = -1;
 	int strate_OrderActionRef = -1;
 	// Timed logic vars
@@ -210,7 +210,7 @@ public:
 	std::atomic<int> scout_status{0};
 	std::chrono::steady_clock::time_point scout_order_acpt_time;
 	long long scout_monitor_duration = 600000000000;
-	char scout_OrderSysID[21];
+	char scout_OrderSysID[21] = "";
 	int scout_OrderRef = -1;
 	int scout_OrderActionRef = -1;
 
@@ -271,15 +271,15 @@ public:
 		// !!!
 		// No locks here because the context where check_scout_order() is called should be already locked
 		long long duration_from_scout_order_acpt =  std::chrono::duration_cast<std::chrono::nanoseconds>(this->temp_curr_time - this->scout_order_acpt_time).count();
-		if(duration_from_scout_order_acpt <= this->scout_monitor_duration)
-		{
-			m_logger->warn("S,{}, [CHECK SCOUT] , code: {}, scout traded within {} s formal order not placed, scout ordersysID: {}, ",
+		m_logger->warn("S,{}, [CHECK SCOUT] , code: {}, scout traded within {} s, scout ordersysID: {}, ",
 							this->strate_SInfo,
 							this->strate_stock_code,
 							duration_from_scout_order_acpt/1000000000.0,
 							this->scout_OrderSysID
 							);
 
+		if(duration_from_scout_order_acpt <= this->scout_monitor_duration)
+		{
 			if(this->if_formal_order_sent == false)// scout traded before formal order sent
 			{
 				this->can_resend_order = false;
@@ -292,7 +292,7 @@ public:
 				this->reset_scout();
 			}
 			// cancel formal order
-			if(this->formal_order_accepted == true && this->if_cancel_sent == false)
+			if(this->if_formal_order_sent == true && this->if_cancel_sent == false)
 			{
 				this->strate_OrderActionRef = m_dispatcher_ptr->trader_ptr->m_OrderActionRef.fetch_add(1);
 				m_dispatcher_ptr->trader_ptr->Send_Cancle_Order_OrderActionRef(this->strate_exchangeID,
@@ -648,6 +648,11 @@ public:
 																		this->strate_SInfo,
 																		this->scout_OrderActionRef,
 																		2);
+						m_logger->warn("S,{}, [ON_TRANSAC] , Huifengzaimai canceling last scout order, limup price is {},Trade price is {},  strate_limup_price {}, ",
+									this->strate_SInfo,
+									this->strate_limup_price,
+									temp_transac->TradePrice,
+									this->strate_limup_price);
 					}
 					this->scout_order_sent = false;
 					m_logger->warn("S,{}, [ON_TRANSAC] , limup price is {},Trade price is {}, Bitsetting can_resend_order  to true. strate_limup_price and this->strate_limup_price {} ",
@@ -700,9 +705,9 @@ public:
 			this->scout_order_acpt_time = std::chrono::steady_clock::now();
 			this->scout_order_acpt = true;
 			this->scout_status.store(ScoutStatus::SCOUT_ORDER_SENT);
-			m_logger->info("S,{}, [ORDER_SUCCESS] ,scout order acpt, securityID:{}, SInfo:{}, IInfo: {}, OrderSysID: {}",
+			m_logger->info("S,{}, [ORDER_SUCCESS] ,scout order acpt, securityID:{}, SInfo:{}, IInfo: {}, source OrderSysID: {}, strate scout ordersysID {}",
 							this->strate_SInfo, 
-							temp_orderField->SecurityID, temp_orderField->SInfo, temp_orderField->SInfo , temp_orderField->OrderSysID);
+							temp_orderField->SecurityID, temp_orderField->SInfo, temp_orderField->SInfo , temp_orderField->OrderSysID, this->scout_OrderSysID);
 			return;
 		}
 
@@ -771,10 +776,6 @@ public:
 	void on_cancel_success(std::shared_ptr<SEObject> e) override
 	{
 		std::shared_ptr<SE_InputOrderActionField> temp_orderActionField = std::static_pointer_cast<SE_InputOrderActionField>(e);
-		if (strcmp(temp_orderActionField->SInfo , strate_SInfo) != 0 ){
-		m_logger->info("S,{}, [CANCEL_SUCCESS] ,SInfo dont match {},  Strategy{}",this->strate_SInfo,temp_orderActionField->SInfo, this->strate_SInfo);
-		return;
-		}
 
 		if (temp_orderActionField->IInfo == 2)
 		{
@@ -786,6 +787,11 @@ public:
 							this->strate_stock_code,
 							temp_orderActionField->SInfo, temp_orderActionField->IInfo , temp_orderActionField->OrderSysID);
 			return;
+		}
+
+		if (strcmp(temp_orderActionField->SInfo , strate_SInfo) != 0 ){
+		m_logger->info("S,{}, [CANCEL_SUCCESS] ,SInfo dont match {},  Strategy{}",this->strate_SInfo,temp_orderActionField->SInfo, this->strate_SInfo);
+		return;
 		}
 
 		{
@@ -806,10 +812,6 @@ public:
 	void on_cancel_error(std::shared_ptr<SEObject> e) override
 	{
 		std::shared_ptr<SE_InputOrderActionField> temp_orderActionField = std::static_pointer_cast<SE_InputOrderActionField>(e);
-		if (strcmp(temp_orderActionField->SInfo , strate_SInfo) != 0 ){
-		m_logger->info("S,{}, [CANCLE_ERROR] , SInfo dont match:{},  Strategy{}",this->strate_SInfo,temp_orderActionField->SInfo, this->strate_SInfo);
-		return;
-		}
 
 		if (temp_orderActionField->IInfo == 2)
 		{
@@ -820,6 +822,11 @@ public:
 							this->strate_stock_code,
 							temp_orderActionField->SInfo, temp_orderActionField->SInfo , temp_orderActionField->OrderSysID);
 			return;
+		}
+
+		if (strcmp(temp_orderActionField->SInfo , strate_SInfo) != 0 ){
+		m_logger->info("S,{}, [CANCLE_ERROR] , SInfo dont match:{},  Strategy{}",this->strate_SInfo,temp_orderActionField->SInfo, this->strate_SInfo);
+		return;
 		}
 
 
