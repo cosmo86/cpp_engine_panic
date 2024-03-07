@@ -408,6 +408,12 @@ private:
 			temp_event.event = InputOrderActionField;
 			strcpy(temp_event.S_id, pInputOrderActionField->SInfo);
 			m_Event_Q_ptr->enqueue(std::move(temp_event));
+			m_logger->warn("T, [OnRspOrderAction] Cancel Error , OrderRef {} , OrderActionRef {} , OrderSysID {}, error ID {}, error message: {}",
+							pInputOrderActionField->OrderRef,
+							pInputOrderActionField->OrderActionRef,
+							pInputOrderActionField->OrderSysID,
+							pRspInfo->ErrorID,
+							pRspInfo->ErrorMsg);
 		}
 	}
 
