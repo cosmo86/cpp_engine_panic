@@ -294,7 +294,7 @@ public:
 			// cancel formal order
 			if(this->if_formal_order_sent == true && this->if_cancel_sent == false)
 			{
-				this->strate_OrderActionRef = this->strate_OrderRef + 1;
+				this->strate_OrderActionRef = m_dispatcher_ptr->trader_ptr->m_OrderRef.fetch_add(1);
 				m_dispatcher_ptr->trader_ptr->Send_Cancle_Order_OrderActionRef(this->strate_exchangeID,
 																			this->strate_SInfo,
 																			this->strate_OrderRef,
@@ -387,6 +387,7 @@ public:
 
 		//Cancel order
 
+		this->duration_from_formal_order_acpt = std::chrono::duration_cast<std::chrono::nanoseconds>(this->temp_curr_time - this->formal_order_acpt_time).count();
 		if (this->formal_order_accepted == true && this->if_cancel_sent == false && this->duration_from_formal_order_acpt >= this->lower_time_limit)
 		{
 			bool __cancel_cond_1 = false;
@@ -395,7 +396,6 @@ public:
 			bool __cancel_cond_4 = false;
 			bool __cancel_cond_5 = false;
 
-			this->duration_from_formal_order_acpt = std::chrono::duration_cast<std::chrono::nanoseconds>(this->temp_curr_time - this->formal_order_acpt_time).count();
 
 			// cond 2
 			if ( this->duration_from_formal_order_acpt <= this->condition_2_higher_time )
@@ -418,14 +418,14 @@ public:
 
 			if ( __cancel_cond_1 || __cancel_cond_2 || __cancel_cond_3 || __cancel_cond_4 || __cancel_cond_5)
 			{
-				this->strate_OrderActionRef = this->strate_OrderRef + 1;
+				this->strate_OrderActionRef = m_dispatcher_ptr->trader_ptr->m_OrderRef.fetch_add(1);
 				m_dispatcher_ptr->trader_ptr->Send_Cancle_Order_OrderActionRef(this->strate_exchangeID,
 																this->strate_SInfo,
 																this->strate_OrderRef,
 																this->strate_OrderActionRef);
 				this->if_cancel_sent = true;
 
-				this->scout_OrderActionRef = this->scout_OrderRef + 1;
+				this->scout_OrderActionRef = m_dispatcher_ptr->trader_ptr->m_OrderRef.fetch_add(1);
 				m_dispatcher_ptr->trader_ptr->Send_Cancle_Order_OrderActionRef(this->strate_exchangeID, 
 																this->strate_SInfo,
 																this->scout_OrderRef,
@@ -652,7 +652,7 @@ public:
 					this->can_resend_order = true;
 					if (this->scout_order_sent == true)
 					{
-						this->scout_OrderActionRef = this->scout_OrderRef + 1;
+						this->scout_OrderActionRef = m_dispatcher_ptr->trader_ptr->m_OrderRef.fetch_add(1);
 						m_dispatcher_ptr->trader_ptr->Send_Cancle_Order_OrderActionRef(this->strate_exchangeID, 
 																		this->strate_SInfo,
 																		this->scout_OrderRef,
@@ -713,6 +713,7 @@ public:
 		if (temp_orderField->IInfo == 1)
 		{
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
+			this->temp_curr_time = std::chrono::steady_clock::now();
 			strcpy(this->scout_OrderSysID,temp_orderField->OrderSysID);
 			this->scout_order_acpt_time = std::chrono::steady_clock::now();
 			this->scout_order_acpt = true;
@@ -732,6 +733,8 @@ public:
 
 		{
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
+			this->temp_curr_time = std::chrono::steady_clock::now();
+			this->formal_order_acpt_time = std::chrono::steady_clock::now();
 			this->running_status.store(StrategyStatus::ORDER_SENT);
 			strcpy(this->strate_OrderSysID,temp_orderField->OrderSysID);
 			this->formal_order_accepted = true;
@@ -744,7 +747,14 @@ public:
 
 	void on_order_error(std::shared_ptr<SEObject> e) override
 	{
+		
 		std::shared_ptr<SE_OrderField> temp_orderField = std::static_pointer_cast<SE_OrderField>(e);
+
+		m_logger->info("S,{}, [ORDER_ERROR] ,order error received, securityID:{}, OrderRef:{} , SInfo:{}, IInfo: {}, OrderSysID: {}",
+							this->strate_SInfo, 
+							temp_orderField->SecurityID,  temp_orderField->OrderRef,
+							temp_orderField->SInfo, temp_orderField->SInfo , temp_orderField->OrderSysID);
+
 		if (strcmp(temp_orderField->SecurityID, strate_stock_code) != 0){
 			return;
 		}
@@ -752,6 +762,7 @@ public:
 		if (temp_orderField->IInfo == 1)
 		{
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
+			this->temp_curr_time = std::chrono::steady_clock::now();
 			this->scout_order_sent  = false;
 			this->scout_status.store(ScoutStatus::SCOUT_ORDER_REJECTED);
 			m_logger->info("S,{}, [ORDER_ERROR] ,scout order NOT acpt, securityID:{}, SInfo:{}, IInfo: {}, OrderSysID: {}",
@@ -767,6 +778,7 @@ public:
 
 		{
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
+			this->temp_curr_time = std::chrono::steady_clock::now();
 			this->if_formal_order_sent = false;
 			// Reached max order reject time, stop stategy
 			if (this->order_error_tolerance_count > this->max_order_error_tolerance)
@@ -792,6 +804,7 @@ public:
 		if (temp_orderActionField->IInfo == 2)
 		{
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
+			this->temp_curr_time = std::chrono::steady_clock::now();
 			this->reset_scout();
 			this->scout_status.store(ScoutStatus::SCOUT_ORDER_CANCELED);
 			m_logger->info("S,{}, [CANCEL SUCCESS] ,scout order canceled, securityID:{}, SInfo:{}, IInfo: {}, OrderSysID: {}",
@@ -808,6 +821,7 @@ public:
 
 		{
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
+			this->temp_curr_time = std::chrono::steady_clock::now();
 			this->current_trigger_times += 1;
 			if (this->current_trigger_times >= this->max_trigger_times ){
 				this->stop_strategy();
@@ -828,6 +842,7 @@ public:
 		if (temp_orderActionField->IInfo == 2)
 		{
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
+			this->temp_curr_time = std::chrono::steady_clock::now();
 			this->scout_status.store(ScoutStatus::SCOUT_ORDER_CANCELED_ABNORMAL);
 			m_logger->info("S,{}, [CANCEL ERROR] ,scout order NOT canceled, securityID:{}, SInfo:{}, IInfo: {}, OrderSysID: {}",
 							this->strate_SInfo, 
@@ -844,6 +859,7 @@ public:
 
 		{
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
+			this->temp_curr_time = std::chrono::steady_clock::now();
 			this->if_cancel_sent = false;
 			this->running_status.store(StrategyStatus::ORDER_CANCELED_ABNORMAL);
 		}
@@ -858,6 +874,7 @@ public:
 		if (strcmp(temp_TradeField->OrderSysID , this->scout_OrderSysID) == 0 )
 		{
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
+			this->temp_curr_time = std::chrono::steady_clock::now();
 			this->scout_order_traded = true;
 			this->check_scout_order();
 			this->scout_status.store(ScoutStatus::SCOUT_TRADED);
@@ -875,6 +892,7 @@ public:
 
 		{
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
+			this->temp_curr_time = std::chrono::steady_clock::now();
 			this->current_position.fetch_add(temp_TradeField->Volume);
 			if (this->current_position.load() == this->target_position)
 			{

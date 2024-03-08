@@ -98,6 +98,10 @@ void Dispatcher::dispatch()
 			   temp_event.e_type == Eventtype::ORDER_ERROR ||
 			   temp_event.e_type == Eventtype::TRADE )
 			   {
+
+					this->m_logger_ptr->warn("[Dispatcher::dispatch], must-check received, s_id {}, etype {} ",
+													temp_event.S_id,
+													temp_event.e_type);
 					if (temp_event.S_id[0] == '\0') // S_id is SInfo, if its empty, then the order could be placed by another system or manuelly
 					{
 						std::cout<<"Sinfo is empty "<<temp_event.e_type<<temp_event.event<<std::endl;
