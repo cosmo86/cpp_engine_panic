@@ -213,6 +213,7 @@ public:
 	char scout_OrderSysID[21] = "";
 	int scout_OrderRef = -1;
 	int scout_OrderActionRef = -1;
+	int scout_curr_trigger_times = 0;
 
 	// condition 2
 	float condition_2_percentage = -0.35;
@@ -267,11 +268,17 @@ public:
 
 	void check_scout_order()
 	{
+		this->scout_curr_trigger_times += 1;
+		if (this->scout_curr_trigger_times >= this->max_trigger_times ){
+				m_logger->info("S,{}, [CHECK_SCOUT] ,scout max trigger time reached, stategy stopped",this->strate_SInfo);
+				this->stop_strategy();
+				return;
+			}
 		// !!! This functoin is under the condition scout is traded
 		// !!!
 		// No locks here because the context where check_scout_order() is called should be already locked
 		long long duration_from_scout_order_acpt =  std::chrono::duration_cast<std::chrono::nanoseconds>(this->temp_curr_time - this->scout_order_acpt_time).count();
-		m_logger->warn("S,{}, [CHECK SCOUT] , code: {}, scout traded within {} s, scout ordersysID: {}, ",
+		m_logger->warn("S,{}, [CHECK_SCOUT] , code: {}, scout traded within {} s, scout ordersysID: {}, ",
 							this->strate_SInfo,
 							this->strate_stock_code,
 							duration_from_scout_order_acpt/1000000000.0,
@@ -807,6 +814,12 @@ public:
 			this->temp_curr_time = std::chrono::steady_clock::now();
 			this->reset_scout();
 			this->scout_status.store(ScoutStatus::SCOUT_ORDER_CANCELED);
+			this->scout_curr_trigger_times += 1;
+			if (this->scout_curr_trigger_times >= this->max_trigger_times ){
+				m_logger->info("S,{}, [CANCEL_SUCCESS] ,scout max trigger time reached, stategy stopped",this->strate_SInfo);
+				this->stop_strategy();
+				return;
+			}
 			m_logger->info("S,{}, [CANCEL SUCCESS] ,scout order canceled, securityID:{}, SInfo:{}, IInfo: {}, OrderSysID: {}",
 							this->strate_SInfo, 
 							this->strate_stock_code,
@@ -824,8 +837,8 @@ public:
 			this->temp_curr_time = std::chrono::steady_clock::now();
 			this->current_trigger_times += 1;
 			if (this->current_trigger_times >= this->max_trigger_times ){
-				this->stop_strategy();
 				m_logger->info("S,{}, [CANCEL_SUCCESS] ,max trigger time reached, stategy stopped",this->strate_SInfo);
+				this->stop_strategy();
 				return;
 			}
 			this->running_status.store(StrategyStatus::ORDER_CANCELED);
