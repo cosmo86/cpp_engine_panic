@@ -439,13 +439,18 @@ public:
 																this->scout_OrderActionRef,
 																2);
 				
-				m_logger->info("S,{}, [ACTION] , code: {}, cancle sent, curr_volume: {}, cancle_volume: {}, strate OrderRef {}, strate OrderActionRef {}", 
+				m_logger->info("S,{}, [ACTION] , code: {}, cancle sent, curr_volume: {}, cancle_volume: {}, strate OrderRef {}, strate OrderActionRef {}, cond1 {}, cond2 {}, cond3 {}, cond4 {}, cond5 {}", 
 								this->strate_SInfo,
 								this->strate_stock_code,
 								this->curr_FengBan_volume,
 								this->cancel_trigger_volume,
 								this->strate_OrderRef,
-								this->strate_OrderActionRef
+								this->strate_OrderActionRef,
+								__cancel_cond_1,
+								__cancel_cond_2,
+								__cancel_cond_3,
+								__cancel_cond_4,
+								__cancel_cond_5
 								);
 				m_logger->info("S,{}, [ACTION] , code: {}, SCOUT cancle sent, curr_volume: {}, cancle_volume: {}, scout_OrderRef {}, scout OrderActionRef {}", 
 								this->strate_SInfo,
