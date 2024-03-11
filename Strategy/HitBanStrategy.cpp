@@ -439,7 +439,7 @@ public:
 																this->scout_OrderActionRef,
 																2);
 				
-				m_logger->info("S,{}, [ACTION] , code: {}, cancle sent, curr_volume: {}, cancle_volume: {}, strate OrderRef {}, strate OrderActionRef {}, cond1 {}, cond2 {}, cond3 {}, cond4 {}, cond5 {}", 
+				m_logger->info("S,{}, [ACTION] , code: {}, cancle sent, curr_volume: {}, cancle_volume: {}, strate OrderRef {}, strate OrderActionRef {}, cond1 {}, cond2 {}, cond2 volume {}, cond3 {}, cond4 {}, cond5 {}", 
 								this->strate_SInfo,
 								this->strate_stock_code,
 								this->curr_FengBan_volume,
@@ -448,6 +448,7 @@ public:
 								this->strate_OrderActionRef,
 								__cancel_cond_1,
 								__cancel_cond_2,
+								time_volume_tracker.getTotalVolume(),
 								__cancel_cond_3,
 								__cancel_cond_4,
 								__cancel_cond_5
