@@ -707,7 +707,7 @@ public:
 				{
 				// If false, set tp true to enable send order,ExecType == '1' is trade ,2 is cancel
 					this->can_resend_order = true;
-					if (this->scout_order_sent == true)
+					if (this->scout_order_sent == true && this->scout_status != ScoutStatus::SCOUT_ORDER_CANCELED)
 					{
 						this->scout_OrderActionRef = m_dispatcher_ptr->trader_ptr->m_OrderRef.fetch_add(1);
 						m_dispatcher_ptr->trader_ptr->Send_Cancle_Order_OrderActionRef(this->strate_exchangeID, 
@@ -724,11 +724,13 @@ public:
 									this->scout_OrderActionRef);
 					}
 					this->scout_order_sent = false;
-					m_logger->warn("S,{}, [ON_TRANSAC] , limup price is {},Trade price is {}, Bitsetting can_resend_order  to true. strate_limup_price and this->strate_limup_price {} ",
+					m_logger->warn("S,{}, [ON_TRANSAC] , Huifengzaimai, scout status {}, limup price is {},Trade price is {}, Bitsetting can_resend_order  to true and scout_order_sent to false, scout_OrderRef {}, scout_OrderActionRef {} ",
 									this->strate_SInfo,
+									this->scout_status,
 									this->strate_limup_price,
 									temp_transac->TradePrice,
-									this->strate_limup_price);
+									this->scout_OrderRef,
+									this->scout_OrderActionRef);
 
 					this->callback_ref ++;
 					return;

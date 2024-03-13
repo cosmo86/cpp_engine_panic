@@ -542,7 +542,7 @@ private:
 
 		auto temp_map_ptr = OrderSysid_Sinfo_map.find(std::string(pTrade->OrderSysID));
 		// If ordersysid not in the map, then the order to this trade was not sent by this program, probably done other platform manuelly
-		if(temp_map_ptr== OrderSysid_Sinfo_map.end() ){
+		if(temp_map_ptr == OrderSysid_Sinfo_map.end() ){
 			std::cout<<"[Trader:OnRtnTrade] SInfo is empty, please check order source "<< std::endl;
 			printf("OnRtnTrade: TradeID[%s] InvestorID[%s] SecurityID[%s] OrderRef[%d] OrderLocalID[%s] Price[%.2f] Volume[%d]\n",
 			pTrade->TradeID, pTrade->InvestorID, pTrade->SecurityID, pTrade->OrderRef, pTrade->OrderLocalID, pTrade->Price, pTrade->Volume);
@@ -740,10 +740,11 @@ public:
 		}
 		else
 		{
-			m_logger->info("T, [Send_Order_LimitPrice] ,ReqOrderInsert Suc,{},{},{},{},{},{},{},{},{},{}",
+			m_logger->info("T, [Send_Order_LimitPrice] ,ReqOrderInsert Suc,{},{},{},{},{},{},{},{},{},{},{}",
 							input_order_field.ExchangeID,
 							input_order_field.ShareholderID,
 							input_order_field.SecurityID,
+							input_order_field.OrderRef,
 							input_order_field.Direction,
 							input_order_field.VolumeTotalOriginal,
 							input_order_field.LimitPrice,
