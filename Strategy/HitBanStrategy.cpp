@@ -167,6 +167,8 @@ public:
 	int position;
 	int target_position;
 	int current_trigger_times = 0;
+
+	int callback_ref = 0;
 	
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// Please refer to dispatcher.check_running_strategy() 
@@ -341,7 +343,8 @@ public:
 
 		// Scout order
 		// only place order when scout is not sent and formal order is not acpted
-		if(this->scout_order_sent == false && this->formal_order_accepted == false)
+
+		if(this->scout_order_sent == false && this->formal_order_accepted == false && this->can_resend_order == true)
 		{
 			if(curr_FengBan_volume * strate_limup_price >= scout_buy_trigger_cash_lim)
 			{
@@ -474,7 +477,7 @@ public:
 		////////////////////////////////////
 		if (strcmp(temp_tick->SecurityID, strate_stock_code) == 0)
 		{
-			m_logger->info("S,{}, [on_transac] , RECEIVED , SecurityID , source: {}, Strategy: {},",
+			m_logger->info("S,{}, [ON_TICK] , RECEIVED , SecurityID , source: {}, Strategy: {},",
 							this->strate_SInfo,
 							temp_tick->SecurityID,
 							strate_stock_code);
@@ -497,6 +500,8 @@ public:
 			return;
 		}
 
+		
+
 		// unique_lock scope
 		{
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
@@ -518,6 +523,22 @@ public:
 					return;
 				}
 			}
+
+			if(this->callback_ref == 0)
+			{
+				m_logger->info("S,{}, [ON_TICK]  Limup at adding strategy ref_count {}, code: {} limup: {} curr price: {}, curr_volume: {}, trigger_volume:{},cancle_volume: {} ",
+						 this->strate_SInfo,
+						 this->callback_ref,
+						 temp_tick->SecurityID, 
+						 this->strate_limup_price,
+						 temp_tick->LastPrice,
+						 this->curr_FengBan_volume,
+						 this->buy_trigger_volume,
+						 this->cancel_trigger_volume );
+				return;
+			} // for disbaling strategy when limup at adding strategy
+
+
 			// Stock is limup
 			this->curr_FengBan_volume = temp_tick->BidVolume1;
 			action();
@@ -542,7 +563,7 @@ public:
 		////////////////////////////////////
 		if (strcmp(temp_orderdetial->SecurityID, strate_stock_code) == 0)
 		{
-			m_logger->info("S,{}, [on_transac] , RECEIVED , SecurityID , source: {}, Strategy: {},",
+			m_logger->info("S,{}, [ON_ORDERDETIAL] , RECEIVED , SecurityID , source: {}, Strategy: {},",
 							this->strate_SInfo,
 							temp_orderdetial->SecurityID,
 							strate_stock_code);
@@ -550,7 +571,7 @@ public:
 
 		if (  strncmp(strate_stock_code, temp_orderdetial->SecurityID, 6) == 0 &&  strcmp(temp_orderdetial->SecurityID, strate_stock_code) != 0)
 		{
-			m_logger->warn("S,{}, [ON_TICK] , len of strate_stock_code {}, len of coming data {}",
+			m_logger->warn("S,{}, [ON_ORDERDETIAL] , len of strate_stock_code {}, len of coming data {}",
 						this->strate_SInfo,
 						strlen(strate_stock_code),
 						strlen(temp_orderdetial->SecurityID)
@@ -579,6 +600,20 @@ public:
 				return;
 			}
 
+			if(this->callback_ref == 0)
+			{
+				m_logger->info("S,{}, [ON_ORDERDETIAL]  Limup at adding strategy ref_count {}, code: {} limup: {} curr price: {}, curr_volume: {}, trigger_volume:{},cancle_volume: {} ",
+						 this->strate_SInfo,
+						 this->callback_ref,
+						 temp_orderdetial->SecurityID, 
+						 this->strate_limup_price,
+						 temp_orderdetial->Price,
+						 this->curr_FengBan_volume,
+						 this->buy_trigger_volume,
+						 this->cancel_trigger_volume );
+				return;
+			} // for disbaling strategy when limup at adding strategy
+
 			//buy order not cancled, add buy volume to fengban_volume
 			if (temp_orderdetial->Price == this->strate_limup_price && 
 				temp_orderdetial->Side == '1' && 
@@ -589,7 +624,7 @@ public:
 				{
 					action();
 				}
-				m_logger->info("S,{}, [ON_ORDERDETIAL] , code: {} limup: {} curr price: {}, curr_volume: {}, trigger_volume:{},cancle_volume: {} ",
+				m_logger->info("S,{}, [ON_ORDERDETIAL] buy order , code: {} limup: {} curr price: {}, curr_volume: {}, trigger_volume:{},cancle_volume: {} ",
 						 this->strate_SInfo,
 						 temp_orderdetial->SecurityID, 
 						 this->strate_limup_price,
@@ -605,8 +640,11 @@ public:
 			{
 				curr_FengBan_volume -= temp_orderdetial->Volume;
 				time_volume_tracker.insertPair( this->temp_curr_time, -temp_orderdetial->Volume );
-				action();
-				m_logger->info("S,{}, [ON_ORDERDETIAL] , code: {} limup: {} curr price: {}, curr_volume: {}, trigger_volume:{},cancle_volume: {} ",
+				if (this->strate_curr_trade_price >= this->strate_limup_price )
+				{
+					action();
+				}
+				m_logger->info("S,{}, [ON_ORDERDETIAL] buy order cancel , code: {} limup: {} curr price: {}, curr_volume: {}, trigger_volume:{},cancle_volume: {} ",
 				         this->strate_SInfo,
 						 temp_orderdetial->SecurityID, 
 						 this->strate_limup_price,
@@ -626,7 +664,7 @@ public:
 		////////////////////////////////////
 		if (strcmp(temp_transac->SecurityID, strate_stock_code) == 0)
 		{
-			m_logger->info("S,{}, [on_transac] , RECEIVED , SecurityID , source: {}, Strategy: {},",
+			m_logger->info("S,{}, [ON_TRANSAC] , RECEIVED , SecurityID , source: {}, Strategy: {},",
 							this->strate_SInfo,
 							temp_transac->SecurityID,
 							strate_stock_code);
@@ -634,7 +672,7 @@ public:
 
 		if (  strncmp(strate_stock_code, temp_transac->SecurityID, 6) == 0 &&  strcmp(temp_transac->SecurityID, strate_stock_code) != 0)
 		{
-			m_logger->warn("S,{}, [ON_TICK] , len of strate_stock_code {}, len of coming data {}",
+			m_logger->warn("S,{}, [ON_TRANSAC] , len of strate_stock_code {}, len of coming data {}",
 						this->strate_SInfo,
 						strlen(strate_stock_code),
 						strlen(temp_transac->SecurityID)
@@ -658,9 +696,15 @@ public:
 
 			if (temp_transac->TradePrice < this->strate_limup_price)
 			{
+				this->strate_curr_trade_price = temp_transac->TradePrice;
 				// If true remain true to enable send order
-				if (this->can_resend_order){return;}
-				else if(temp_transac->ExecType == '1'){
+				if (this->can_resend_order)
+				{
+					this->callback_ref ++;
+					return;
+				}
+				else if(temp_transac->ExecType == '1')
+				{
 				// If false, set tp true to enable send order,ExecType == '1' is trade ,2 is cancel
 					this->can_resend_order = true;
 					if (this->scout_order_sent == true)
@@ -685,16 +729,31 @@ public:
 									this->strate_limup_price,
 									temp_transac->TradePrice,
 									this->strate_limup_price);
+
+					this->callback_ref ++;
 					return;
 				}
 			}
-			else
+
+			else // case for limup
 			{
+				if (this->callback_ref == 0)// for disbaling strategy when limup at adding strategy
+				{
+					this->can_resend_order = false;
+					m_logger->info("S,{}, [ON_TRANSAC] Limup at adding strategy, tradetime {}, price {}, volume {}, callback_ref {}.", 
+					this->strate_SInfo,
+					temp_transac->TradeTime,
+					temp_transac->TradePrice,
+					temp_transac->TradeVolume,
+					this->callback_ref
+					);
+				} 
 				this->curr_FengBan_volume -= temp_transac->TradeVolume;
 				time_volume_tracker.insertPair( this->temp_curr_time, -temp_transac->TradeVolume );
 				this->action();
 				this->strate_curr_trade_price = temp_transac->TradePrice;
 			}
+			this->callback_ref ++;// for disbaling strategy when limup at adding strategy
 		}
 		// ExchangeID == '2' SZSE , ExecType == '2' cancel order  
 		if (temp_transac->ExchangeID == '2' and temp_transac->ExecType == '2')
