@@ -821,7 +821,9 @@ public:
 
 	void on_order_error(std::shared_ptr<SEObject> e) override
 	{
-		
+		// !!! this should be dynamic_cast, but since all the fields
+		// we are accessing in this on_order_error() are shared between
+		// SE_OrderField and SE_InputOrderField, using static_cast for now
 		std::shared_ptr<SE_OrderField> temp_orderField = std::static_pointer_cast<SE_OrderField>(e);
 
 		m_logger->info("S,{}, [ORDER_ERROR] ,order error received, securityID:{}, OrderRef:{} , SInfo:{}, IInfo: {}, OrderSysID: {}",
@@ -873,7 +875,10 @@ public:
 
 	void on_cancel_success(std::shared_ptr<SEObject> e) override
 	{
-		std::shared_ptr<SE_InputOrderActionField> temp_orderActionField = std::static_pointer_cast<SE_InputOrderActionField>(e);
+		// !!! this should be dynamic_cast, but since all the fields
+		// we are accessing in this on_cancel_success() are shared between
+		// SE_OrderField and SE_InputOrderActionField, using static_cast for now
+		std::shared_ptr<SE_OrderField> temp_orderActionField = std::static_pointer_cast<SE_OrderField>(e);
 
 		if (temp_orderActionField->IInfo == 2)
 		{
@@ -924,10 +929,12 @@ public:
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
 			this->temp_curr_time = std::chrono::steady_clock::now();
 			this->scout_status.store(ScoutStatus::SCOUT_ORDER_CANCELED_ABNORMAL);
-			m_logger->info("S,{}, [CANCEL ERROR] ,scout order NOT canceled, securityID:{}, SInfo:{}, IInfo: {}, OrderSysID: {}",
+			m_logger->info("S,{}, [CANCEL ERROR] ,scout order NOT canceled, securityID:{},OrderRef {}, OrderActionRef {}, SInfo:{}, IInfo: {}, OrderSysID: {}",
 							this->strate_SInfo, 
 							this->strate_stock_code,
-							temp_orderActionField->SInfo, temp_orderActionField->SInfo , temp_orderActionField->OrderSysID);
+							temp_orderActionField->OrderRef,
+							temp_orderActionField->OrderActionRef,
+							temp_orderActionField->SInfo, temp_orderActionField->IInfo , temp_orderActionField->OrderSysID);
 			return;
 		}
 
@@ -943,7 +950,12 @@ public:
 			this->if_cancel_sent = false;
 			this->running_status.store(StrategyStatus::ORDER_CANCELED_ABNORMAL);
 		}
-		m_logger->info("S,{}, [CANCLE_ERROR] ,  OrderSysID:{} ",this->strate_SInfo, temp_orderActionField->OrderSysID);
+		m_logger->info("S,{}, [CANCEL ERROR] ,formal order NOT canceled, securityID:{},OrderRef {}, OrderActionRef {}, SInfo:{}, IInfo: {}, OrderSysID: {}",
+							this->strate_SInfo, 
+							this->strate_stock_code,
+							temp_orderActionField->OrderRef,
+							temp_orderActionField->OrderActionRef,
+							temp_orderActionField->SInfo, temp_orderActionField->IInfo , temp_orderActionField->OrderSysID);
 	}
 
 	void on_trade(std::shared_ptr<SEObject> e) override //SE_TradeField

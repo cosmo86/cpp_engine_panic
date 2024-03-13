@@ -365,6 +365,14 @@ private:
 			this->m_OrderRef.store(pInputOrderField->OrderRef + 1);
 			return;
 		}
+		m_logger->warn("T, [OnErrRtnOrderInsert] , code:{}, ordersysID:{}, source order ref:{} , trader: {} , msg {}",
+							pInputOrderField->SecurityID,
+							pInputOrderField->OrderSysID,
+							pInputOrderField->OrderRef,
+							this->m_OrderRef.load(),
+							convertEncoding(pRspInfoField->ErrorMsg,"GBK", "UTF-8" )
+							);
+
 
 	}
 
@@ -400,10 +408,16 @@ private:
 		if (pRspInfo->ErrorID == 0)
 		{
 			//printf("OnRspOrderAction: OK! [%d] [%d] [%s] \n", nRequestID, pInputOrderActionField->OrderActionRef, pInputOrderActionField->CancelOrderSysID);
-			temp_event.e_type = Eventtype::CANCEL_SUCCESS;
-			temp_event.event = InputOrderActionField;
-			strcpy(temp_event.S_id, pInputOrderActionField->SInfo);
-			m_Event_Q_ptr->enqueue(std::move(temp_event));
+			//temp_event.e_type = Eventtype::CANCEL_SUCCESS;
+			//temp_event.event = InputOrderActionField;
+			//strcpy(temp_event.S_id, pInputOrderActionField->SInfo);
+			//m_Event_Q_ptr->enqueue(std::move(temp_event));
+			m_logger->warn("T, [OnRspOrderAction] CANCEL_ACPT  , OrderRef {} , OrderActionRef {} , OrderSysID {}, error ID {}, error message: {}",
+							pInputOrderActionField->OrderRef,
+							pInputOrderActionField->OrderActionRef,
+							pInputOrderActionField->OrderSysID,
+							pRspInfo->ErrorID,
+							convertEncoding(pRspInfo->ErrorMsg,"GBK", "UTF-8" ));
 		}
 		else
 		{
@@ -412,7 +426,7 @@ private:
 			temp_event.event = InputOrderActionField;
 			strcpy(temp_event.S_id, pInputOrderActionField->SInfo);
 			m_Event_Q_ptr->enqueue(std::move(temp_event));
-			m_logger->warn("T, [OnRspOrderAction] Cancel Error , OrderRef {} , OrderActionRef {} , OrderSysID {}, error ID {}, error message: {}",
+			m_logger->warn("T, [OnRspOrderAction] CANCEL_ERROR , OrderRef {} , OrderActionRef {} , OrderSysID {}, error ID {}, error message: {}",
 							pInputOrderActionField->OrderRef,
 							pInputOrderActionField->OrderActionRef,
 							pInputOrderActionField->OrderSysID,
@@ -463,7 +477,49 @@ private:
 			return;
 		}
 
-		// order succedd status=2 and not withdraw submitstatud = 1
+		OrderSysid_Sinfo_map[std::string(pOrder->OrderSysID)] = std::string(pOrder->SInfo);
+
+		// order rejected status= 7 and insert submitstatud = 1
+		if (pOrder->OrderStatus == '7' &&  pOrder->OrderSubmitStatus == '1')
+		{
+			SEEvent temp_event;
+			std::shared_ptr<SE_OrderField> orderField = SEObject::Create<SE_OrderField>();
+			memcpy(orderField.get(),pOrder,sizeof(SE_OrderField));
+
+			temp_event.e_type = Eventtype::ORDER_ERROR;
+			temp_event.event = orderField;
+			strcpy(temp_event.S_id, pOrder->SInfo);
+			m_Event_Q_ptr->enqueue(std::move(temp_event));
+			//OrderSysid_Sinfo_map[std::string(pOrder->OrderSysID)] = std::string(pOrder->SInfo);
+			m_logger->warn("T, [OnRtnOrder] , ORDER_ERROR , OrderStatus {} , OrderSubmitStatus {} , OrderRef {} , OrderSysID {}.",
+							pOrder->OrderStatus,
+							pOrder->OrderSubmitStatus,
+							pOrder->OrderRef,
+							pOrder->OrderSysID
+							);
+		}
+
+		// order acpt = 2 and CancelRejected = 4
+		if (pOrder->OrderStatus == '2' &&  pOrder->OrderSubmitStatus == '4')
+		{
+			SEEvent temp_event;
+			std::shared_ptr<SE_OrderField> orderField = SEObject::Create<SE_OrderField>();
+			memcpy(orderField.get(),pOrder,sizeof(SE_OrderField));
+
+			temp_event.e_type = Eventtype::CANCEL_ERROR;
+			temp_event.event = orderField;
+			strcpy(temp_event.S_id, pOrder->SInfo);
+			m_Event_Q_ptr->enqueue(std::move(temp_event));
+			//OrderSysid_Sinfo_map[std::string(pOrder->OrderSysID)] = std::string(pOrder->SInfo);
+			m_logger->warn("T, [OnRtnOrder] , CANCEL_ERROR , OrderStatus {} , OrderSubmitStatus {} , OrderRef {} , OrderSysID {}.",
+							pOrder->OrderStatus,
+							pOrder->OrderSubmitStatus,
+							pOrder->OrderRef,
+							pOrder->OrderSysID
+							);
+		}
+
+		// order succedd status=2 and insert submitstatud = 1
 		if (pOrder->OrderStatus == '2' &&  pOrder->OrderSubmitStatus == '1')
 		{
 			SEEvent temp_event;
@@ -477,9 +533,37 @@ private:
 			//std::shared_ptr<SE_Lev2MarketDataField> temp = std::static_pointer_cast<SE_Lev2MarketDataField>(temp_event.event);
 			//std::cout<<temp->SecurityID<<" "<<temp->ClosePrice<<std::endl;
 			m_Event_Q_ptr->enqueue(std::move(temp_event));
-			OrderSysid_Sinfo_map[std::string(pOrder->OrderSysID)] = std::string(pOrder->SInfo);
-			
-			if (pOrder->OrderRef > this->m_OrderRef.load() )
+			//OrderSysid_Sinfo_map[std::string(pOrder->OrderSysID)] = std::string(pOrder->SInfo);
+			m_logger->warn("T, [OnRtnOrder] , ORDER_SUCCESS , OrderStatus {} , OrderSubmitStatus {} , OrderRef {} , OrderSysID {}.",
+							pOrder->OrderStatus,
+							pOrder->OrderSubmitStatus,
+							pOrder->OrderRef,
+							pOrder->OrderSysID
+							);
+		}
+
+		// cancel success (OrderStatus=AllCanceled or OrderStatus=PartTradeCanceled)  and  SubmitStatus=CancelSubmitted 
+		if ( (pOrder->OrderStatus == '6' || pOrder->OrderStatus == '5') &&  pOrder->OrderSubmitStatus == '1')
+		{
+			SEEvent temp_event;
+			std::shared_ptr<SE_OrderField> orderField = SEObject::Create<SE_OrderField>();
+			memcpy(orderField.get(),pOrder,sizeof(SE_OrderField));
+
+			temp_event.e_type = Eventtype::CANCEL_SUCCESS;
+			temp_event.event = orderField;
+			strcpy(temp_event.S_id, pOrder->SInfo);
+			m_Event_Q_ptr->enqueue(std::move(temp_event));
+			//OrderSysid_Sinfo_map[std::string(pOrder->OrderSysID)] = std::string(pOrder->SInfo);
+			m_logger->warn("T, [OnRtnOrder] , CANCEL_SUCCESS , OrderStatus {} , OrderSubmitStatus {} , OrderRef {} , OrderSysID {}.",
+							pOrder->OrderStatus,
+							pOrder->OrderSubmitStatus,
+							pOrder->OrderRef,
+							pOrder->OrderSysID
+							);
+		}
+
+
+		if (pOrder->OrderRef > this->m_OrderRef.load() )
 			{
 				m_logger->warn("T, [OnRtnOrder] , code:{}, ordersysID:{}, source order ref:{} , trader: {} , source is bigger than trader, there could be maunel order",
 								pOrder->SecurityID,
@@ -495,26 +579,6 @@ private:
 			{
 				m_logger->info("T, [OnRtnOrder] ,OrderSysid_Sinfo_map content: key: {}, value:{}",it->first,it->second);
 			}
-
-			printf(
-				"OnRtnOrder:::\n"
-				"---RequestID[%d] SecurityID[%s] OrderRef[%d] OrderLocalID[%s] OrderSysID[%s]\n"
-				"---OrderType[%c] LimitPrice[%.2f]\n"
-				"---OrderStatus[%c] StatusMsg[%s] OrderSubmitStatus[%c]\n"
-				"---VolumeTotalOriginal[%d] VolumeTraded[%d] VolumeCanceled[%d]\n"
-				"---InsertUser[%s] InsertDate[%s] InsertTime[%s] AcceptTime[%s]\n"
-				"---CancelUser[%s] CancelTime[%s]"
-				"---PbuID[%s]"
-				"\n"
-				, pOrder->RequestID, pOrder->SecurityID, pOrder->OrderRef, pOrder->OrderLocalID, pOrder->OrderSysID
-				, pOrder->OrderType, pOrder->LimitPrice
-				, pOrder->OrderStatus, pOrder->StatusMsg, pOrder->OrderSubmitStatus
-				, pOrder->VolumeTotalOriginal, pOrder->VolumeTraded, pOrder->VolumeCanceled
-				, pOrder->InsertUser, pOrder->InsertDate, pOrder->InsertTime, pOrder->AcceptTime
-				, pOrder->CancelUser, pOrder->CancelTime
-				, pOrder->PbuID
-				);
-		}
 	}
 
 	virtual void OnRtnTrade(CTORATstpTradeField* pTrade)
