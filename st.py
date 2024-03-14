@@ -109,21 +109,21 @@ with st.sidebar:
         exchange='1'
     if exchange == 'SZSE':
         exchange = '2'
-    limit_volume = submit_container.number_input('封单金额(万)：', min_value=100, step=100)
-    cancel_volume = submit_container.number_input('撤单金额(万)：', min_value=100, step=100)
-    position = submit_container.number_input('打板金额(万)：', min_value=0.1, step=100.0)
-    count = submit_container.number_input('撤单次数：', min_value=1, step=1)
+    limit_volume = submit_container.number_input('封单金额(万)：', min_value=1000, step=100)
+    cancel_volume = submit_container.number_input('撤单金额(万)：', min_value=12000, step=100)
+    position = submit_container.number_input('打板金额(万)：', min_value=0.3, step=100.0)
+    count = submit_container.number_input('撤单次数：', min_value=3, step=1)
 
     # Timed logic vars
     lower_time_limit = submit_container.number_input('大单延时(秒)：', min_value=0.0, step=0.01, value= 2.0)
     scout_buy_trigger_cash_lim = submit_container.number_input('保护单封单金额(万)：', min_value=100, step=100, value = 500)
-    scout_monitor_duration = submit_container.number_input('小单监控时间(分钟)：', min_value=0.0, step=0.1, value = 10.0)
-    condition_2_percentage = submit_container.number_input('撤单动量比例',  step=0.01, value = 0.35)
+    scout_monitor_duration = submit_container.number_input('小单监控时间(分钟)：', min_value=0.0, step=0.1, value = 5.0)
+    condition_2_percentage = submit_container.number_input('撤单动量比例',  step=0.01, value = -0.35)
     condition_2_higher_time = submit_container.number_input('撤单动量监控时间(分钟)：', min_value=0.0, step=0.1, value = 3.0)
     condition_2_track_duration = submit_container.number_input('撤单动量时间区间(秒)：', min_value=0.0, step=0.01, value= 3.0)
-    cancel_trigger_volume_large = submit_container.number_input('大单大封单金额(万)：', min_value=100, step=100, value = 40000)
+    cancel_trigger_volume_large = submit_container.number_input('大单大封单金额(万)：', min_value=100, step=100, value = 30000)
     condition_4_low_time = submit_container.number_input('大单大封单起始时间(秒)：', min_value=0.0, step=0.01, value= 4.0)
-    condition_4_high_time = submit_container.number_input('大单大封结束时间(分钟)：', min_value=0.0, step=0.01, value= 10.0)
+    condition_4_high_time = submit_container.number_input('大单大封结束时间(分钟)：', min_value=0.0, step=0.01, value= 5.0)
 
 
     try:
