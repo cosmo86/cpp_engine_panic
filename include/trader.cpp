@@ -543,7 +543,7 @@ private:
 		}
 
 		// cancel success (OrderStatus=AllCanceled or OrderStatus=PartTradeCanceled)  and  SubmitStatus=CancelSubmitted 
-		if ( (pOrder->OrderStatus == '6' || pOrder->OrderStatus == '5') &&  pOrder->OrderSubmitStatus == '1')
+		if ( (pOrder->OrderStatus == '6' || pOrder->OrderStatus == '5') &&  pOrder->OrderSubmitStatus == '3')
 		{
 			SEEvent temp_event;
 			std::shared_ptr<SE_OrderField> orderField = SEObject::Create<SE_OrderField>();

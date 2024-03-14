@@ -709,7 +709,7 @@ public:
 					if (this->can_resend_order)
 					{
 						this->callback_ref ++;
-						m_logger->warn("S,{}, [ON_TRANSAC] add callback_ref , can_resend_order {},TradePrice {}, strate_limup_price {}, transac type {}.",
+						m_logger->info("S,{}, [ON_TRANSAC] add callback_ref , can_resend_order {},TradePrice {}, strate_limup_price {}, transac type {}.",
 										this->strate_SInfo,
 										this->can_resend_order,
 										temp_transac->TradePrice,
