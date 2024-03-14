@@ -542,14 +542,15 @@ public:
 			// Stock is limup
 			this->curr_FengBan_volume = temp_tick->BidVolume1;
 			action();
-			m_logger->info("S,{}, [ON_TICK] , code: {} limup: {} curr price: {}, curr_volume: {}, trigger_volume:{},cancle_volume: {} ",
+			m_logger->info("S,{}, [ON_TICK] , code: {} limup: {} curr price: {}, curr_volume: {}, trigger_volume:{},cancle_volume: {}, callback_ref {} ",
 						 this->strate_SInfo,
 						 temp_tick->SecurityID, 
 						 this->strate_limup_price,
 						 temp_tick->BidPrice1,
 						 this->curr_FengBan_volume,
 						 this->buy_trigger_volume,
-						 this->cancel_trigger_volume );
+						 this->cancel_trigger_volume,
+						 this->callback_ref );
 
 			//this->strate_curr_trade_price = temp_tick->LastPrice;
 		}
@@ -620,11 +621,12 @@ public:
 				temp_orderdetial->OrderStatus != 'D')
 			{
 				curr_FengBan_volume += temp_orderdetial->Volume;
+				time_volume_tracker.insertPair( this->temp_curr_time, temp_orderdetial->Volume );
 				if (this->strate_curr_trade_price >= this->strate_limup_price )
 				{
 					action();
 				}
-				m_logger->info("S,{}, [ON_ORDERDETIAL] buy order , code: {} limup: {} curr price: {}, curr_volume: {}, trigger_volume:{},cancle_volume: {} ",
+				m_logger->info("S,{}, [ON_ORDERDETIAL] buy order , code: {} limup: {} order price: {}, curr_volume: {}, trigger_volume:{},cancle_volume: {} ",
 						 this->strate_SInfo,
 						 temp_orderdetial->SecurityID, 
 						 this->strate_limup_price,
@@ -644,11 +646,12 @@ public:
 				{
 					action();
 				}
-				m_logger->info("S,{}, [ON_ORDERDETIAL] buy order cancel , code: {} limup: {} curr price: {}, curr_volume: {}, trigger_volume:{},cancle_volume: {} ",
+				m_logger->info("S,{}, [ON_ORDERDETIAL] buy order cancel , code: {} limup: {} order price: {}, order volume {}, curr_volume: {}, trigger_volume:{},cancle_volume: {} ",
 				         this->strate_SInfo,
 						 temp_orderdetial->SecurityID, 
 						 this->strate_limup_price,
 						 temp_orderdetial->Price,
+						 temp_orderdetial->Volume,
 						 this->curr_FengBan_volume,
 						 this->buy_trigger_volume,
 						 this->cancel_trigger_volume );
@@ -664,10 +667,11 @@ public:
 		////////////////////////////////////
 		if (strcmp(temp_transac->SecurityID, strate_stock_code) == 0)
 		{
-			m_logger->info("S,{}, [ON_TRANSAC] , RECEIVED , SecurityID , source: {}, Strategy: {},",
+			m_logger->info("S,{}, [ON_TRANSAC] , RECEIVED , SecurityID , source: {}, Strategy: {}, trasac type {}",
 							this->strate_SInfo,
 							temp_transac->SecurityID,
-							strate_stock_code);
+							strate_stock_code,
+							temp_transac->ExecType);
 		}
 
 		if (  strncmp(strate_stock_code, temp_transac->SecurityID, 6) == 0 &&  strcmp(temp_transac->SecurityID, strate_stock_code) != 0)
@@ -693,19 +697,26 @@ public:
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
 
 			this->temp_curr_time = std::chrono::steady_clock::now();
-
-			if (temp_transac->TradePrice < this->strate_limup_price)
+			
+			// Not limup
+			if (temp_transac->TradePrice < this->strate_limup_price )
 			{
-				this->strate_curr_trade_price = temp_transac->TradePrice;
-				// If true remain true to enable send order
-				if (this->can_resend_order)
+				if (temp_transac->ExecType == '1')
 				{
-					this->callback_ref ++;
-					return;
-				}
-				else if(temp_transac->ExecType == '1')
-				{
-				// If false, set tp true to enable send order,ExecType == '1' is trade ,2 is cancel
+					this->strate_curr_trade_price = temp_transac->TradePrice;
+					// If true remain true to enable send order
+					if (this->can_resend_order)
+					{
+						this->callback_ref ++;
+						m_logger->warn("S,{}, [ON_TRANSAC] add callback_ref , can_resend_order {},TradePrice {}, strate_limup_price {}, transac type {}.",
+										this->strate_SInfo,
+										this->can_resend_order,
+										temp_transac->TradePrice,
+										this->strate_limup_price,
+										temp_transac->ExecType);
+						return;
+					}
+					// If false, set tp true to enable send order,ExecType == '1' is trade ,2 is cancel
 					this->can_resend_order = true;
 					if (this->scout_order_sent == true && this->scout_status != ScoutStatus::SCOUT_ORDER_CANCELED)
 					{
@@ -739,7 +750,7 @@ public:
 
 			else // case for limup
 			{
-				if (this->callback_ref == 0)// for disbaling strategy when limup at adding strategy
+				if (this->callback_ref == 0 && temp_transac->ExecType == '1')// for disbaling strategy when limup at adding strategy
 				{
 					this->can_resend_order = false;
 					m_logger->info("S,{}, [ON_TRANSAC] Limup at adding strategy, tradetime {}, price {}, volume {}, callback_ref {}.", 
@@ -749,32 +760,36 @@ public:
 					temp_transac->TradeVolume,
 					this->callback_ref
 					);
+					this->callback_ref ++;// for disbaling strategy when limup at adding strategy
 				} 
 				this->curr_FengBan_volume -= temp_transac->TradeVolume;
 				time_volume_tracker.insertPair( this->temp_curr_time, -temp_transac->TradeVolume );
 				this->action();
 				this->strate_curr_trade_price = temp_transac->TradePrice;
 			}
-			this->callback_ref ++;// for disbaling strategy when limup at adding strategy
+			
 		}
+
 		// ExchangeID == '2' SZSE , ExecType == '2' cancel order  
 		if (temp_transac->ExchangeID == '2' and temp_transac->ExecType == '2')
 		{
-			m_logger->info("S,{}, [ON_TRANSAC] SZSE cancel, tradetime {}, price {}, volume {}, BuyNo {}. SellNo {}", 
+			m_logger->info("S,{}, [ON_TRANSAC] SZSE cancel, tradetime {}, price {}, volume {}, BuyNo {}. SellNo {},callback_ref {}.", 
 			this->strate_SInfo,
 			temp_transac->TradeTime,
 			temp_transac->TradePrice,
 			temp_transac->TradeVolume,
 			temp_transac->BuyNo,
-			temp_transac->SellNo);
+			temp_transac->SellNo,
+			this->callback_ref);
 		}		
-		m_logger->info("S,{}, [ON_TRANSAC] ,SZSE transaction, tradetime {}, trade_price {}, volume {}, Exectype {}, curr_FengBan_volume {}", 
+		m_logger->info("S,{}, [ON_TRANSAC] ,SZSE transaction, tradetime {}, trade_price {}, volume {}, Exectype {}, curr_FengBan_volume {}, callback_ref {}.", 
 					this->strate_SInfo,
 					temp_transac->TradeTime,
 					temp_transac->TradePrice,
 					temp_transac->TradeVolume,
 					temp_transac->ExecType,
-					this->curr_FengBan_volume);
+					this->curr_FengBan_volume,
+					this->callback_ref);
 	}
 
 	void on_order_success(std::shared_ptr<SEObject> e) override
