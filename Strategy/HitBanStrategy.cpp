@@ -701,7 +701,8 @@ public:
 			// Not limup
 			if (temp_transac->TradePrice < this->strate_limup_price )
 			{
-				if (temp_transac->ExecType == '1')
+				// Tansaction only '1' SZ transaction 'N' SH transaction
+				if (temp_transac->ExecType == '1' || temp_transac->ExecType == 'N' )
 				{
 					this->strate_curr_trade_price = temp_transac->TradePrice;
 					// If true remain true to enable send order
@@ -750,7 +751,7 @@ public:
 
 			else // case for limup
 			{
-				if (this->callback_ref == 0 && temp_transac->ExecType == '1')// for disbaling strategy when limup at adding strategy
+				if (this->callback_ref == 0 && (temp_transac->ExecType == '1' || temp_transac->ExecType == 'N') )// for disbaling strategy when limup at adding strategy
 				{
 					this->can_resend_order = false;
 					m_logger->info("S,{}, [ON_TRANSAC] Limup at adding strategy, tradetime {}, price {}, volume {}, callback_ref {}.", 
@@ -766,6 +767,14 @@ public:
 				time_volume_tracker.insertPair( this->temp_curr_time, -temp_transac->TradeVolume );
 				this->action();
 				this->strate_curr_trade_price = temp_transac->TradePrice;
+				m_logger->info("S,{}, [ON_TRANSAC] ,transaction, tradetime {}, trade_price {}, volume {}, Exectype {}, curr_FengBan_volume {}, callback_ref {}.", 
+					this->strate_SInfo,
+					temp_transac->TradeTime,
+					temp_transac->TradePrice,
+					temp_transac->TradeVolume,
+					temp_transac->ExecType,
+					this->curr_FengBan_volume,
+					this->callback_ref);
 			}
 			
 		}
@@ -781,15 +790,7 @@ public:
 			temp_transac->BuyNo,
 			temp_transac->SellNo,
 			this->callback_ref);
-		}		
-		m_logger->info("S,{}, [ON_TRANSAC] ,SZSE transaction, tradetime {}, trade_price {}, volume {}, Exectype {}, curr_FengBan_volume {}, callback_ref {}.", 
-					this->strate_SInfo,
-					temp_transac->TradeTime,
-					temp_transac->TradePrice,
-					temp_transac->TradeVolume,
-					temp_transac->ExecType,
-					this->curr_FengBan_volume,
-					this->callback_ref);
+		}
 	}
 
 	void on_order_success(std::shared_ptr<SEObject> e) override
