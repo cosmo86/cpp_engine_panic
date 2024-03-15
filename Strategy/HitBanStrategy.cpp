@@ -169,6 +169,7 @@ public:
 	int current_trigger_times = 0;
 
 	int callback_ref = 0;
+	uint64_t last_L2Trsac_receTime = 0;
 	
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// Please refer to dispatcher.check_running_strategy() 
@@ -603,11 +604,13 @@ public:
 
 			if(this->callback_ref == 0)
 			{
-				m_logger->info("S,{}, [ON_ORDERDETIAL]  Limup at adding strategy ref_count {}, code: {} limup: {} curr price: {}, curr_volume: {}, trigger_volume:{},cancle_volume: {} ",
+				m_logger->info("S,{}, [ON_ORDERDETIAL]  Limup at adding strategy ref_count {}, code: {} limup: {}, OrderTime {} , rece_time {}  curr price: {}, curr_volume: {}, trigger_volume:{},cancle_volume: {} ",
 						 this->strate_SInfo,
 						 this->callback_ref,
 						 temp_orderdetial->SecurityID, 
 						 this->strate_limup_price,
+						 temp_orderdetial->OrderTime,
+						 temp_orderdetial->Info3,
 						 temp_orderdetial->Price,
 						 this->curr_FengBan_volume,
 						 this->buy_trigger_volume,
@@ -626,10 +629,12 @@ public:
 				{
 					action();
 				}
-				m_logger->info("S,{}, [ON_ORDERDETIAL] buy order , code: {} limup: {} order price: {}, curr_volume: {}, trigger_volume:{},cancle_volume: {} ",
+				m_logger->info("S,{}, [ON_ORDERDETIAL] buy order , code: {} limup: {} , ordertime {}, recetime {}, order price: {}, curr_volume: {}, trigger_volume:{},cancle_volume: {} ",
 						 this->strate_SInfo,
 						 temp_orderdetial->SecurityID, 
 						 this->strate_limup_price,
+						 temp_orderdetial->OrderTime,
+						 temp_orderdetial->Info3,
 						 temp_orderdetial->Price,
 						 this->curr_FengBan_volume,
 						 this->buy_trigger_volume,
@@ -646,10 +651,12 @@ public:
 				{
 					action();
 				}
-				m_logger->info("S,{}, [ON_ORDERDETIAL] buy order cancel , code: {} limup: {} order price: {}, order volume {}, curr_volume: {}, trigger_volume:{},cancle_volume: {} ",
+				m_logger->info("S,{}, [ON_ORDERDETIAL] buy order cancel , code: {} limup: {}, ordertime {},recetime {}, order price: {}, order volume {}, curr_volume: {}, trigger_volume:{},cancle_volume: {} ",
 				         this->strate_SInfo,
 						 temp_orderdetial->SecurityID, 
 						 this->strate_limup_price,
+						 temp_orderdetial->OrderTime,
+						 temp_orderdetial->Info3,
 						 temp_orderdetial->Price,
 						 temp_orderdetial->Volume,
 						 this->curr_FengBan_volume,
@@ -667,10 +674,12 @@ public:
 		////////////////////////////////////
 		if (strcmp(temp_transac->SecurityID, strate_stock_code) == 0)
 		{
-			m_logger->info("S,{}, [ON_TRANSAC] , RECEIVED , SecurityID , source: {}, Strategy: {}, trasac type {}",
+			m_logger->info("S,{}, [ON_TRANSAC] , RECEIVED , SecurityID , source: {}, Strategy: {},TradeTime{}, recetime {}, trasac type {}",
 							this->strate_SInfo,
 							temp_transac->SecurityID,
 							strate_stock_code,
+							temp_transac->TradeTime,
+							temp_transac->Info3,
 							temp_transac->ExecType);
 		}
 
@@ -693,9 +702,32 @@ public:
 		}
 
 		//unique share-lock
-		{
+		{   
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
 
+			if (this->last_L2Trsac_receTime == 0)
+			{
+				this->last_L2Trsac_receTime = temp_transac->Info3;
+			} 
+			else
+			{
+				// received time early than last received, no action, just update 
+				if( temp_transac->Info3 < this->last_L2Trsac_receTime )
+				{
+					this->curr_FengBan_volume -= temp_transac->TradeVolume;
+					m_logger->warn("S,{}, [ON_TRANSAC] , received time early than last received ,recetime {}, last recetime {}, tradetime {}, trade_price {}, volume {}, Exectype {}, curr_FengBan_volume {}, callback_ref {}.", 
+									this->strate_SInfo,
+									temp_transac->Info3,
+									this->last_L2Trsac_receTime,
+									temp_transac->TradeTime,
+									temp_transac->TradePrice,
+									temp_transac->TradeVolume,
+									temp_transac->ExecType,
+									this->curr_FengBan_volume,
+									this->callback_ref);
+					return;
+				}
+			}
 			this->temp_curr_time = std::chrono::steady_clock::now();
 			
 			// Not limup
@@ -709,9 +741,10 @@ public:
 					if (this->can_resend_order)
 					{
 						this->callback_ref ++;
-						m_logger->info("S,{}, [ON_TRANSAC] add callback_ref , can_resend_order {},TradePrice {}, strate_limup_price {}, transac type {}.",
+						m_logger->info("S,{}, [ON_TRANSAC] add callback_ref , can_resend_order {}, Tradetime {},TradePrice {}, strate_limup_price {}, transac type {}.",
 										this->strate_SInfo,
 										this->can_resend_order,
+										temp_transac->TradeTime,
 										temp_transac->TradePrice,
 										this->strate_limup_price,
 										temp_transac->ExecType);
@@ -727,19 +760,21 @@ public:
 																		this->scout_OrderRef,
 																		this->scout_OrderActionRef,
 																		2);
-						m_logger->warn("S,{}, [ON_TRANSAC] , Huifengzaimai canceling last scout order, limup price is {},Trade price is {},  strate_limup_price {}, scout_OrderRef {}, scout_OrderActionRef {} ",
+						m_logger->warn("S,{}, [ON_TRANSAC] , Huifengzaimai canceling last scout order, limup price is {}, TradeTime {} ,Trade price is {},  strate_limup_price {}, scout_OrderRef {}, scout_OrderActionRef {} ",
 									this->strate_SInfo,
 									this->strate_limup_price,
+									temp_transac->TradeTime,
 									temp_transac->TradePrice,
 									this->strate_limup_price,
 									this->scout_OrderRef,
 									this->scout_OrderActionRef);
 					}
 					this->scout_order_sent = false;
-					m_logger->warn("S,{}, [ON_TRANSAC] , Huifengzaimai, scout status {}, limup price is {},Trade price is {}, Bitsetting can_resend_order  to true and scout_order_sent to false, scout_OrderRef {}, scout_OrderActionRef {} ",
+					m_logger->warn("S,{}, [ON_TRANSAC] , Huifengzaimai, scout status {}, limup price is {}, TradeTime {} ,Trade price is {}, Bitsetting can_resend_order  to true and scout_order_sent to false, scout_OrderRef {}, scout_OrderActionRef {} ",
 									this->strate_SInfo,
 									this->scout_status,
 									this->strate_limup_price,
+									temp_transac->TradeTime,
 									temp_transac->TradePrice,
 									this->scout_OrderRef,
 									this->scout_OrderActionRef);

@@ -519,7 +519,7 @@ private:
 							);
 		}
 
-		// order succedd status=2 and insert submitstatud = 1
+		// order acpted status=2 and insert submitstatud = 1
 		if (pOrder->OrderStatus == '2' &&  pOrder->OrderSubmitStatus == '1')
 		{
 			SEEvent temp_event;

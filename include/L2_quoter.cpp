@@ -450,19 +450,35 @@ public:
 						pTransaction->TradeBSFlag,
 						pTransaction->BizIndex);
 
-		static_assert(sizeof(CTORATstpLev2TransactionField) == sizeof(SE_Lev2TransactionStruct), "Size mismatch");
+		//static_assert(sizeof(CTORATstpLev2TransactionField) == sizeof(SE_Lev2TransactionStruct), "Size mismatch");
 		auto start = std::chrono::high_resolution_clock::now();
+		auto duration = start.time_since_epoch();
+		uint64_t rece_time = std::chrono::duration_cast<std::chrono::nanoseconds>(duration).count();
 		std::shared_ptr<SE_Lev2TransactionStruct> transstuct = SEObject::Create<SE_Lev2TransactionStruct>();
-		memcpy(transstuct.get(),pTransaction,sizeof(SE_Lev2TransactionStruct));
-
+		//memcpy(transstuct.get(),pTransaction,sizeof(SE_Lev2TransactionStruct));
+		///////////////////////////////////////////////////////////////////
+		transstuct->ExchangeID = pTransaction->ExchangeID;
+		//strcpy(transStruct->ExchangeID, pTransaction->ExchangeID);
+		strcpy(transstuct->SecurityID, pTransaction->SecurityID);
+		transstuct->TradeTime = pTransaction->TradeTime;
+		transstuct->TradePrice = pTransaction->TradePrice;
+		transstuct->TradeVolume = pTransaction->TradeVolume;
+		transstuct->ExecType = pTransaction->ExecType;
+		transstuct->MainSeq = pTransaction->MainSeq;
+		transstuct->SubSeq = pTransaction->SubSeq;
+		transstuct->BuyNo = pTransaction->BuyNo;
+		transstuct->SellNo = pTransaction->SellNo;
+		transstuct->Info1 = pTransaction->Info1;
+		transstuct->Info2 = pTransaction->Info2;
+		transstuct->Info3 = rece_time;
+		transstuct->TradeBSFlag = pTransaction->TradeBSFlag;
+		transstuct->BizIndex = pTransaction->BizIndex;
+		////////////////////////////////////////////////////////////////////
 
 		SEEvent temp_event;
 		temp_event.e_type = Eventtype::TRANSACTION;
 		temp_event.event = transstuct;
-		m_Event_Q_ptr->enqueue(std::move(temp_event));
-		auto stop = std::chrono::high_resolution_clock::now();
-		auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
-		
+		m_Event_Q_ptr->enqueue(std::move(temp_event));	
 	};
 
 
@@ -486,17 +502,35 @@ public:
 						pOrderDetail->OrderStatus,
 						pOrderDetail->BizIndex);
 
-		static_assert(sizeof(CTORATstpLev2OrderDetailField) == sizeof(SE_Lev2OrderDetailField), "Size mismatch");
+		//static_assert(sizeof(CTORATstpLev2OrderDetailField) == sizeof(SE_Lev2OrderDetailField), "Size mismatch");
 		auto start = std::chrono::high_resolution_clock::now();
-		std::shared_ptr<SE_Lev2OrderDetailField> orderDetial = SEObject::Create<SE_Lev2OrderDetailField>();
-		memcpy(orderDetial.get(),pOrderDetail,sizeof(SE_Lev2OrderDetailField));
+		auto duration = start.time_since_epoch();
+		uint64_t rece_time = std::chrono::duration_cast<std::chrono::nanoseconds>(duration).count();
 
+		std::shared_ptr<SE_Lev2OrderDetailField> orderDetial = SEObject::Create<SE_Lev2OrderDetailField>();
+		//memcpy(orderDetial.get(),pOrderDetail,sizeof(SE_Lev2OrderDetailField));
+		/////////////////////////////////////////////////////////////////
+		//strcpy(orderDetial->ExchangeID, pOrderDetail->ExchangeID);
+		orderDetial->ExchangeID = pOrderDetail->ExchangeID;
+		strcpy(orderDetial->SecurityID, pOrderDetail->SecurityID);
+		orderDetial->OrderTime = pOrderDetail->OrderTime;
+		orderDetial->Price = pOrderDetail->Price;
+		orderDetial->Volume = pOrderDetail->Volume;
+		orderDetial->Side = pOrderDetail->Side;
+		orderDetial->OrderType = pOrderDetail->OrderType;
+		orderDetial->MainSeq = pOrderDetail->MainSeq;
+		orderDetial->SubSeq = pOrderDetail->SubSeq;
+		orderDetial->Info1 = pOrderDetail->Info1;
+		orderDetial->Info2 = pOrderDetail->Info2;
+		orderDetial->Info3 = rece_time;
+		orderDetial->OrderNO = pOrderDetail->OrderNO;
+		orderDetial->OrderStatus = pOrderDetail->OrderStatus;
+		orderDetial->BizIndex = pOrderDetail->BizIndex;
+		/////////////////////////////////////////////////////////////////////////
 		SEEvent temp_event;
 		temp_event.e_type = Eventtype::ORDER_DETIAL;
 		temp_event.event = orderDetial;
 		m_Event_Q_ptr->enqueue(std::move(temp_event));
-		auto stop = std::chrono::high_resolution_clock::now();
-		auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
 	};
 
 private:

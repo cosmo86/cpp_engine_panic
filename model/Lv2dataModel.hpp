@@ -46,7 +46,7 @@ struct SE_Lev2TransactionStruct : public SEObject
 		TTORATstpIntInfoType	Info2;
 
 		///附加信息3
-		TTORATstpIntInfoType	Info3;
+		uint64_t 	Info3;
 
 		///内外盘标志（只有上海行情有效）
 		TTORATstpTradeBSFlagType	TradeBSFlag;
@@ -93,7 +93,7 @@ struct SE_Lev2OrderDetailField : public SEObject
 		TTORATstpIntInfoType	Info2;
 
 		///附加信息3
-		TTORATstpIntInfoType	Info3;
+		uint64_t 	Info3;
 
 		///委托序号
 		TTORATstpLongSequenceType	OrderNO;
