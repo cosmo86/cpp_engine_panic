@@ -672,34 +672,15 @@ public:
 		std::shared_ptr<SE_Lev2TransactionStruct> temp_transac = std::static_pointer_cast<SE_Lev2TransactionStruct>(e);
 		
 		////////////////////////////////////
-		if (strcmp(temp_transac->SecurityID, strate_stock_code) == 0)
-		{
-			m_logger->info("S,{}, [ON_TRANSAC] , RECEIVED , SecurityID , source: {}, Strategy: {},TradeTime{}, recetime {}, trasac type {}",
-							this->strate_SInfo,
-							temp_transac->SecurityID,
-							strate_stock_code,
-							temp_transac->TradeTime,
-							temp_transac->Info3,
-							temp_transac->ExecType);
-		}
 
-		if (  strncmp(strate_stock_code, temp_transac->SecurityID, 6) == 0 &&  strcmp(temp_transac->SecurityID, strate_stock_code) != 0)
-		{
-			m_logger->warn("S,{}, [ON_TRANSAC] , len of strate_stock_code {}, len of coming data {}",
+		m_logger->info("S,{}, [ON_TRANSAC] , RECEIVED , SecurityID , source: {}, Strategy: {},TradeTime{}, recetime {}, trasac type {}",
 						this->strate_SInfo,
-						strlen(strate_stock_code),
-						strlen(temp_transac->SecurityID)
-						);
-		}
-		///////////////////////////////////////////////////////
-		if (strcmp(temp_transac->SecurityID, strate_stock_code) != 0)
-		{
-			//m_logger->warn("S,{}, [on_transac] , SecurityID mismatach, source: {}, Strategy: {}",
-			//				this->strate_SInfo,
-			//				temp_transac->SecurityID,
-			//				strate_stock_code);
-			return;
-		}
+						temp_transac->SecurityID,
+						strate_stock_code,
+						temp_transac->TradeTime,
+						temp_transac->Info3,
+						temp_transac->ExecType);
+
 
 		//unique share-lock
 		{   
@@ -721,8 +702,9 @@ public:
 						this->curr_FengBan_volume -= temp_transac->TradeVolume;
 						time_volume_tracker.insertPair( this->temp_curr_time, -temp_transac->TradeVolume );
 					}
-					m_logger->warn("S,{}, [ON_TRANSAC] , received time early than last received ,recetime {}, last recetime {}, tradetime {}, limup {}, trade_price {}, volume {}, Exectype {}, curr_FengBan_volume {}, callback_ref {}.", 
+					m_logger->warn("S,{}, [ON_TRANSAC] , received time early than last received , time diff {} ,recetime {}, last recetime {}, tradetime {}, limup {}, trade_price {}, volume {}, Exectype {}, curr_FengBan_volume {}, callback_ref {}.", 
 									this->strate_SInfo,
+									this->last_L2Trsac_receTime - temp_transac->Info3,
 									temp_transac->Info3,
 									this->last_L2Trsac_receTime,
 									temp_transac->TradeTime,

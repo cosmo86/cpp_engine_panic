@@ -157,13 +157,7 @@ void Dispatcher::worker_main()
 		SETask task;
 		if (_task_q.try_dequeue(task)) 
 		{
-			try 
-			{
-				(task.s.get()->*task._cb_funcPtr)(task.event);
-			} catch (const std::exception& e) {
-				// Code to handle the exception
-				std::cerr << "Exception caught: " << e.what() << std::endl;
-			}
+			(task.s.get()->*task._cb_funcPtr)(task.event);
 		}
 		// call the Strategy's instance method
 		//std::cout << "[Dispatcher] trying to process event of type " << item._e.e_type << " and payload: " << item._e.payload;
@@ -234,10 +228,13 @@ void Dispatcher::remove_strategy(int s_id, std::string SecurityID, const char& e
 	}
 }
 
+
 int Dispatcher::get_event_q_size()
 {
-	return _event_q.size_approx();
+	//return _event_q.size_approx();
+	return 0;
 }
+
 
 void Dispatcher::bind_Callback(Eventtype e_type, FuncPtr func)
 {

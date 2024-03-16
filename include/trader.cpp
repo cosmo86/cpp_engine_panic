@@ -23,6 +23,7 @@
 #include "OrderModels.hpp"
 #include "helper_functions.hpp"
 #include <pthread.h>
+#include "ThreadSafeQueue.hpp"
 
 using LoggerPtr = std::shared_ptr<spdlog::async_logger>;
 
@@ -85,8 +86,8 @@ private:
 
 	
 
-	
-	moodycamel::ConcurrentQueue<SEEvent>* m_Event_Q_ptr = nullptr;
+	ThreadSafeQueue<SEEvent>* m_Event_Q_ptr = nullptr;
+	//moodycamel::ConcurrentQueue<SEEvent>* m_Event_Q_ptr = nullptr;
 	LoggerPtr m_logger=nullptr;
 
 	std::unordered_map<std::string, double> limup_table; //<securityid , limup_price>
@@ -121,7 +122,7 @@ public:
 		}
 	}
 
-	void init_trader(moodycamel::ConcurrentQueue<SEEvent>* m_Event_Q_ptr,LoggerPtr logger_ptr)
+	void init_trader(ThreadSafeQueue<SEEvent>* m_Event_Q_ptr,LoggerPtr logger_ptr)
 	{
 		std::cout<< "[TradeSpi] pointer before init :"<<m_Event_Q_ptr<<std::endl;
 		this->m_Event_Q_ptr = m_Event_Q_ptr;

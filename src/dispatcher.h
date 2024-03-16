@@ -13,6 +13,7 @@
 #include "StrategyBase.h"
 #include "L2_quoter.cpp"
 #include "trader.cpp"
+#include "ThreadSafeQueue.hpp"
 
 #include "concurrentqueue.h"
 
@@ -41,7 +42,9 @@ public:
 	void update_delay_duration(int s_id, int new_delay_duration);
 
 public:
-	moodycamel::ConcurrentQueue<SEEvent>  _event_q;
+
+	ThreadSafeQueue<SEEvent>  _event_q;
+	//moodycamel::ConcurrentQueue<SEEvent>  _event_q;
 	Lev2MdSpi* L2_quoter_ptr;
     TradeSpi* trader_ptr;
 private:

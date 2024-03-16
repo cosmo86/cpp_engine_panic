@@ -31,6 +31,7 @@
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/async.h"
 #include "helper_functions.hpp"
+#include "ThreadSafeQueue.hpp"
 
 using LoggerPtr = std::shared_ptr<spdlog::async_logger>;
 
@@ -57,7 +58,7 @@ public:
 	}
 
 public:
-	void init_quoter(moodycamel::ConcurrentQueue<SEEvent>* m_Event_Q_ptr, LoggerPtr logger_ptr)
+	void init_quoter(ThreadSafeQueue<SEEvent>* m_Event_Q_ptr, LoggerPtr logger_ptr)
 	{
 		std::cout<< "[Lev2MdSpi] pointer before init :"<<m_Event_Q_ptr<<std::endl;
 		this->m_Event_Q_ptr = m_Event_Q_ptr;
@@ -541,7 +542,7 @@ private:
 	char m_address[64];
 	char m_mode[21];
 
-	moodycamel::ConcurrentQueue<SEEvent>* m_Event_Q_ptr = nullptr;
+	ThreadSafeQueue<SEEvent>* m_Event_Q_ptr = nullptr;
 	//moodycamel::ConcurrentQueue<std::shared_ptr<SEObject>>* m_Event_Q_ptr;
 	LoggerPtr m_logger=nullptr;
 	std::map<int,std::tuple<Strategy*,bool>>* m_StrategyMap_Ptr;
