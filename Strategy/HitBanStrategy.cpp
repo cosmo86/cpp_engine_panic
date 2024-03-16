@@ -705,6 +705,8 @@ public:
 		{   
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
 
+			this->temp_curr_time = std::chrono::steady_clock::now();
+
 			if (this->last_L2Trsac_receTime == 0)
 			{
 				this->last_L2Trsac_receTime = temp_transac->Info3;
@@ -714,12 +716,17 @@ public:
 				// received time early than last received, no action, just update 
 				if( temp_transac->Info3 < this->last_L2Trsac_receTime )
 				{
-					this->curr_FengBan_volume -= temp_transac->TradeVolume;
-					m_logger->warn("S,{}, [ON_TRANSAC] , received time early than last received ,recetime {}, last recetime {}, tradetime {}, trade_price {}, volume {}, Exectype {}, curr_FengBan_volume {}, callback_ref {}.", 
+					if (temp_transac->TradePrice >= this->strate_limup_price )
+					{
+						this->curr_FengBan_volume -= temp_transac->TradeVolume;
+						time_volume_tracker.insertPair( this->temp_curr_time, -temp_transac->TradeVolume );
+					}
+					m_logger->warn("S,{}, [ON_TRANSAC] , received time early than last received ,recetime {}, last recetime {}, tradetime {}, limup {}, trade_price {}, volume {}, Exectype {}, curr_FengBan_volume {}, callback_ref {}.", 
 									this->strate_SInfo,
 									temp_transac->Info3,
 									this->last_L2Trsac_receTime,
 									temp_transac->TradeTime,
+									this->strate_limup_price,
 									temp_transac->TradePrice,
 									temp_transac->TradeVolume,
 									temp_transac->ExecType,
@@ -728,7 +735,6 @@ public:
 					return;
 				}
 			}
-			this->temp_curr_time = std::chrono::steady_clock::now();
 			
 			// Not limup
 			if (temp_transac->TradePrice < this->strate_limup_price )
@@ -748,6 +754,7 @@ public:
 										temp_transac->TradePrice,
 										this->strate_limup_price,
 										temp_transac->ExecType);
+						this->last_L2Trsac_receTime = temp_transac->Info3;
 						return;
 					}
 					// If false, set tp true to enable send order,ExecType == '1' is trade ,2 is cancel
@@ -780,6 +787,7 @@ public:
 									this->scout_OrderActionRef);
 
 					this->callback_ref ++;
+					this->last_L2Trsac_receTime = temp_transac->Info3;
 					return;
 				}
 			}
@@ -810,6 +818,7 @@ public:
 					temp_transac->ExecType,
 					this->curr_FengBan_volume,
 					this->callback_ref);
+				this->last_L2Trsac_receTime = temp_transac->Info3;
 			}
 			
 		}
@@ -931,7 +940,7 @@ public:
 		// SE_OrderField and SE_InputOrderActionField, using static_cast for now
 		std::shared_ptr<SE_OrderField> temp_orderActionField = std::static_pointer_cast<SE_OrderField>(e);
 
-		if (temp_orderActionField->IInfo == 2)
+		if (temp_orderActionField->IInfo == 1)
 		{
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
 			this->temp_curr_time = std::chrono::steady_clock::now();

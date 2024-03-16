@@ -841,16 +841,17 @@ public:
 		int ret = m_api->ReqOrderAction(&input_order_action_field, m_req_id++);
 		if (ret != 0)
 		{
-			m_logger->warn("T, [Send_Cancle_Order] ReqOrderAction fail, ret:{}", ret);
+			m_logger->warn("T, [Send_Cancle_Order_OrderActionRef] ReqOrderAction fail, ret:{}", ret);
 			//printf("ReqOrderAction fail, ret[%d]\n", ret);
 		}
 		else
 		{
-			m_logger->warn("T, [Send_Cancle_Order] ,ReqOrderAction Suc,{},{},{},{}, SessionID {}, FrontID {}, OrderRef {}, OrderActionRef {}",
+			m_logger->warn("T, [Send_Cancle_Order_OrderActionRef] ,ReqOrderAction Suc, ExchangeID {},ActionFlag {},OrderSysID {},SInfo {},IInfo {}, SessionID {}, FrontID {}, OrderRef {}, OrderActionRef {}",
                input_order_action_field.ExchangeID,
                input_order_action_field.ActionFlag,
                input_order_action_field.OrderSysID,
                input_order_action_field.SInfo,
+			   input_order_action_field.IInfo,
 			   input_order_action_field.SessionID,
 			   input_order_action_field.FrontID,
 			   input_order_action_field.OrderRef,
