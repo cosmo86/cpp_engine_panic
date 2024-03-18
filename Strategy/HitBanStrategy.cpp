@@ -985,7 +985,7 @@ public:
 	{
 		std::shared_ptr<SE_InputOrderActionField> temp_orderActionField = std::static_pointer_cast<SE_InputOrderActionField>(e);
 
-		if (temp_orderActionField->IInfo == 2)
+		if (temp_orderActionField->IInfo == 1 || temp_orderActionField->IInfo == 2)
 		{
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
 			this->temp_curr_time = std::chrono::steady_clock::now();
