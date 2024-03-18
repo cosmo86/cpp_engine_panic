@@ -348,7 +348,33 @@ private:
 
 		SEEvent temp_event;
 		std::shared_ptr<SE_InputOrderField> temp_InputOrderField = SEObject::Create<SE_InputOrderField>();
-		memcpy(temp_InputOrderField.get(),pInputOrderField,sizeof(SE_InputOrderField));
+		//memcpy(temp_InputOrderField.get(),pInputOrderField,sizeof(SE_InputOrderField));
+
+		/////////////////////////////////////////////////////////
+		temp_InputOrderField->ExchangeID = pInputOrderField->ExchangeID;
+		strcpy(temp_InputOrderField->InvestorID, pInputOrderField->InvestorID);
+		strcpy(temp_InputOrderField->BusinessUnitID, pInputOrderField->BusinessUnitID);
+		strcpy(temp_InputOrderField->ShareholderID, pInputOrderField->ShareholderID);
+		strcpy(temp_InputOrderField->SecurityID, pInputOrderField->SecurityID);
+		temp_InputOrderField->Direction = pInputOrderField->Direction;
+		temp_InputOrderField->OrderPriceType = pInputOrderField->OrderPriceType;
+		temp_InputOrderField->TimeCondition = pInputOrderField->TimeCondition;
+		temp_InputOrderField->VolumeCondition = pInputOrderField->VolumeCondition;
+		temp_InputOrderField->LimitPrice = pInputOrderField->LimitPrice;
+		temp_InputOrderField->VolumeTotalOriginal = pInputOrderField->VolumeTotalOriginal;
+		temp_InputOrderField->LotType = pInputOrderField->LotType;
+		strcpy(temp_InputOrderField->GTDate, pInputOrderField->GTDate);
+		temp_InputOrderField->Operway = pInputOrderField->Operway;
+		temp_InputOrderField->CondCheck = pInputOrderField->CondCheck;
+		strcpy(temp_InputOrderField->SInfo, pInputOrderField->SInfo);
+		temp_InputOrderField->IInfo = pInputOrderField->IInfo;
+		temp_InputOrderField->OrderRef = pInputOrderField->OrderRef;
+		strcpy(temp_InputOrderField->OrderSysID, pInputOrderField->OrderSysID);
+		temp_InputOrderField->ForceCloseReason = pInputOrderField->ForceCloseReason;
+		strcpy(temp_InputOrderField->CreditDebtID, pInputOrderField->CreditDebtID);
+		temp_InputOrderField->CreditQuotaType = pInputOrderField->CreditQuotaType;
+		/////////////////////////////////////////////////////////////////////////////////////
+
 		temp_event.e_type = Eventtype::ORDER_ERROR;
 		temp_event.event = temp_InputOrderField;
 		strcpy(temp_event.S_id, pInputOrderField->SInfo);

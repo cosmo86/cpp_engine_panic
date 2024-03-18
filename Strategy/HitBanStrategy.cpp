@@ -890,7 +890,7 @@ public:
 		m_logger->info("S,{}, [ORDER_ERROR] ,order error received, securityID:{}, OrderRef:{} , SInfo:{}, IInfo: {}, OrderSysID: {}",
 							this->strate_SInfo, 
 							temp_orderField->SecurityID,  temp_orderField->OrderRef,
-							temp_orderField->SInfo, temp_orderField->SInfo , temp_orderField->OrderSysID);
+							temp_orderField->SInfo, temp_orderField->IInfo , temp_orderField->OrderSysID);
 
 		if (strcmp(temp_orderField->SecurityID, strate_stock_code) != 0){
 			return;
@@ -984,6 +984,13 @@ public:
 	void on_cancel_error(std::shared_ptr<SEObject> e) override
 	{
 		std::shared_ptr<SE_InputOrderActionField> temp_orderActionField = std::static_pointer_cast<SE_InputOrderActionField>(e);
+
+		m_logger->info("S,{}, [CANCEL_ERROR] , cancel received , securityID:{},OrderRef {}, OrderActionRef {}, SInfo:{}, IInfo: {}, OrderSysID: {}",
+							this->strate_SInfo, 
+							this->strate_stock_code,
+							temp_orderActionField->OrderRef,
+							temp_orderActionField->OrderActionRef,
+							temp_orderActionField->SInfo, temp_orderActionField->IInfo , temp_orderActionField->OrderSysID);
 
 		if (temp_orderActionField->IInfo == 1 || temp_orderActionField->IInfo == 2)
 		{
