@@ -8,6 +8,7 @@ import json
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from typing import List
 
 ############### Cache Initialization Start ###############
 # Create the cache folder 
@@ -113,6 +114,19 @@ def add_strategy(user_input: UserStrategyModel):
     print(f"[App_entry] Params parsed to cpp is {json_str}, type of user_input is {type(user_input)}")
     programCache_data["PreviousRemoved_Strategy_Group"][int(user_input.ID)] = user_input.model_dump()
     programCache_data["RunningGroup"][int(user_input.ID)] = user_input.model_dump()
+
+
+@app.post('/group_add_strategy')
+def group_add_strategy(user_inputs: List[UserStrategyModel]):
+    print(user_inputs)
+    failed_cache = ""
+    for user_input in user_inputs:
+        try:
+            add_strategy(user_input)
+        except HTTPException as e:
+            failed_cache += user_input.SecurityID + ", "
+            print(f"Failed to add strategy for ID {user_input.ID} with error: {e.detail}")
+    return {"Not_added" : failed_cache}
 
 @app.post('/remove_strategy')
 def remove_strategy(user_input: UserStrategyModel):
