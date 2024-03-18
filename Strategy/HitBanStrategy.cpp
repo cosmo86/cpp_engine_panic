@@ -885,7 +885,7 @@ public:
 		// !!! this should be dynamic_cast, but since all the fields
 		// we are accessing in this on_order_error() are shared between
 		// SE_OrderField and SE_InputOrderField, using static_cast for now
-		std::shared_ptr<SE_OrderField> temp_orderField = std::static_pointer_cast<SE_OrderField>(e);
+		std::shared_ptr<SE_OrderErrorField> temp_orderField = std::static_pointer_cast<SE_OrderErrorField>(e);
 
 		m_logger->info("S,{}, [ORDER_ERROR] ,order error received, securityID:{}, OrderRef:{} , SInfo:{}, IInfo: {}, OrderSysID: {}",
 							this->strate_SInfo, 
@@ -983,7 +983,7 @@ public:
 
 	void on_cancel_error(std::shared_ptr<SEObject> e) override
 	{
-		std::shared_ptr<SE_InputOrderActionField> temp_orderActionField = std::static_pointer_cast<SE_InputOrderActionField>(e);
+		std::shared_ptr<SE_CancelErrorField> temp_orderActionField = std::static_pointer_cast<SE_CancelErrorField>(e);
 
 		m_logger->info("S,{}, [CANCEL_ERROR] , cancel received , securityID:{},OrderRef {}, OrderActionRef {}, SInfo:{}, IInfo: {}, OrderSysID: {}",
 							this->strate_SInfo, 

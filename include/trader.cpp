@@ -347,7 +347,7 @@ private:
 		}
 
 		SEEvent temp_event;
-		std::shared_ptr<SE_InputOrderField> temp_InputOrderField = SEObject::Create<SE_InputOrderField>();
+		std::shared_ptr<SE_OrderErrorField> temp_InputOrderField = SEObject::Create<SE_OrderErrorField>();
 		//memcpy(temp_InputOrderField.get(),pInputOrderField,sizeof(SE_InputOrderField));
 
 		/////////////////////////////////////////////////////////
@@ -428,8 +428,17 @@ private:
 			return;
 		}
 		SEEvent temp_event;
-		std::shared_ptr<SE_InputOrderActionField> InputOrderActionField = SEObject::Create<SE_InputOrderActionField>();
-		memcpy(InputOrderActionField.get(),pInputOrderActionField,sizeof(SE_InputOrderActionField));
+		std::shared_ptr<SE_CancelErrorField> InputOrderActionField = SEObject::Create<SE_CancelErrorField>();
+		////////////////////////////////////////////////////////////////////////
+		InputOrderActionField->ExchangeID = pInputOrderActionField->ExchangeID;
+		InputOrderActionField->FrontID = pInputOrderActionField->FrontID;
+		InputOrderActionField->SessionID = pInputOrderActionField->SessionID;
+		InputOrderActionField->OrderRef = pInputOrderActionField->OrderRef;
+		strcpy(InputOrderActionField->OrderSysID , pInputOrderActionField->OrderSysID);
+		InputOrderActionField->Operway = pInputOrderActionField->Operway;
+		strcpy(InputOrderActionField->SInfo , pInputOrderActionField->SInfo);
+		InputOrderActionField->IInfo = pInputOrderActionField->IInfo;
+		////////////////////////////////////////////////////////////////////////
 
 		if (pRspInfo->ErrorID == 0)
 		{
@@ -509,8 +518,31 @@ private:
 		if (pOrder->OrderStatus == '7' &&  pOrder->OrderSubmitStatus == '1')
 		{
 			SEEvent temp_event;
-			std::shared_ptr<SE_OrderField> orderField = SEObject::Create<SE_OrderField>();
-			memcpy(orderField.get(),pOrder,sizeof(SE_OrderField));
+			std::shared_ptr<SE_OrderErrorField> orderField = SEObject::Create<SE_OrderErrorField>();
+			/////////////////////////////////////////////////////////
+			orderField->ExchangeID = pOrder->ExchangeID;
+			strcpy(orderField->InvestorID, pOrder->InvestorID);
+			strcpy(orderField->BusinessUnitID, pOrder->BusinessUnitID);
+			strcpy(orderField->ShareholderID, pOrder->ShareholderID);
+			strcpy(orderField->SecurityID, pOrder->SecurityID);
+			orderField->Direction = pOrder->Direction;
+			orderField->OrderPriceType = pOrder->OrderPriceType;
+			orderField->TimeCondition = pOrder->TimeCondition;
+			orderField->VolumeCondition = pOrder->VolumeCondition;
+			orderField->LimitPrice = pOrder->LimitPrice;
+			orderField->VolumeTotalOriginal = pOrder->VolumeTotalOriginal;
+			orderField->LotType = pOrder->LotType;
+			strcpy(orderField->GTDate, pOrder->GTDate);
+			orderField->Operway = pOrder->Operway;
+			orderField->CondCheck = pOrder->CondCheck;
+			strcpy(orderField->SInfo, pOrder->SInfo);
+			orderField->IInfo = pOrder->IInfo;
+			orderField->OrderRef = pOrder->OrderRef;
+			strcpy(orderField->OrderSysID, pOrder->OrderSysID);
+			orderField->ForceCloseReason = pOrder->ForceCloseReason;
+			strcpy(orderField->CreditDebtID, pOrder->CreditDebtID);
+			orderField->CreditQuotaType = pOrder->CreditQuotaType;
+			/////////////////////////////////////////////////////////////////////////////////////
 
 			temp_event.e_type = Eventtype::ORDER_ERROR;
 			temp_event.event = orderField;
@@ -529,8 +561,17 @@ private:
 		if (pOrder->OrderStatus == '2' &&  pOrder->OrderSubmitStatus == '4')
 		{
 			SEEvent temp_event;
-			std::shared_ptr<SE_OrderField> orderField = SEObject::Create<SE_OrderField>();
-			memcpy(orderField.get(),pOrder,sizeof(SE_OrderField));
+			std::shared_ptr<SE_CancelErrorField> orderField = SEObject::Create<SE_CancelErrorField>();
+			////////////////////////////////////////////////////////////////////////
+			orderField->ExchangeID = pOrder->ExchangeID;
+			orderField->FrontID = pOrder->FrontID;
+			orderField->SessionID = pOrder->SessionID;
+			orderField->OrderRef = pOrder->OrderRef;
+			strcpy(orderField->OrderSysID , pOrder->OrderSysID);
+			orderField->Operway = pOrder->Operway;
+			strcpy(orderField->SInfo , pOrder->SInfo);
+			orderField->IInfo = pOrder->IInfo;
+			////////////////////////////////////////////////////////////////////////
 
 			temp_event.e_type = Eventtype::CANCEL_ERROR;
 			temp_event.event = orderField;

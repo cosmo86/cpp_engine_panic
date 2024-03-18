@@ -6,6 +6,102 @@ class SEObject;
 
 using namespace TORASTOCKAPI;
 
+struct SE_CancelErrorField : public SEObject
+{
+    ///交易所代码
+    TTORATstpExchangeIDType	ExchangeID;
+
+    ///前置编号
+    TTORATstpFrontIDType	FrontID;
+
+    ///会话编号
+    TTORATstpSessionIDType	SessionID;
+
+    ///报单引用
+    TTORATstpOrderRefType	OrderRef;
+
+    ///系统报单编号
+    TTORATstpOrderSysIDType	OrderSysID;
+
+    ///委托方式
+    TTORATstpOperwayType	Operway;
+
+    ///字符串附加信息
+    TTORATstpStrInfoType	SInfo;
+
+    ///整形附加信息
+    TTORATstpIntInfoType	IInfo;
+};
+
+struct SE_OrderErrorField : public SEObject
+{
+    ///交易所代码
+    TTORATstpExchangeIDType ExchangeID;
+
+    ///投资者代码
+    TTORATstpInvestorIDType InvestorID;
+
+    ///投资单元代码
+    TTORATstpBusinessUnitIDType BusinessUnitID;
+
+    ///股东账户代码
+    TTORATstpShareholderIDType ShareholderID;
+
+    ///证券代码
+    TTORATstpSecurityIDType SecurityID;
+
+    ///买卖方向
+    TTORATstpDirectionType Direction;
+
+    ///报单价格条件
+    TTORATstpOrderPriceTypeType OrderPriceType;
+
+    ///有效期类型
+    TTORATstpTimeConditionType TimeCondition;
+
+    ///成交量类型
+    TTORATstpVolumeConditionType VolumeCondition;
+
+    ///价格
+    TTORATstpPriceType LimitPrice;
+
+    ///数量
+    TTORATstpVolumeType VolumeTotalOriginal;
+
+    ///委托方式
+    TTORATstpOperwayType Operway;
+
+    ///报单引用
+    TTORATstpOrderRefType OrderRef;
+
+    ///港股通订单数量类型
+    TTORATstpLotTypeType LotType;
+
+    ///系统报单编号
+    TTORATstpOrderSysIDType OrderSysID;
+
+    ///条件检查
+    TTORATstpCondCheckType CondCheck;
+
+    ///有效日期
+    TTORATstpDateType GTDate;
+
+    ///强平原因(两融专用)
+    TTORATstpForceCloseReasonType ForceCloseReason;
+
+    ///指定偿还的信用负债编号（该字段置空表示不指定偿还）(两融专用)
+    TTORATstpCreditDebtIDType CreditDebtID;
+
+    ///头寸类型(两融专用)
+    TTORATstpCreditQuotaTypeType CreditQuotaType;
+
+    ///字符串附加信息
+    TTORATstpStrInfoType SInfo;
+
+    ///整形附加信息
+    TTORATstpIntInfoType IInfo;
+};
+
 struct SE_InputOrderField : public SEObject
 {
 	///用户请求编号
