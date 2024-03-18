@@ -1,4 +1,5 @@
 import streamlit as st  # web development
+import json
 import pandas as pd
 import requests
 from pydantic import  ValidationError
@@ -261,19 +262,20 @@ else:
 ########### Add Group Strategy ###########
 
 def add_group_strategy(model_instances):
-    fail_to_add_models = []
-    print(model_instances)
+    temp_input = []
     for i,model in enumerate(model_instances):
         model.Position = 1000
-        print("[add_group_strategy]",model, "type is ",type(model))
-        res_code = add_strategy(model)
-        if res_code ==0:
-            pass
-        else:
-            fail_to_add_models.append(model.SecurityID)
+        #temp_input.append(model.model_dump_json())
+        temp_input.append(json.loads(model.model_dump_json()))
         AddGroup_progressBar.progress( i/len(model_instances) )
     AddGroup_progressBar.empty()
-    st.error(f"以下股票添加失败， 代码{fail_to_add_models}")
+    print("temp_input" , temp_input)
+    json_data = json.dumps(temp_input)
+    res = requests.post(url="http://127.0.0.1:9001/group_add_strategy", data=json_data)
+    response_data = res.json()
+    print(response_data)
+    st.error(f"以下股票添加失败， 代码{response_data['Not_added']}")
+    
 
 def row_to_model(row):
     return UserStrategyModel(**row.to_dict())
