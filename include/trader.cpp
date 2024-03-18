@@ -438,6 +438,7 @@ private:
 		InputOrderActionField->Operway = pInputOrderActionField->Operway;
 		strcpy(InputOrderActionField->SInfo , pInputOrderActionField->SInfo);
 		InputOrderActionField->IInfo = pInputOrderActionField->IInfo;
+		InputOrderActionField->OrderActionRef = pInputOrderActionField->OrderActionRef;
 		////////////////////////////////////////////////////////////////////////
 
 		if (pRspInfo->ErrorID == 0)

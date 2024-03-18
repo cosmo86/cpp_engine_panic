@@ -18,7 +18,10 @@ struct SE_CancelErrorField : public SEObject
     TTORATstpSessionIDType	SessionID;
 
     ///报单引用
-    TTORATstpOrderRefType	OrderRef;
+    TORASTOCKAPI::TTORATstpOrderRefType	OrderRef;
+
+	///报单操作引用
+	TORASTOCKAPI::TTORATstpOrderRefType	OrderActionRef;
 
     ///系统报单编号
     TTORATstpOrderSysIDType	OrderSysID;
@@ -72,7 +75,7 @@ struct SE_OrderErrorField : public SEObject
     TTORATstpOperwayType Operway;
 
     ///报单引用
-    TTORATstpOrderRefType OrderRef;
+    TORASTOCKAPI::TTORATstpOrderRefType OrderRef;
 
     ///港股通订单数量类型
     TTORATstpLotTypeType LotType;
