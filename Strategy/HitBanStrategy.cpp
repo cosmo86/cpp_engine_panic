@@ -89,7 +89,10 @@ public:
 	  current_position(0), 
       running_status(0) 
 	{
-		std::cout<<"[HitBanStrategy] One instance created"<<std::endl;
+		std::string tempStr_sinfo = j["ID"].get<std::string>();
+		std::strcpy(this->strate_SInfo, tempStr_sinfo.c_str());
+		//std::cout<<"[HitBanStrategy] One instance created"<<std::endl;
+		m_logger->warn("S,{}, [Strategy_Init] .",tempStr_sinfo);
 		this->buy_trigger_volume = j["BuyTriggerVolume"].get<int>();
 		this->cancel_trigger_volume = j["CancelVolume"].get<int>();
 		this->max_trigger_times = j["MaxTriggerTimes"].get<int>();
@@ -109,9 +112,6 @@ public:
 
 		std::string tempStr_securityID = j["SecurityID"].get<std::string>();
 		std::strcpy(this->strate_stock_code, tempStr_securityID.c_str());
-
-		std::string tempStr_sinfo = j["ID"].get<std::string>();
-		std::strcpy(this->strate_SInfo, tempStr_sinfo.c_str());
 
 		std::string tempStr_sname = j["SecurityName"].get<std::string>();
 		std::strcpy(this->strate_stock_name, tempStr_sname.c_str());
@@ -133,17 +133,16 @@ public:
 				std::cout << value << std::endl;}
 		}
 
-		std::cout<<"strate_stock_code"<<strate_stock_code<<std::endl;
-		std::cout<<"buy_trigger_volume"<<buy_trigger_volume<<std::endl;
-		std::cout<<"cancel_trigger_volume"<<cancel_trigger_volume<<std::endl;
-		std::cout<<"max_trigger_times"<<max_trigger_times<<std::endl;
-		std::cout<<"position"<<position<<std::endl;
-		std::cout<<"strate_SInfo"<<strate_SInfo<<std::endl;
-		std::cout<<"strate_stock_name"<<strate_stock_name<<std::endl;
-		std::cout<<"strate_exchangeID"<<strate_exchangeID<<std::endl;
-		std::cout<<"target_position"<<target_position<<std::endl;
-		std::cout<<"strate_limup_price"<<strate_limup_price<<std::endl;
-		std::cout<<"strate_stock_name"<<strate_stock_name<<std::endl;
+		m_logger->warn("S,{}, [Strategy_Init], strate_stock_code {}", tempStr_sinfo, strate_stock_code);
+		m_logger->warn("S,{}, [Strategy_Init], buy_trigger_volume {}", tempStr_sinfo, buy_trigger_volume);
+		m_logger->warn("S,{}, [Strategy_Init], cancel_trigger_volume {}", tempStr_sinfo, cancel_trigger_volume);
+		m_logger->warn("S,{}, [Strategy_Init], max_trigger_times {}", tempStr_sinfo, max_trigger_times);
+		m_logger->warn("S,{}, [Strategy_Init], position {}", tempStr_sinfo, position);
+		m_logger->warn("S,{}, [Strategy_Init], strate_SInfo {}", tempStr_sinfo, strate_SInfo);
+		m_logger->warn("S,{}, [Strategy_Init], strate_stock_name {}", tempStr_sinfo, strate_stock_name);
+		m_logger->warn("S,{}, [Strategy_Init], strate_exchangeID {}", tempStr_sinfo, strate_exchangeID);
+		m_logger->warn("S,{}, [Strategy_Init], target_position {}", tempStr_sinfo, target_position);
+		m_logger->warn("S,{}, [Strategy_Init], strate_limup_price {}", tempStr_sinfo, strate_limup_price);
 	}
 
 	~HitBanStrategy(){std::cout<<"[HitBanStrategy] destoryed"<<std::endl;}
@@ -241,6 +240,7 @@ public:
 		temp_json["ExchangeID"] = std::string(1, this->strate_exchangeID);
 		temp_json["BuyTriggerVolume"] = this->buy_trigger_volume;
 		temp_json["CancelVolume"] = this->cancel_trigger_volume;
+		temp_json["Position"] = this->position;
 		temp_json["TargetPosition"] = this->target_position;
 		temp_json["CurrPosition"] = this->current_position.load();
 		temp_json["Status"] = this->running_status.load();
