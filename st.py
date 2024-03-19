@@ -186,6 +186,7 @@ if st.session_state.strategy_container:
             'ExchangeID': '交易所',
             'BuyTriggerVolume': '封单额',
             'CancelVolume': '撤单额',
+            'Position': '仓位（元）',
             'TargetPosition': '目标仓位（股）',
             'CurrPosition': '已买仓位（股）',
             'Count': '撤单次数',
@@ -206,7 +207,7 @@ if st.session_state.strategy_container:
             "Cond4HighTime": "大单大撤单结束时间"
         },
             
-        column_order=('ID', 'SecurityID','SecurityName','ExchangeID', 'BuyTriggerVolume', 'CancelVolume', 'TargetPosition', 'CurrPosition', 
+        column_order=('ID', 'SecurityID','SecurityName','ExchangeID', 'BuyTriggerVolume', 'CancelVolume', 'Position', 'TargetPosition', 'CurrPosition', 
                       'LowerTimeLimit' ,'Count','Status','OrderID','ScoutStatus','ScoutBuyTriggerCashLim','ScoutMonitorDuration',
                       'Cond2Percent','Cond2HighTime','Cond2TrackDuration','CancelTriggerVolumeLarge','Cond4LowTime','Cond4HighTime'),
         hide_index=True,
@@ -227,6 +228,7 @@ if st.session_state.strategy_container:
             'ExchangeID': '交易所',
             'BuyTriggerVolume': '封单额',
             'CancelVolume': '撤单额',
+            'Position': '仓位（元）',
             'TargetPosition': '目标仓位（股）',
             'CurrPosition': '已买仓位（股）',
             'Count': '撤单次数',
@@ -247,7 +249,7 @@ if st.session_state.strategy_container:
             "Cond4HighTime": "大单大撤单结束时间"
         },
             
-        column_order=('ID', 'SecurityID','SecurityName','ExchangeID', 'BuyTriggerVolume', 'CancelVolume', 'TargetPosition', 'CurrPosition', 
+        column_order=('ID', 'SecurityID','SecurityName','ExchangeID', 'BuyTriggerVolume', 'CancelVolume', 'Position', 'TargetPosition', 'CurrPosition', 
                       'LowerTimeLimit' ,'Count','Status','OrderID','ScoutStatus','ScoutBuyTriggerCashLim','ScoutMonitorDuration',
                       'Cond2Percent','Cond2HighTime','Cond2TrackDuration','CancelTriggerVolumeLarge','Cond4LowTime','Cond4HighTime'),
         hide_index=True,
@@ -264,7 +266,7 @@ else:
 def add_group_strategy(model_instances):
     temp_input = []
     for i,model in enumerate(model_instances):
-        model.Position = 1000
+        #model.Position = 1000
         #temp_input.append(model.model_dump_json())
         temp_input.append(json.loads(model.model_dump_json()))
         AddGroup_progressBar.progress( i/len(model_instances) )
@@ -295,6 +297,7 @@ if uploaded_group is not None:
                 'CurrPosition': int,
                 'LowerTimeLimit': int,
                 'MaxTriggerTimes':int,
+                #'CancelTriggerVolumeLarge': int,
                 'ID':str,
                 'Status':int,
                 'OrderID':str,
@@ -302,6 +305,8 @@ if uploaded_group is not None:
                }
     # Convert the uploaded file to a pandas DataFrame
     uploaded_group_strategy = pd.read_csv(uploaded_group,dtype = column_types, na_filter=False)
+    print('uploaded_group_strategy', uploaded_group_strategy)
+    print('uploaded_group_strategy types',uploaded_group_strategy.dtypes)
     model_instances = uploaded_group_strategy.apply(row_to_model, axis=1)
     model_instances_for_display = pd.DataFrame([i.model_dump() for i in model_instances.to_list()])
     #print(uploaded_group_strategy)
@@ -319,6 +324,7 @@ if st.session_state.display_group_add:
             'ExchangeID': '交易所',
             'BuyTriggerVolume': '封单额',
             'CancelVolume': '撤单额',
+            'Position': '仓位（元）',
             'TargetPosition': '目标仓位（股）',
             'CurrPosition': '已买仓位（股）',
             'Count': '撤单次数',
@@ -339,13 +345,15 @@ if st.session_state.display_group_add:
             "Cond4HighTime": "大单大撤单结束时间"
         },
             
-        column_order=('ID', 'SecurityID','SecurityName','ExchangeID', 'BuyTriggerVolume', 'CancelVolume', 'TargetPosition', 'CurrPosition', 
+        column_order=('ID', 'SecurityID','SecurityName','ExchangeID', 'BuyTriggerVolume', 'CancelVolume', 'Position', 'TargetPosition', 'CurrPosition', 
                       'LowerTimeLimit' ,'Count','Status','OrderID','ScoutStatus','ScoutBuyTriggerCashLim','ScoutMonitorDuration',
                       'Cond2Percent','Cond2HighTime','Cond2TrackDuration','CancelTriggerVolumeLarge','Cond4LowTime','Cond4HighTime'),
         hide_index=True,
         use_container_width=True
     )
-    print("model_instances",model_instances)
+
+
+    print("model_instances",type(model_instances))
     AddGroup_container.button('批量添加', on_click=add_group_strategy, args =(model_instances,))
 
     progress_text = "批量策略添加进度"

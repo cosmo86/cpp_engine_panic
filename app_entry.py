@@ -118,7 +118,7 @@ def add_strategy(user_input: UserStrategyModel):
 
 @app.post('/group_add_strategy')
 def group_add_strategy(user_inputs: List[UserStrategyModel]):
-    print(user_inputs)
+    print("[group_add_strategy]" , user_inputs)
     failed_cache = ""
     for user_input in user_inputs:
         try:

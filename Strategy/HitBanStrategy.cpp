@@ -721,7 +721,7 @@ public:
 						this->curr_FengBan_volume -= temp_transac->TradeVolume;
 						time_volume_tracker.insertPair( this->temp_curr_time, -temp_transac->TradeVolume );
 					}
-					m_logger->warn("S,{}, [ON_TRANSAC] , received time early than last received , time diff {} ,recetime {}, last recetime {}, tradetime {}, limup {}, trade_price {}, volume {}, Exectype {}, curr_FengBan_volume {}, callback_ref {}.", 
+					m_logger->info("S,{}, [ON_TRANSAC] , received time early than last received , time diff {} ,recetime {}, last recetime {}, tradetime {}, limup {}, trade_price {}, volume {}, Exectype {}, curr_FengBan_volume {}, callback_ref {}.", 
 									this->strate_SInfo,
 									this->last_L2Trsac_receTime - temp_transac->Info3,
 									temp_transac->Info3,
