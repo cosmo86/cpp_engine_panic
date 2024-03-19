@@ -674,10 +674,12 @@ public:
 		////////////////////////////////////
 		if (strcmp(temp_transac->SecurityID, strate_stock_code) == 0)
 		{
-			m_logger->info("S,{}, [ON_TRANSAC] , RECEIVED , SecurityID , source: {}, Strategy: {},TradeTime{}, recetime {}, trasac type {}",
+			m_logger->info("S,{}, [ON_TRANSAC] , RECEIVED , SecurityID , source: {}, Strategy: {}, tradePrice {}, tradeVolume {},TradeTime{}, recetime {}, trasac type {}",
 							this->strate_SInfo,
 							temp_transac->SecurityID,
 							strate_stock_code,
+							temp_transac->TradePrice,
+							temp_transac->TradeVolume,
 							temp_transac->TradeTime,
 							temp_transac->Info3,
 							temp_transac->ExecType);
@@ -743,10 +745,11 @@ public:
 				// Tansaction only '1' SZ transaction 'N' SH transaction
 				if (temp_transac->ExecType == '1' || temp_transac->ExecType == 'N' )
 				{
-					this->strate_curr_trade_price = temp_transac->TradePrice;
+					//this->strate_curr_trade_price = temp_transac->TradePrice;
 					// If true remain true to enable send order
 					if (this->can_resend_order)
 					{
+						this->strate_curr_trade_price = temp_transac->TradePrice;
 						this->callback_ref ++;
 						m_logger->info("S,{}, [ON_TRANSAC] add callback_ref , can_resend_order {}, Tradetime {},TradePrice {}, strate_limup_price {}, transac type {}.",
 										this->strate_SInfo,
@@ -758,6 +761,26 @@ public:
 						this->last_L2Trsac_receTime = temp_transac->Info3;
 						return;
 					}
+					// SH trasaction sometimes send unreasonable trasantion, here we check:
+					// 1. tradePrice < limup price ; 
+					// 2. can_resend_order== false (the last trasaction tradeprice is still limup)
+					// 3. curr_FengBan_volume * strate_limup_price >=1000000 (fengban still large)
+					// because this should not happen, so we log err and skip it.
+					if( this->curr_FengBan_volume * this->strate_limup_price >=1000000 )
+					{
+						m_logger->error("S,{}, [ON_TRANSAC] , trade price smaller than limup while Fengban , curr_FengBan_volume {}, limup {}, Tradetime {},TradePrice {}, TradeVolume {}, strate_limup_price {}, transac type {}, can_resend_order {},",
+										this->strate_SInfo,
+										this->curr_FengBan_volume,
+										this->strate_limup_price,
+										temp_transac->TradeTime,
+										temp_transac->TradePrice,
+										temp_transac->TradeVolume,
+										this->strate_limup_price,
+										temp_transac->ExecType,
+										this->can_resend_order);
+						return;
+					}
+
 					// If false, set tp true to enable send order,ExecType == '1' is trade ,2 is cancel
 					this->can_resend_order = true;
 					if (this->scout_order_sent == true && this->scout_status != ScoutStatus::SCOUT_ORDER_CANCELED)
@@ -776,6 +799,7 @@ public:
 									this->strate_limup_price,
 									this->scout_OrderRef,
 									this->scout_OrderActionRef);
+						this->strate_curr_trade_price = temp_transac->TradePrice;
 					}
 					this->scout_order_sent = false;
 					m_logger->warn("S,{}, [ON_TRANSAC] , Huifengzaimai, scout status {}, limup price is {}, TradeTime {} ,Trade price is {}, Bitsetting can_resend_order  to true and scout_order_sent to false, scout_OrderRef {}, scout_OrderActionRef {} ",
