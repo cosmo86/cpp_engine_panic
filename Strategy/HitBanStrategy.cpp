@@ -968,13 +968,13 @@ public:
 		{
 			std::unique_lock<std::shared_mutex> lock(m_shared_mtx);
 			this->temp_curr_time = std::chrono::steady_clock::now();
+			this->running_status.store(StrategyStatus::ORDER_CANCELED);
 			this->current_trigger_times += 1;
 			if (this->current_trigger_times >= this->max_trigger_times ){
 				m_logger->info("S,{}, [CANCEL_SUCCESS] ,max trigger time reached, stategy stopped",this->strate_SInfo);
 				this->stop_strategy();
 				return;
 			}
-			this->running_status.store(StrategyStatus::ORDER_CANCELED);
 			this->if_formal_order_sent = false;
 			this->formal_order_accepted = false;
 		}
