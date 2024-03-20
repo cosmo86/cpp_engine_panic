@@ -398,10 +398,12 @@ public:
 
 		//Cancel order
 
+		// cond 2
+
 		this->duration_from_formal_order_acpt = std::chrono::duration_cast<std::chrono::nanoseconds>(this->temp_curr_time - this->formal_order_acpt_time).count();
-		if (this->formal_order_accepted == true && this->if_cancel_sent == false && this->duration_from_formal_order_acpt >= this->lower_time_limit)
+		if (this->formal_order_accepted == true && this->if_cancel_sent == false )
 		{
-			bool __cancel_cond_1 = false;
+			//bool __cancel_cond_1 = false; This is scout order protection, it is checked during check_scout() so ignored here.
 			bool __cancel_cond_2 = false;
 			bool __cancel_cond_3 = false;
 			bool __cancel_cond_4 = false;
@@ -415,19 +417,35 @@ public:
 				if( static_cast<double>(time_volume_tracker.getTotalVolume()) / this->curr_FengBan_volume <= this->condition_2_percentage )
 				{ 
 					__cancel_cond_2= true;
+					m_logger->warn("S,{}, [ACTION] COND2 trigger, code: {}, curr_volume: {}, cancle_volume: {}, strate OrderRef {},  cond2 {}, cond2 volume {}", 
+								this->strate_SInfo,
+								this->strate_stock_code,
+								this->curr_FengBan_volume,
+								this->cancel_trigger_volume,
+								this->strate_OrderRef,
+								this->strate_OrderActionRef,
+								__cancel_cond_2,
+								time_volume_tracker.getTotalVolume()
+								);
+				}
+
+				//TODO: cond5 here, Dan Qian Feng Dan
+			}
+
+			// cond 3,4;
+			if (this->duration_from_formal_order_acpt >= this->lower_time_limit)
+			{
+					// cond 3
+				__cancel_cond_3 = this->curr_FengBan_volume * this->strate_limup_price <= this->cancel_trigger_volume;
+
+				// cond 4
+				if (this->duration_from_formal_order_acpt >= this->condition_4_low_time && this->duration_from_formal_order_acpt <= this->condition_4_high_time)
+				{
+					__cancel_cond_4 = this->curr_FengBan_volume * this->strate_limup_price <= this->cancel_trigger_volume_large;
 				}
 			}
 
-			// cond 3
-			__cancel_cond_3 = this->curr_FengBan_volume * this->strate_limup_price <= this->cancel_trigger_volume;
-
-			// cond 4
-			if (this->duration_from_formal_order_acpt >= this->condition_4_low_time && this->duration_from_formal_order_acpt <= this->condition_4_high_time)
-			{
-				__cancel_cond_4 = this->curr_FengBan_volume * this->strate_limup_price <= this->cancel_trigger_volume_large;
-			}
-
-			if ( __cancel_cond_1 || __cancel_cond_2 || __cancel_cond_3 || __cancel_cond_4 || __cancel_cond_5)
+			if (  __cancel_cond_2 || __cancel_cond_3 || __cancel_cond_4 || __cancel_cond_5)
 			{
 				this->strate_OrderActionRef = m_dispatcher_ptr->trader_ptr->m_OrderRef.fetch_add(1);
 				m_dispatcher_ptr->trader_ptr->Send_Cancle_Order_OrderActionRef(this->strate_exchangeID,
@@ -450,7 +468,6 @@ public:
 								this->cancel_trigger_volume,
 								this->strate_OrderRef,
 								this->strate_OrderActionRef,
-								__cancel_cond_1,
 								__cancel_cond_2,
 								time_volume_tracker.getTotalVolume(),
 								__cancel_cond_3,
