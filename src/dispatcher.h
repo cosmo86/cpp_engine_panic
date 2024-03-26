@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <thread>
 #include <map>
 #include <vector>
@@ -55,7 +56,7 @@ private:
     std::mutex _task_mutex;
     std::mutex _pool_mutex;
 
-	size_t _poolsize = 2;
+	size_t _poolsize = 1;
 	
 	
 	//moodycamel::ConcurrentQueue<std::shared_ptr<SEObject>>  _event_q;

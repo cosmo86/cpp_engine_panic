@@ -90,6 +90,8 @@ def process_log_line(temp_line):
         target_log = "L2_Quoter"
     elif temp_line[1] == "S":
         target_log = f"S{temp_line[2]}"
+    elif temp_line[1] == "[Dispatcher]" or temp_line[1] == "[Dispatcher::dispatch]":
+        target_log = f"Dispatcher"
     else:
         return  # If the line doesn't match the expected patterns, skip it
     

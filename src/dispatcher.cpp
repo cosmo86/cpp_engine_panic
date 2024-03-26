@@ -87,7 +87,9 @@ void Dispatcher::dispatch()
 			if (func_to_call == _cb_mapping.end()) 
 			{
 				// Handle the case where there is no callback for this event type
-				std::cout << "No callback found for this event type, Your etype is : " << temp_event.e_type << std::endl;
+				this->m_logger_ptr->warn("[Dispatcher::dispatch], No callback found for this event type, Your etype is, s_id {}, etype {} ",
+													temp_event.S_id,
+													temp_event.e_type);
 				continue;
 			}
 
@@ -104,7 +106,10 @@ void Dispatcher::dispatch()
 													temp_event.e_type);
 					if (temp_event.S_id[0] == '\0') // S_id is SInfo, if its empty, then the order could be placed by another system or manuelly
 					{
-						std::cout<<"Sinfo is empty "<<temp_event.e_type<<temp_event.event<<std::endl;
+						this->m_logger_ptr->warn("[Dispatcher::dispatch], Sinfo is empty, s_id {}, etype {} ",
+													temp_event.S_id,
+													temp_event.e_type);
+						//std::cout<<"Sinfo is empty "<<temp_event.e_type<<temp_event.event<<std::endl;
 						continue;
 					}
 
@@ -118,7 +123,7 @@ void Dispatcher::dispatch()
 							this->m_logger_ptr->warn("[Dispatcher::dispatch], Strategy might be removed s_id:{} ,e_type:{} ",
 													temp_event.S_id,
 													temp_event.e_type);
-							std::cout<<"Strategy might be removed s_id: "<< temp_event.S_id<<" e_type " << temp_event.e_type <<std::endl;
+							//std::cout<<"Strategy might be removed s_id: "<< temp_event.S_id<<" e_type " << temp_event.e_type <<std::endl;
 							continue;
 						}
 
@@ -131,12 +136,16 @@ void Dispatcher::dispatch()
 			else 
 			{
 				std::shared_lock<std::shared_mutex> lock(_strategy_mutex);
+				std::stringstream running_tasks_strstream;
 				for (const auto& pair : _sID_strategyPtr_map) 
 				{
-					m_logger_ptr->info("[Dispatcher::dispatch], dispatching s_id:{}" , pair.first);
+					//m_logger_ptr->info("[Dispatcher::dispatch], dispatching s_id:{}" , pair.first);
 					SETask task( temp_event.event, func_to_call->second,  pair.second );
 					_task_q.enqueue(std::move(task));
+					running_tasks_strstream << pair.first << ", ";
 				}
+				std::string running_tasks_str = running_tasks_strstream.str();
+				m_logger_ptr->info("[Dispatcher::dispatch], dispatching s_id:{}", running_tasks_str);
 			}
 		}
 		auto stop = std::chrono::high_resolution_clock::now();
@@ -230,7 +239,9 @@ void Dispatcher::remove_strategy(int s_id, std::string SecurityID, const char& e
 	}
 	else {
 		// Handle the case where there is no callback for this event type
-		std::cout << "No Strategy found , Your Strategy is: " << s_id << std::endl;
+		m_logger_ptr->warn("[Dispatcher], [remove_strategy] ,No Strategy found , Your Strategy is {}" ,
+								s_id);
+		//std::cout << "No Strategy found , Your Strategy is: " << s_id << std::endl;
 	}
 }
 
@@ -272,7 +283,7 @@ nlohmann::json Dispatcher::check_running_strategy()
 
 			combinedJson.push_back(temp_strategy->get_strategy_params());
 
-			std::cout<<"[Dispatcher check running] "<<combinedJson<<std::endl;
+			//std::cout<<"[Dispatcher check running] "<<combinedJson<<std::endl;
 		}
 		std::cout<<"[Dispatcher check running] "<<combinedJson<<std::endl;
 	}

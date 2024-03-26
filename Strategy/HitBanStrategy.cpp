@@ -461,7 +461,7 @@ public:
 																this->scout_OrderActionRef,
 																2);
 				
-				m_logger->info("S,{}, [ACTION] , code: {}, cancle sent, curr_volume: {}, cancle_volume: {}, strate OrderRef {}, strate OrderActionRef {}, cond1 {}, cond2 {}, cond2 volume {}, cond3 {}, cond4 {}, cond5 {}", 
+				m_logger->info("S,{}, [ACTION] , code: {}, cancle sent, curr_volume: {}, cancle_volume: {}, strate OrderRef {}, strate OrderActionRef {}, cond2 {}, cond2 volume {}, cond3 {}, cond4 {}, cond5 {}", 
 								this->strate_SInfo,
 								this->strate_stock_code,
 								this->curr_FengBan_volume,
@@ -646,13 +646,14 @@ public:
 				{
 					action();
 				}
-				m_logger->info("S,{}, [ON_ORDERDETIAL] buy order , code: {} limup: {} , ordertime {}, recetime {}, order price: {}, curr_volume: {}, trigger_volume:{},cancle_volume: {} ",
+				m_logger->info("S,{}, [ON_ORDERDETIAL] buy order , code: {} limup: {} , ordertime {}, recetime {}, order price: {}, order_volume {}, curr_volume: {}, trigger_volume:{},cancle_volume: {} ",
 						 this->strate_SInfo,
 						 temp_orderdetial->SecurityID, 
 						 this->strate_limup_price,
 						 temp_orderdetial->OrderTime,
 						 temp_orderdetial->Info3,
 						 temp_orderdetial->Price,
+						 temp_orderdetial->Volume,
 						 this->curr_FengBan_volume,
 						 this->buy_trigger_volume,
 						 this->cancel_trigger_volume );
