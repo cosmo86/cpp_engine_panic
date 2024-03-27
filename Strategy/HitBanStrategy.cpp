@@ -488,6 +488,12 @@ public:
 
 	}                                                                         
 
+	///////////////////////// Dis-able ON_TICK, as it may interfere ///////////////////////////////
+	void on_tick(std::shared_ptr<SEObject> e) override
+	{
+		return;
+	}
+	/* ///////////////////////// Dis-able ON_TICK, as it may interfere ///////////////////////////////
 	void on_tick(std::shared_ptr<SEObject> e) override
 	{
 		std::shared_ptr<SE_Lev2MarketDataField> temp_tick = std::static_pointer_cast<SE_Lev2MarketDataField>(e);
@@ -573,6 +579,8 @@ public:
 			//this->strate_curr_trade_price = temp_tick->LastPrice;
 		}
 	}
+
+	*////////////////////////////////////////////////////////////////////////////////////////
 
 	void on_orderDetial(std::shared_ptr<SEObject> e) override
 	{
@@ -851,8 +859,8 @@ public:
 				} 
 				this->curr_FengBan_volume -= temp_transac->TradeVolume;
 				time_volume_tracker.insertPair( this->temp_curr_time, -temp_transac->TradeVolume );
-				this->action();
 				this->strate_curr_trade_price = temp_transac->TradePrice;
+				this->action();
 				m_logger->info("S,{}, [ON_TRANSAC] ,transaction, tradetime {}, trade_price {}, volume {}, Exectype {}, curr_FengBan_volume {}, callback_ref {}.", 
 					this->strate_SInfo,
 					temp_transac->TradeTime,
